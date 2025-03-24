@@ -62,10 +62,12 @@
   <ItemGroup>
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandLeaveRoom.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\CustomRoomInfo.cs" />
+    <Compile Include="Assets\_Scripts\Procedural\Room.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandPrint.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\ITextChatCommand.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\PasswordPopup.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleRpcSerializable.cs" />
+    <Compile Include="Assets\_Scripts\Procedural\AStar.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMove.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowser.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMe.cs" />
@@ -94,6 +96,8 @@
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleRpcProcedureParameters.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\StatusPopup.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandRotate.cs" />
+    <Compile Include="Assets\_Scripts\Procedural\LevelGenerator.cs" />
+    <Compile Include="Assets\_Scripts\Procedural\BSPNode.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\BaseRoomBrowser.cs" />
   </ItemGroup>
   <ItemGroup>
