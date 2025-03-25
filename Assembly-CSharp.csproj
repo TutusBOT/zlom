@@ -69,17 +69,21 @@
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\CustomRoomInfo.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandPrint.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\ITextChatCommand.cs" />
+    <Compile Include="Assets\_Scripts\GlobalHealthConnector.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\PasswordPopup.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleRpcSerializable.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMove.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowser.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMe.cs" />
+    <Compile Include="Assets\_Scripts\DamageSource.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowserSortButton.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandJoinRoom.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomMenu\RoomMenu.cs" />
+    <Compile Include="Assets\_Scripts\HealthDisplayer.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandRoom.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandUid.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleOnlyRunForLowestIndex.cs" />
+    <Compile Include="Assets\_Scripts\DamageZone.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleOnlyForLocalAvatar.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\CreateRoomMenu.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleAttributeRpc.cs" />
@@ -92,6 +96,7 @@
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandTarget.cs" />
     <Compile Include="Assets\Alteruna\Scripts\EnsureEventSystem.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowserRow.cs" />
+    <Compile Include="Assets\_Scripts\HealthController.cs" />
     <Compile Include="Assets\Alteruna\Scripts\SingleClientEvent.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\MapDescriptions.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleSynchronizable.cs" />
@@ -103,9 +108,32 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Alteruna\Plugins\Alteruna.TrinityEditor.dll" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile-2-Pass.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
     <None Include="Assets\Alteruna\Plugins\Alteruna.Trinity.xml" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\SDFFunctions.hlsl" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface.shader" />
+    <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
     <None Include="Assets\Alteruna\Resources\RegisteredLicense.txt" />
+    <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
     <None Include="Assets\Alteruna\Plugins\Alteruna.Trinity.dll" />
+    <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
+    <None Include="Assets\TextMesh Pro\Shaders\TMP_Sprite.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
