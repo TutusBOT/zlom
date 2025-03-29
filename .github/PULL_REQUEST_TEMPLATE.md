@@ -2,9 +2,10 @@
 
 <!-- Sections commented out will not show in the PR description, uncomment them as needed -->
 
-## 🔗 Related Issue
+## 🔗 General info
 
-🆔 **Issue ID:** ZLO-X
+**Issue ID:** ZLO-X
+**Related documentation:** Link
 
 ---
 
@@ -48,8 +49,6 @@
 ---
 
 ## 📝 Notes for Reviewers
-
-🔍 **Review Focus Areas:**
 
 -
 
