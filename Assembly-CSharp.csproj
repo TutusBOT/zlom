@@ -103,6 +103,7 @@
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandTarget.cs" />
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Grid3D.cs" />
     <Compile Include="Assets\Alteruna\Scripts\EnsureEventSystem.cs" />
+    <Compile Include="Assets\_Scripts\Procedural\RoomController.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowserRow.cs" />
     <Compile Include="Assets\_Scripts\HealthController.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\GenericPriorityQueueNode.cs" />
