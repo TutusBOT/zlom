@@ -9,7 +9,7 @@ public class LobbyManager : AttributesSync
     [SynchronizableMethod]
     public void StartGame()
     {
-        Multiplayer.LoadScene("Dungeon3D");
+        Multiplayer.LoadScene("Dungeon3D", true);
     }
 
     void OnMouseDown()
