@@ -1058,17 +1058,22 @@ public class DungeonGenerator : MonoBehaviour
     {
         Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
 
+        // Calculate offset to place starting room at world origin
+        Room startingRoom = rooms[0];
+        float offsetX = -((startingRoom.xOrigin + (startingRoom.width / 2f)) * gridUnitSize);
+        float offsetZ = -((startingRoom.zOrigin + (startingRoom.length / 2f)) * gridUnitSize);
+
         for (int i = 0; i < rooms.Count; i++)
         {
             Room room = rooms[i];
             bool isStartingRoom = (i == 0);
             GameObject renderedRoom = null;
 
-            // Calculate the scaled room center position
+            // Calculate the scaled room center position with offset
             Vector3 roomCenter = new Vector3(
-                (room.xOrigin + (room.width / 2f)) * gridUnitSize,
-                0,
-                (room.zOrigin + (room.length / 2f)) * gridUnitSize
+                (room.xOrigin + (room.width / 2f)) * gridUnitSize + offsetX,
+                -1,
+                (room.zOrigin + (room.length / 2f)) * gridUnitSize + offsetZ
             );
 
             if (isStartingRoom && startingRoomPrefab != null)
