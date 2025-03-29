@@ -7,15 +7,11 @@
 **Issue ID:** ZLO-X
 **Related documentation:** Link
 
----
-
 ## 📌 Checklist
 
 - [ ] I self reviewed my code
 - [ ] Code follows project conventions
 - [ ] Changes are tested and verified
-
----
 
 ## ✨ Summary of Changes
 
@@ -24,8 +20,6 @@
 - Briefly describe the changes made in this PR
 - Highlight any important modifications or additions
 
----
-
 <!-- ## 📸 Screenshots / Demos (if applicable)
 🖼 **Visual Changes:**
 - Add screenshots, GIFs, or videos showcasing UI/UX updates (if needed)   -->
@@ -33,8 +27,6 @@
 🎮 **Gameplay Changes:**
 
 - Describe any relevant gameplay modifications
-
----
 
 ## ✅ How to Test
 
@@ -45,8 +37,6 @@
 
 <!-- ⚠️ **Edge Cases Considered:**
 - Mention any special cases tested   -->
-
----
 
 ## 📝 Notes for Reviewers
 
