@@ -1221,12 +1221,6 @@ public class DungeonGenerator : MonoBehaviour
                 );
                 Gizmos.DrawLine(new Vector3(roomMin.x, roomMin.y, roomMax.z), roomMin);
 
-                // Draw labels for each room
-                Handles.Label(
-                    roomCenter + Vector3.up * 0.5f,
-                    $"Room {i}\n{room.width}x{room.length}"
-                );
-
                 // Draw doors with red spheres
                 Gizmos.color = Color.red;
                 foreach (ConnectionPoint cp in room.connectionPoints)
