@@ -14,6 +14,6 @@ public class LobbyManager : AttributesSync
 
     void OnMouseDown()
     {
-        StartGame();
+        BroadcastRemoteMethod(nameof(StartGame));
     }
 }
