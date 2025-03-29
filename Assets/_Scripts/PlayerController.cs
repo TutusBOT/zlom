@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         characterController = GetComponent<CharacterController>();
-        playerCamera = Camera.main;
+        playerCamera = GetComponentInChildren<Camera>();
         playerCamera.transform.position = new Vector3(
             transform.position.x,
             transform.position.y + cameraYOffset,

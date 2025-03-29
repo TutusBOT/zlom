@@ -250,6 +250,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6248326845081752646}
   - component: {fileID: 2631899845515232551}
+  - component: {fileID: 1867226234572465722}
   m_Layer: 0
   m_Name: StartingRoom
   m_TagString: Untagged
@@ -305,6 +306,24 @@ MonoBehaviour:
   - {fileID: 4508728411948834060}
   westDoors:
   - {fileID: 8208188203016494712}
+--- !u!114 &1867226234572465722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7510496102614955654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09225bc941750f748818ca903dc0ce5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Multiplayer: {fileID: 0}
+  _uidString: b9a4daf6-d98c-4251-b9ed-3e4c0b942bcd
+  Reliability: 1
+  LocalMethodBehavior: 1
+  spawnPoint: {fileID: 6248326845081752646}
+  playerPrefab: {fileID: 457794671632602189, guid: a599a347672d93c4889e03fb8bb82317, type: 3}
 --- !u!1 &7981475874084533602
 GameObject:
   m_ObjectHideFlags: 0

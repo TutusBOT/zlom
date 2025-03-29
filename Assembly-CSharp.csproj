@@ -65,11 +65,13 @@
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\CustomRoomInfo.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandPrint.cs" />
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Prim.cs" />
+    <Compile Include="Assets\_Scripts\Lobby\LobbyManager.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\ITextChatCommand.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\StablePriorityQueueNode.cs" />
     <Compile Include="Assets\_Scripts\GlobalHealthConnector.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\PasswordPopup.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleRpcSerializable.cs" />
+    <Compile Include="Assets\_Scripts\Network\SpawnManager.cs" />
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Graphs.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMove.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowser.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Grid3D.cs" />
     <Compile Include="Assets\Alteruna\Scripts\EnsureEventSystem.cs" />
     <Compile Include="Assets\_Scripts\Procedural\RoomController.cs" />
+    <Compile Include="Assets\_Scripts\MainMenu\PlayGame.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowserRow.cs" />
     <Compile Include="Assets\_Scripts\HealthController.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\GenericPriorityQueueNode.cs" />
