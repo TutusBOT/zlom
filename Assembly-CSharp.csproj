@@ -76,6 +76,7 @@
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMove.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\RoomBrowser.cs" />
     <Compile Include="Assets\_Scripts\Procedural\DungeonGenerator.cs" />
+    <Compile Include="Assets\_Scripts\Valuable\Valuable.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandMe.cs" />
     <Compile Include="Assets\_Scripts\DamageSource.cs" />
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Delaunay3D.cs" />
@@ -90,7 +91,7 @@
     <Compile Include="Assets\_Scripts\DamageZone.cs" />
     <Compile Include="Assets\_Scripts\MainMenu\QuitGame.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleOnlyForLocalAvatar.cs" />
-    <Compile Include="Assets\_Scripts\Items\PickUpItem.cs" />
+    <Compile Include="Assets\_Scripts\ParticleManager.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\CreateRoomMenu.cs" />
     <Compile Include="Assets\Alteruna\Scripts\Examples\ExampleAttributeRpc.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandLoadScene.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Assets\_Scripts\HealthController.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\GenericPriorityQueueNode.cs" />
     <Compile Include="Assets\Alteruna\Scripts\SingleClientEvent.cs" />
+    <Compile Include="Assets\_Scripts\Valuable\PickUpItem.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\GenericPriorityQueue.cs" />
     <Compile Include="Assets\_Scripts\Procedural\RoomVariantsWrapper.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\IPriorityQueue.cs" />
