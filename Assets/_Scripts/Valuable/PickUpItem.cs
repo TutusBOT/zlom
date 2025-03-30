@@ -17,6 +17,35 @@ public class ObjectPickup : MonoBehaviour
     private float itemDistance;
     private Vector3 objectAttachPoint; // Dynamic attachment point on object
 
+    void OnEnable()
+    {
+        Valuable.OnItemBroke += HandleItemBreak;
+    }
+
+    void OnDisable()
+    {
+        Valuable.OnItemBroke -= HandleItemBreak;
+    }
+
+    private void HandleItemBreak(GameObject brokenItem)
+    {
+        // Check if this is our currently held item
+        if (isHoldingItem && currentItem == brokenItem)
+        {
+            // Clean up references
+            isHoldingItem = false;
+            if (springJoint != null)
+                Destroy(springJoint);
+
+            currentRigidbody = null;
+            currentItem = null;
+
+            // Reset line renderer
+            lineRenderer.SetPosition(0, transform.position);
+            lineRenderer.SetPosition(1, transform.position);
+        }
+    }
+
     void Update()
     {
         RaycastHit hit;
@@ -33,10 +62,19 @@ public class ObjectPickup : MonoBehaviour
             if (Input.GetMouseButtonDown(0)) // Pick up object
             {
                 currentItem = hit.collider.gameObject;
+                if (!currentItem.CompareTag("Valuable"))
+                {
+                    Debug.Log("This item cannot be picked up - not valuable.");
+                    return;
+                }
                 currentRigidbody = currentItem.GetComponent<Rigidbody>();
-                if (currentRigidbody == null) return;
+                if (currentRigidbody == null)
+                    return;
 
-                itemDistance = Vector3.Distance(playerHand.position, currentItem.transform.position);
+                itemDistance = Vector3.Distance(
+                    playerHand.position,
+                    currentItem.transform.position
+                );
                 isHoldingItem = true;
                 currentRigidbody.useGravity = true;
 
@@ -67,9 +105,24 @@ public class ObjectPickup : MonoBehaviour
             // Dynamically update attachment point on player
             springJoint.connectedAnchor = playerHand.position;
 
-            Vector3 mouseWorldPos = playerCamera.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, itemDistance));
+            Vector3 mouseWorldPos = playerCamera.ScreenToWorldPoint(
+                new Vector3(Input.mousePosition.x, Input.mousePosition.y, itemDistance)
+            );
+
             Vector3 forceDirection = (mouseWorldPos - currentRigidbody.position);
-            currentRigidbody.AddForce(forceDirection * moveForce, ForceMode.Acceleration);
+
+            float massAdjustedForce = moveForce;
+            currentRigidbody.AddForce(forceDirection * massAdjustedForce, ForceMode.Force);
+
+            if (springJoint != null)
+            {
+                // Heavier objects need stiffer springs to avoid excessive stretching
+                float massFactor = Mathf.Clamp(currentRigidbody.mass, 0.1f, 10f);
+                springJoint.spring = maxSpringForce * massFactor;
+
+                // Increase damper for heavier objects to reduce oscillation
+                springJoint.damper = 10f * massFactor;
+            }
 
             lineRenderer.SetPosition(0, playerHand.position);
             lineRenderer.SetPosition(1, currentItem.transform.TransformPoint(springJoint.anchor));
@@ -83,7 +136,6 @@ public class ObjectPickup : MonoBehaviour
                 // Reset drag & stop movement
                 currentRigidbody.linearDamping = 0f;
                 currentRigidbody.angularDamping = 0.05f;
-
 
                 currentRigidbody = null;
                 currentItem = null;
