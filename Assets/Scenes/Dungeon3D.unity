@@ -413,31 +413,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f103caadec83ad4eb7469fef173321a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSizeX: 10
-  gridSizeZ: 10
+  gridUnitSize: 5
+  gridSizeX: 50
+  gridSizeZ: 50
   roomCount: 8
-  startingRoomPrefab: {fileID: 1355118755759328817, guid: 46420be74975eb948a61b59fbe20a824, type: 3}
+  startingRoomPrefab: {fileID: 7510496102614955654, guid: 8c344a1ea855f3042ad0697e9c75913b, type: 3}
+  debug: 1
   roomVariantsWrapper:
     roomVariantsList:
     - size:
         width: 1
         length: 1
-      variants:
-      - {fileID: 3134115627117509059, guid: 0da10730604b5404ebd915dfa3956092, type: 3}
-      - {fileID: 835633105186228086, guid: c5d12c34a3b768c4d8d7a8760912c297, type: 3}
-      startingRoomVariant: {fileID: 0}
-    - size:
-        width: 1
-        length: 2
-      variants:
-      - {fileID: 5788251191992946623, guid: 34403d3fb2790934e9aa03159afacbee, type: 3}
-      startingRoomVariant: {fileID: 0}
+      variantData:
+        normalVariants:
+        - {fileID: 7510496102614955654, guid: 0e0155e05507fb64b94c0bf5e1ef64a5, type: 3}
+        allowDoorsAnywhere: 1
+        allowedNorthDoors: []
+        allowedSouthDoors: []
+        allowedEastDoors: []
+        allowedWestDoors: []
     - size:
         width: 2
-        length: 2
-      variants:
-      - {fileID: 5528292057546296218, guid: 37fcb06347645d64c8b7389681911411, type: 3}
-      startingRoomVariant: {fileID: 0}
+        length: 1
+      variantData:
+        normalVariants:
+        - {fileID: 7510496102614955654, guid: 4a616d78e42fd8c4f9ba9190a6a11f44, type: 3}
+        allowDoorsAnywhere: 0
+        allowedNorthDoors: []
+        allowedSouthDoors: []
+        allowedEastDoors:
+        - {x: 0, y: 0}
+        allowedWestDoors:
+        - {x: 0, y: 0}
 --- !u!1 &1515053883
 GameObject:
   m_ObjectHideFlags: 0

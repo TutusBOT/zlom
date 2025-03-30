@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Room
   - HealthDisplayer
+  - Item
+  - Valuable
+  - Valueable
   layers:
   - Default
   - TransparentFX
