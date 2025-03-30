@@ -63,6 +63,7 @@
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\FastPriorityQueue.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandLeaveRoom.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\RoomBrowser\Scripts\CustomRoomInfo.cs" />
+    <Compile Include="Assets\_Scripts\Valuable\ValuableSpawner.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandPrint.cs" />
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Prim.cs" />
     <Compile Include="Assets\_Scripts\Lobby\LobbyManager.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandLoadScene.cs" />
     <Compile Include="Assets\_Scripts\Procedural\ComplexGenerator\Generator3D.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandTp.cs" />
+    <Compile Include="Assets\_Scripts\Valuable\ValuableSpawnPoint.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\IFixedSizePriorityQueue.cs" />
     <Compile Include="Assets\_Scripts\Procedural\BlueRaja\SimplePriorityQueue.cs" />
     <Compile Include="Assets\Alteruna\Prefabs\TextChat\TextChatCommands\CommandCreateRoom.cs" />
