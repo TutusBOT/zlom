@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1560814385129430009}
   - component: {fileID: -3998459993699843077}
   - component: {fileID: 4286912790948540255}
+  - component: {fileID: 3921108572199274389}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -302,6 +303,27 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &3921108572199274389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 637668e4bc60be24f9cdd8b354a0b4c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRange: 5
+  interactableLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  defaultColor: {r: 0, g: 1, b: 1, a: 1}
+  pickupColor: {r: 0, g: 1, b: 0, a: 1}
+  animateCrosshair: 1
+  scaleSpeed: 8
+  hoverScale: 1.2
 --- !u!1 &2369446905339070106
 GameObject:
   m_ObjectHideFlags: 0
