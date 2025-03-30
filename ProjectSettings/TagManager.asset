@@ -8,7 +8,6 @@ TagManager:
   - HealthDisplayer
   - Item
   - Valuable
-  - Valueable
   layers:
   - Default
   - TransparentFX

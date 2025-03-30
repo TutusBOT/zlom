@@ -51,6 +51,9 @@ public class DungeonGenerator : MonoBehaviour
     public const int DEFAULT_GRID_SIZE_Z = 50;
     public const int DEFAULT_ROOM_COUNT = 8;
 
+    [Header("Valuable Spawning")]
+    public ValuableSpawner valuableSpawner;
+
     [Header("Room Scaling")]
     public float gridUnitSize = 5f;
 
@@ -165,16 +168,21 @@ public class DungeonGenerator : MonoBehaviour
         ConnectRooms();
         RenderDungeon();
 
-        foreach (Room room in rooms)
+        if (valuableSpawner != null)
         {
-            Debug.Log(
-                $"Room at ({room.xOrigin}, {room.zOrigin}) with size {room.width}x{room.length}"
-            );
-            foreach (Room connection in room.connections)
-            {
-                Debug.Log($"  Connected to room at ({connection.xOrigin}, {connection.zOrigin})");
-            }
+            valuableSpawner.SpawnValuablesInRooms();
         }
+
+        // foreach (Room room in rooms)
+        // {
+        //     Debug.Log(
+        //         $"Room at ({room.xOrigin}, {room.zOrigin}) with size {room.width}x{room.length}"
+        //     );
+        //     foreach (Room connection in room.connections)
+        //     {
+        //         Debug.Log($"  Connected to room at ({connection.xOrigin}, {connection.zOrigin})");
+        //     }
+        // }
     }
 
     void PlaceRooms()
