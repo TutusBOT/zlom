@@ -82,4 +82,21 @@ public class Valuable : MonoBehaviour
         OnItemBroke?.Invoke(gameObject);
         Destroy(gameObject);
     }
+
+    public float GetCurrentValue()
+    {
+        return currentCashValue;
+    }
+
+    public void ShowSellableHighlight(bool show)
+    {
+        Renderer rend = GetComponent<Renderer>();
+        if (rend != null)
+        {
+            if (show)
+                rend.material.color = Color.Lerp(rend.material.color, Color.green, 0.3f);
+            else
+                rend.material.color = Color.white;
+        }
+    }
 }
