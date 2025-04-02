@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
             transform.position.y + cameraYOffset,
             transform.position.z
         );
+
         playerCamera.transform.SetParent(transform);
         // Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
