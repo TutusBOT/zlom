@@ -79,6 +79,11 @@ public class Valuable : MonoBehaviour
             ParticleManager.Instance.PlayEffect("valuable_break", transform.position, SizeScale);
         }
 
+        DestroyValuable();
+    }
+
+    public void DestroyValuable()
+    {
         OnItemBroke?.Invoke(gameObject);
         Destroy(gameObject);
     }

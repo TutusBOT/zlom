@@ -113,7 +113,7 @@ public class SellZone : MonoBehaviour
                 float value = valuable.GetCurrentValue() * valueMultiplier;
                 totalValue += Mathf.RoundToInt(value);
 
-                Destroy(valuable.gameObject);
+                valuable.DestroyValuable();
             }
         }
 
