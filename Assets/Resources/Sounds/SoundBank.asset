@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 989bceb2e0b8d7545b8191492a5915cc, type: 3}
+  m_Name: SoundBank
+  m_EditorClassIdentifier: 
+  sounds:
+  - id: glass_break
+    clips:
+    - {fileID: 8300000, guid: bcfbe21be840a3143aadab16ea1dd811, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
+  - id: glass_damage
+    clips:
+    - {fileID: 8300000, guid: 627813dae1c8b4041a4c72c20e87c166, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
