@@ -108,6 +108,9 @@ public class DungeonGenerator : MonoBehaviour
             RoomSize size = entry.size;
             RoomVariantData data = entry.variantData;
 
+            if (!debug)
+                continue;
+
             Debug.Log(
                 $"Room {size.width}x{size.length}: "
                     + $"allowDoorsAnywhere={data.allowDoorsAnywhere}, "
@@ -1080,7 +1083,7 @@ public class DungeonGenerator : MonoBehaviour
             // Calculate the scaled room center position with offset
             Vector3 roomCenter = new Vector3(
                 (room.xOrigin + (room.width / 2f)) * gridUnitSize + offsetX,
-                -1,
+                0,
                 (room.zOrigin + (room.length / 2f)) * gridUnitSize + offsetZ
             );
 

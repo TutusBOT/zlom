@@ -32,6 +32,8 @@ public class PlayerController : MonoBehaviour
         if (!_avatar.IsMe)
             return;
 
+        DontDestroyOnLoad(gameObject);
+
         characterController = GetComponent<CharacterController>();
         playerCamera = GetComponentInChildren<Camera>();
         playerCamera.transform.position = new Vector3(
