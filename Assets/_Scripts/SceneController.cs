@@ -147,11 +147,17 @@ public class SceneController : MonoBehaviour
         onComplete?.Invoke();
     }
 
-    // Fade in/out effect
     private IEnumerator FadeRoutine(float targetAlpha)
     {
         if (fadeCanvasGroup == null)
             yield break;
+
+        // If we're fading in (going transparent), we should eventually allow raycasts through
+        bool shouldBlockRaycasts = (targetAlpha > 0);
+
+        // If we're fading out to transparent, block raycasts during transition
+        if (targetAlpha == 0)
+            fadeCanvasGroup.blocksRaycasts = true;
 
         float startAlpha = fadeCanvasGroup.alpha;
         float elapsedTime = 0;
@@ -163,6 +169,10 @@ public class SceneController : MonoBehaviour
             yield return null;
         }
 
+        // Ensure we reach the exact target value
         fadeCanvasGroup.alpha = targetAlpha;
+
+        // Set final raycast blocking state
+        fadeCanvasGroup.blocksRaycasts = shouldBlockRaycasts;
     }
 }
