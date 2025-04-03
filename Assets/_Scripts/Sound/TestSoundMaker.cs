@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class TestSoundMaker : MonoBehaviour
 {
-    [SerializeField] private AudioSource source = null;
+    [SerializeField]
+    private AudioSource source = null;
     public float range = 25f;
 
     private void Update()
@@ -15,7 +16,8 @@ public class TestSoundMaker : MonoBehaviour
 
     private void PlaySound()
     {
-        if(source.isPlaying){
+        if (source.isPlaying)
+        {
             return;
         }
 
@@ -23,5 +25,7 @@ public class TestSoundMaker : MonoBehaviour
 
         Sound sound = new Sound(transform.position, range);
         Debug.Log($"Sound created at position: {sound.pos}, with range: {sound.range}");
+
+        Sounds.MakeSound(sound);
     }
 }

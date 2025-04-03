@@ -17,6 +17,8 @@ public class Valuable : MonoBehaviour
     public float maxDamageMultiplier = 0.5f;
     public float breakThreshold = 5f;
     public ValuableSize size;
+    public AudioSource breakSound = null;
+    public AudioSource damageSound = null;
 
     public static event Action<GameObject> OnItemBroke;
 
@@ -69,7 +71,10 @@ public class Valuable : MonoBehaviour
         if (currentCashValue <= 0)
         {
             Break();
+            return;
         }
+
+        AudioManager.Instance.PlaySound("glass_damage", transform.position);
     }
 
     void Break()
@@ -78,6 +83,7 @@ public class Valuable : MonoBehaviour
         {
             ParticleManager.Instance.PlayEffect("valuable_break", transform.position, SizeScale);
         }
+        AudioManager.Instance.PlaySound("glass_break", transform.position);
 
         DestroyValuable();
     }
