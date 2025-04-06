@@ -342,6 +342,11 @@ MonoBehaviour:
         allowedSouthDoors: []
         allowedEastDoors: []
         allowedWestDoors: []
+  enemySpawner: {fileID: 1630119739}
+  spawnEnemiesInRooms: 1
+  minEnemiesPerRoom: 0
+  maxEnemiesPerRoom: 3
+  skipEnemiesInStartRoom: 1
 --- !u!114 &1180316805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -366,9 +371,68 @@ MonoBehaviour:
     spawnWeight: 1
   spawnDensity: 1
   debug: 1
+--- !u!1 &1630119738
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1630119740}
+  - component: {fileID: 1630119739}
+  m_Layer: 0
+  m_Name: EnemySpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1630119739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630119738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d974832713f160b4797b1f8a9a9da3b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefabs:
+  - enemyPrefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
+    spawnChance: 100
+    maxCount: 10
+    currentCount: 0
+  - enemyPrefab: {fileID: 688695566280788618, guid: d9c36f3a400caa74895b79b360b8bd5d, type: 3}
+    spawnChance: 9
+    maxCount: 10
+    currentCount: 0
+  maxEnemies: 10
+  spawnInterval: 5
+  minDistanceFromPlayer: 30
+  maxDistanceFromPlayer: 100
+  debugMode: 0
+--- !u!4 &1630119740
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1630119738}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -7.6787434, y: 2.3305535, z: 1.2332938}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 705507995}
   - {fileID: 1180316802}
+  - {fileID: 1630119740}
