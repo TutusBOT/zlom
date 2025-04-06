@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
+using Unity.AI.Navigation;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public enum CellType
@@ -100,6 +102,22 @@ public class DungeonGenerator : MonoBehaviour
     private CellType[,] grid;
     private List<Room> rooms = new List<Room>();
 
+    [Header("Enemy Spawning")]
+    [SerializeField]
+    private EnemySpawnController enemySpawner;
+
+    [SerializeField]
+    private bool spawnEnemiesInRooms = true;
+
+    [SerializeField]
+    private int minEnemiesPerRoom = 0;
+
+    [SerializeField]
+    private int maxEnemiesPerRoom = 3;
+
+    [SerializeField]
+    private bool skipEnemiesInStartRoom = true;
+
     void Start()
     {
         Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
@@ -154,6 +172,11 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         GenerateDungeon();
+        if (spawnEnemiesInRooms && enemySpawner != null)
+        {
+            StartCoroutine(GenerateNavMeshDelayed());
+            SpawnEnemiesInRooms();
+        }
     }
 
     void GenerateDungeon()
@@ -1148,6 +1171,39 @@ public class DungeonGenerator : MonoBehaviour
                     );
                 }
             }
+        }
+    }
+
+    private IEnumerator GenerateNavMeshDelayed()
+    {
+        // Small delay to ensure all colliders are properly set up
+        yield return new WaitForSeconds(0.5f);
+
+        NavMeshSurface surface = gameObject.AddComponent<NavMeshSurface>();
+
+        surface.collectObjects = CollectObjects.Children;
+        surface.layerMask = LayerMask.GetMask("Walkable");
+
+        surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+
+        surface.defaultArea = 0;
+
+        surface.BuildNavMesh();
+
+        if (debug)
+        {
+            Debug.Log("NavMesh generation complete");
+        }
+    }
+
+    private void SpawnEnemiesInRooms()
+    {
+        int startIndex = skipEnemiesInStartRoom ? 1 : 0;
+
+        for (int i = startIndex; i < transform.childCount; i++)
+        {
+            Transform roomTransform = transform.GetChild(i);
+            enemySpawner.SpawnEnemiesInRoom(roomTransform, minEnemiesPerRoom, maxEnemiesPerRoom);
         }
     }
 
