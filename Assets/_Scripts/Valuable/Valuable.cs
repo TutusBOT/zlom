@@ -1,4 +1,6 @@
 using System;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using TMPro;
 using UnityEngine;
 
@@ -9,10 +11,11 @@ public enum ValuableSize
     Large,
 }
 
-public class Valuable : MonoBehaviour
+public class Valuable : NetworkBehaviour
 {
     public int initialCashValue = 100;
-    private float currentCashValue;
+
+    private readonly SyncVar<float> _currentCashValue = new(100f);
 
     public float minDamageMultiplier = 0.05f;
     public float maxDamageMultiplier = 0.5f;
@@ -22,7 +25,7 @@ public class Valuable : MonoBehaviour
     public string damageSoundId = "glass_damage";
 
     public static event Action<GameObject> OnItemBroke;
-    protected bool isBeingHeld = false;
+    protected readonly SyncVar<bool> _isBeingHeld = new(false);
 
     [Header("Value Display")]
     [SerializeField]
@@ -46,14 +49,15 @@ public class Valuable : MonoBehaviour
         }
     }
 
-    protected virtual void Start()
+    public override void OnStartServer()
     {
-        currentCashValue = initialCashValue;
+        base.OnStartServer();
+        _currentCashValue.Value = initialCashValue;
     }
 
     protected virtual void Update()
     {
-        if (isBeingHeld)
+        if (_isBeingHeld.Value)
         {
             tooltipTimer += Time.deltaTime;
 
@@ -73,13 +77,16 @@ public class Valuable : MonoBehaviour
 
             if (valueText != null)
             {
-                valueText.text = $"${Mathf.RoundToInt(currentCashValue)}";
+                valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
             }
         }
     }
 
     protected virtual void OnCollisionEnter(Collision collision)
     {
+        if (!IsServerInitialized)
+            return;
+
         float impactForce = collision.relativeVelocity.magnitude;
 
         if (impactForce >= breakThreshold)
@@ -93,81 +100,121 @@ public class Valuable : MonoBehaviour
         }
     }
 
+    [Server]
     void ApplyDamage(float damagePercent)
     {
         int damageAmount = Mathf.RoundToInt(initialCashValue * damagePercent);
-        currentCashValue -= damageAmount;
+        _currentCashValue.Value -= damageAmount;
 
+        PlayDamageEffectsRpc();
+
+        Debug.Log($"Item hit! Lost {damageAmount} value. Remaining: {_currentCashValue.Value}");
+
+        if (_currentCashValue.Value <= 0)
+        {
+            Break();
+            return;
+        }
+    }
+
+    [ObserversRpc]
+    void PlayDamageEffectsRpc()
+    {
         if (ParticleManager.Instance != null)
         {
             ParticleManager.Instance.PlayEffect("valuable_damage", transform.position, SizeScale);
         }
 
-        Debug.Log($"Item hit! Lost {damageAmount} value. Remaining: {currentCashValue}");
-
-        if (currentCashValue <= 0)
-        {
-            Break();
-            return;
-        }
-
         AudioManager.Instance.PlaySound(damageSoundId, transform.position);
     }
 
+    [Server]
     protected virtual void Break()
     {
         Debug.Log($"Item broken! Value lost: {initialCashValue}");
+        PlayBreakEffectsRpc();
+        DestroyValuable();
+    }
+
+    [ObserversRpc]
+    void PlayBreakEffectsRpc()
+    {
         if (ParticleManager.Instance != null)
         {
             ParticleManager.Instance.PlayEffect("valuable_break", transform.position, SizeScale);
         }
-        AudioManager.Instance.PlaySound(breakSoundId, transform.position);
 
-        DestroyValuable();
+        AudioManager.Instance.PlaySound(breakSoundId, transform.position);
     }
 
+    [Server]
     public void DestroyValuable()
     {
         OnItemBroke?.Invoke(gameObject);
         HideTooltip();
-        Destroy(gameObject);
+        Despawn();
     }
 
     public float GetCurrentValue()
     {
-        return currentCashValue;
+        return _currentCashValue.Value;
     }
 
     public virtual void OnPickedUp()
     {
-        isBeingHeld = true;
-        tooltipTimer = 0f;
-        Debug.Log(valueDisplayPrefab);
-        Debug.Log(isBeingHeld);
+        // If we're not the server, request pickup via RPC
+        if (!IsServerInitialized)
+            PickUpServerRpc();
+        else
+            _isBeingHeld.Value = true;
 
-        if (valueDisplayPrefab != null)
+        tooltipTimer = 0f;
+
+        // Only show UI on the local client
+        if (IsOwner || IsClientInitialized)
         {
-            // Create display in world space, NOT as a child
+            ShowValueTooltip();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PickUpServerRpc()
+    {
+        _isBeingHeld.Value = true;
+    }
+
+    private void ShowValueTooltip()
+    {
+        if (valueDisplayPrefab != null && activeValueDisplay == null)
+        {
             activeValueDisplay = Instantiate(valueDisplayPrefab);
 
-            // Position it initially
             activeValueDisplay.transform.position =
                 transform.position + Vector3.up * (1.5f * SizeScale);
 
-            // Get the text component
             valueText = activeValueDisplay.GetComponentInChildren<TextMeshProUGUI>();
 
             if (valueText != null)
             {
-                valueText.text = $"${Mathf.RoundToInt(currentCashValue)}";
+                valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
             }
         }
     }
 
     public virtual void OnDropped()
     {
-        isBeingHeld = false;
+        if (!IsServerInitialized)
+            DropServerRpc();
+        else
+            _isBeingHeld.Value = false;
+
         HideTooltip();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void DropServerRpc()
+    {
+        _isBeingHeld.Value = false;
     }
 
     private void HideTooltip()
