@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 1515057478463543743}
   - component: {fileID: 7452423281411795829}
   - component: {fileID: 5027226845931058824}
-  - component: {fileID: 3343481669615595820}
+  - component: {fileID: 5393480343021756752}
   m_Layer: 0
-  m_Name: TestLarge
+  m_Name: CursedVase
   m_TagString: Valuable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.04, y: -0.25, z: -5.98}
-  m_LocalScale: {x: 2, y: 1, z: 2}
+  m_LocalScale: {x: 0.7, y: 2, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -67,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: dda377c2c421f6c4cb6a9cd52d073d53, type: 2}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -137,7 +137,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3343481669615595820
+--- !u!114 &5393480343021756752
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146,11 +146,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 3551952761251280130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63b753bd478fd4842819f4701dcf0ff6, type: 3}
+  m_Script: {fileID: 11500000, guid: 4dad0abe18fd8e24fbccd3b04de6fdb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   initialCashValue: 1000
-  minDamageMultiplier: 0.05
-  maxDamageMultiplier: 0.5
+  minDamageMultiplier: 0.9
+  maxDamageMultiplier: 1
   breakThreshold: 5
-  size: 2
+  size: 0
+  breakSoundId: glass_break
+  damageSoundId: glass_damage
+  valueDisplayPrefab: {fileID: 6123390789393229594, guid: ab92312397c570a4483af0cea06bf972, type: 3}
+  curseSoundId: curse_release
+  curseEffectPrefab: {fileID: 0}

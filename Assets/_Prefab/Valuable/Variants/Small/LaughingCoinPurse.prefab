@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 9167090921501295748}
   - component: {fileID: 5027226845931058824}
   - component: {fileID: 3459423954954052172}
-  - component: {fileID: 3343481669615595820}
+  - component: {fileID: 3158478481696709060}
   m_Layer: 0
-  m_Name: Valuable
+  m_Name: LaughingCoinPurse
   m_TagString: Valuable
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.04, y: -0.25, z: -5.98}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.1, z: 0.05}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6213492739747101098}
@@ -83,7 +83,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3343481669615595820
+--- !u!114 &3158478481696709060
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3551952761251280130}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 63b753bd478fd4842819f4701dcf0ff6, type: 3}
+  m_Script: {fileID: 11500000, guid: 6b5e5e3dbc83bc54291b98d383ff8f1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   initialCashValue: 100
@@ -103,6 +103,15 @@ MonoBehaviour:
   breakSoundId: glass_break
   damageSoundId: glass_damage
   valueDisplayPrefab: {fileID: 6123390789393229594, guid: ab92312397c570a4483af0cea06bf972, type: 3}
+  minLaughInterval: 15
+  maxLaughInterval: 45
+  laughDuration: 5
+  shakeThreshold: 2.5
+  laughSoundId: purse_laugh
+  silencedSoundId: purse_silence
+  faceObject: {fileID: 0}
+  normalMaterial: {fileID: 0}
+  laughingMaterial: {fileID: 0}
 --- !u!1 &8607831301597911085
 GameObject:
   m_ObjectHideFlags: 0
@@ -167,7 +176,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: d9708812e6e8ac84b920940f9199be01, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

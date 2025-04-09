@@ -75,6 +75,11 @@ public class ObjectPickup : MonoBehaviour
                     playerHand.position,
                     currentItem.transform.position
                 );
+                Valuable valuable = currentItem.GetComponent<Valuable>();
+                if (valuable != null)
+                {
+                    valuable.OnPickedUp();
+                }
                 isHoldingItem = true;
                 currentRigidbody.useGravity = true;
 
@@ -94,9 +99,13 @@ public class ObjectPickup : MonoBehaviour
                 springJoint.damper = 10f;
                 springJoint.maxDistance = itemDistance;
 
-                // Increase drag to slow movement
-                currentRigidbody.linearDamping = 5f;
-                currentRigidbody.angularDamping = 5f;
+                float massDampingFactor = Mathf.Lerp(
+                    3f,
+                    15f,
+                    Mathf.Clamp01(currentRigidbody.mass / 10f)
+                );
+                currentRigidbody.linearDamping = massDampingFactor;
+                currentRigidbody.angularDamping = massDampingFactor;
             }
         }
 
@@ -109,7 +118,7 @@ public class ObjectPickup : MonoBehaviour
                 new Vector3(Input.mousePosition.x, Input.mousePosition.y, itemDistance)
             );
 
-            Vector3 forceDirection = (mouseWorldPos - currentRigidbody.position);
+            Vector3 forceDirection = mouseWorldPos - currentRigidbody.position;
 
             float massAdjustedForce = moveForce;
             currentRigidbody.AddForce(forceDirection * massAdjustedForce, ForceMode.Force);
@@ -129,19 +138,7 @@ public class ObjectPickup : MonoBehaviour
 
             if (Input.GetMouseButtonUp(0)) // Drop object
             {
-                isHoldingItem = false;
-                Destroy(springJoint);
-                currentRigidbody.useGravity = true;
-
-                // Reset drag & stop movement
-                currentRigidbody.linearDamping = 0f;
-                currentRigidbody.angularDamping = 0.05f;
-
-                currentRigidbody = null;
-                currentItem = null;
-
-                lineRenderer.SetPosition(0, transform.position);
-                lineRenderer.SetPosition(1, transform.position);
+                DropObject(false);
             }
         }
         else
@@ -149,5 +146,60 @@ public class ObjectPickup : MonoBehaviour
             lineRenderer.SetPosition(0, transform.position);
             lineRenderer.SetPosition(1, transform.position);
         }
+    }
+
+    public void ForceDrop()
+    {
+        DropObject(true);
+    }
+
+    private void DropObject(bool isForced = false)
+    {
+        if (currentItem == null)
+            return;
+
+        // Destroy spring joint if it exists
+        if (springJoint != null)
+        {
+            Destroy(springJoint);
+            springJoint = null;
+        }
+
+        // Mark as no longer holding an item
+        isHoldingItem = false;
+
+        // Apply physics to the dropped item
+        if (currentRigidbody != null)
+        {
+            currentRigidbody.useGravity = true;
+
+            // Reset drag parameters
+            currentRigidbody.linearDamping = 0f;
+            currentRigidbody.angularDamping = 0.05f;
+
+            // Add force if this is a forced drop (like from burning)
+            if (isForced)
+            {
+                currentRigidbody.AddForce(
+                    Vector3.down * 2f + Random.insideUnitSphere * 2f,
+                    ForceMode.Impulse
+                );
+            }
+        }
+
+        // Notify the valuable it's been dropped
+        Valuable valuable = currentItem.GetComponent<Valuable>();
+        if (valuable != null)
+        {
+            valuable.OnDropped();
+        }
+
+        // Reset visual elements
+        lineRenderer.SetPosition(0, transform.position);
+        lineRenderer.SetPosition(1, transform.position);
+
+        // Clear references
+        currentRigidbody = null;
+        currentItem = null;
     }
 }
