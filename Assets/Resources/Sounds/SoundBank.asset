@@ -33,3 +33,55 @@ MonoBehaviour:
     maxDistance: 10
     randomizePitch: 1
     pitchRange: {x: 0.9, y: 1.1}
+  - id: tungsten_cube_break
+    clips:
+    - {fileID: 8300000, guid: d7182290a4bdacd40ba0b64e899f2b78, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
+  - id: tungsten_cube_damage
+    clips:
+    - {fileID: 8300000, guid: 496063fa0b69cd441b25297540a3a4f6, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
+  - id: drum_hit
+    clips:
+    - {fileID: 8300000, guid: ad26a003bab6cbc44ab09a5337896d05, type: 3}
+    - {fileID: 8300000, guid: b5621ac73b2374848b11105af9a5672a, type: 3}
+    - {fileID: 8300000, guid: 43da0fb574f4ccc469664482fdb64336, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
+  - id: explosion_small
+    clips:
+    - {fileID: 8300000, guid: 54cdbb5e6db77374c87e905abf728e93, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
+  - id: purse_laugh
+    clips:
+    - {fileID: 8300000, guid: ef71193183f6ed54f9920816874bf742, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}

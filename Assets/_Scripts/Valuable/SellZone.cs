@@ -41,7 +41,6 @@ public class SellZone : MonoBehaviour
         if (valuable != null && !valuablesInZone.Contains(valuable))
         {
             valuablesInZone.Add(valuable);
-            valuable.ShowSellableHighlight(true);
         }
 
         if (other.CompareTag("Player"))
@@ -63,7 +62,6 @@ public class SellZone : MonoBehaviour
         if (valuable != null)
         {
             valuablesInZone.Remove(valuable);
-            valuable.ShowSellableHighlight(false);
         }
 
         if (other.CompareTag("Player"))

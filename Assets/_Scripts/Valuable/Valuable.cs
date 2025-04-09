@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public enum ValuableSize
@@ -17,10 +18,19 @@ public class Valuable : MonoBehaviour
     public float maxDamageMultiplier = 0.5f;
     public float breakThreshold = 5f;
     public ValuableSize size;
-    public AudioSource breakSound = null;
-    public AudioSource damageSound = null;
+    public string breakSoundId = "glass_break";
+    public string damageSoundId = "glass_damage";
 
     public static event Action<GameObject> OnItemBroke;
+    protected bool isBeingHeld = false;
+
+    [Header("Value Display")]
+    [SerializeField]
+    private GameObject valueDisplayPrefab;
+    private GameObject activeValueDisplay;
+    private TextMeshProUGUI valueText;
+    private float tooltipDisplayTime = 1f;
+    private float tooltipTimer = 0f;
 
     private float SizeScale
     {
@@ -36,12 +46,39 @@ public class Valuable : MonoBehaviour
         }
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         currentCashValue = initialCashValue;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    protected virtual void Update()
+    {
+        if (isBeingHeld)
+        {
+            tooltipTimer += Time.deltaTime;
+
+            if (tooltipTimer >= tooltipDisplayTime)
+            {
+                HideTooltip();
+                return;
+            }
+
+            activeValueDisplay.transform.position =
+                transform.position + Vector3.up * (1.0f * SizeScale);
+
+            if (Camera.main != null)
+            {
+                activeValueDisplay.transform.forward = Camera.main.transform.forward;
+            }
+
+            if (valueText != null)
+            {
+                valueText.text = $"${Mathf.RoundToInt(currentCashValue)}";
+            }
+        }
+    }
+
+    protected virtual void OnCollisionEnter(Collision collision)
     {
         float impactForce = collision.relativeVelocity.magnitude;
 
@@ -74,16 +111,17 @@ public class Valuable : MonoBehaviour
             return;
         }
 
-        AudioManager.Instance.PlaySound("glass_damage", transform.position);
+        AudioManager.Instance.PlaySound(damageSoundId, transform.position);
     }
 
-    void Break()
+    protected virtual void Break()
     {
+        Debug.Log($"Item broken! Value lost: {initialCashValue}");
         if (ParticleManager.Instance != null)
         {
             ParticleManager.Instance.PlayEffect("valuable_break", transform.position, SizeScale);
         }
-        AudioManager.Instance.PlaySound("glass_break", transform.position);
+        AudioManager.Instance.PlaySound(breakSoundId, transform.position);
 
         DestroyValuable();
     }
@@ -91,6 +129,7 @@ public class Valuable : MonoBehaviour
     public void DestroyValuable()
     {
         OnItemBroke?.Invoke(gameObject);
+        HideTooltip();
         Destroy(gameObject);
     }
 
@@ -99,15 +138,45 @@ public class Valuable : MonoBehaviour
         return currentCashValue;
     }
 
-    public void ShowSellableHighlight(bool show)
+    public virtual void OnPickedUp()
     {
-        Renderer rend = GetComponent<Renderer>();
-        if (rend != null)
+        isBeingHeld = true;
+        tooltipTimer = 0f;
+        Debug.Log(valueDisplayPrefab);
+        Debug.Log(isBeingHeld);
+
+        if (valueDisplayPrefab != null)
         {
-            if (show)
-                rend.material.color = Color.Lerp(rend.material.color, Color.green, 0.3f);
-            else
-                rend.material.color = Color.white;
+            // Create display in world space, NOT as a child
+            activeValueDisplay = Instantiate(valueDisplayPrefab);
+
+            // Position it initially
+            activeValueDisplay.transform.position =
+                transform.position + Vector3.up * (1.5f * SizeScale);
+
+            // Get the text component
+            valueText = activeValueDisplay.GetComponentInChildren<TextMeshProUGUI>();
+
+            if (valueText != null)
+            {
+                valueText.text = $"${Mathf.RoundToInt(currentCashValue)}";
+            }
+        }
+    }
+
+    public virtual void OnDropped()
+    {
+        isBeingHeld = false;
+        HideTooltip();
+    }
+
+    private void HideTooltip()
+    {
+        if (activeValueDisplay != null)
+        {
+            Destroy(activeValueDisplay);
+            activeValueDisplay = null;
+            valueText = null;
         }
     }
 }
