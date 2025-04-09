@@ -28,19 +28,33 @@ public class PlayerController : NetworkBehaviour
         base.OnStartClient();
         if (base.IsOwner)
         {
-            playerCamera = Camera.main;
+            if (Camera.main != null)
+            {
+                Camera.main.gameObject.SetActive(false);
+            }
+
+            GameObject cameraObject = new GameObject("PlayerCamera");
+            playerCamera = cameraObject.AddComponent<Camera>();
+            playerCamera.tag = "MainCamera";
+
+            if (playerCamera.GetComponent<AudioListener>() == null)
+                cameraObject.AddComponent<AudioListener>();
+
             playerCamera.transform.position = new Vector3(
                 transform.position.x,
                 transform.position.y + cameraYOffset,
                 transform.position.z
             );
             playerCamera.transform.SetParent(transform);
+
+            Debug.Log($"Created new camera for player {gameObject.name}");
         }
         else
         {
             canMove = false;
             enabled = false;
-            gameObject.GetComponent<PlayerController>().enabled = false;
+
+            Debug.Log($"Disabled control for non-owned player {gameObject.name}");
         }
     }
 
