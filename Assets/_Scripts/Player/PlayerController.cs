@@ -38,6 +38,7 @@ public class PlayerController : NetworkBehaviour
         }
         else
         {
+            canMove = false;
             gameObject.GetComponent<PlayerController>().enabled = false;
         }
     }
