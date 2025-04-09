@@ -1,8 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using FishNet.Connection;
+using FishNet.Object;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     [Header("Base setup")]
     public float walkingSpeed = 7.5f;
@@ -23,40 +23,35 @@ public class PlayerController : MonoBehaviour
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
 
-    private Alteruna.Avatar _avatar;
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        if (base.IsOwner)
+        {
+            playerCamera = Camera.main;
+            playerCamera.transform.position = new Vector3(
+                transform.position.x,
+                transform.position.y + cameraYOffset,
+                transform.position.z
+            );
+            playerCamera.transform.SetParent(transform);
+        }
+        else
+        {
+            gameObject.GetComponent<PlayerController>().enabled = false;
+        }
+    }
 
     void Start()
     {
-        _avatar = GetComponent<Alteruna.Avatar>();
-
-        if (!_avatar.IsMe)
-            return;
-
-        DontDestroyOnLoad(gameObject);
-
         characterController = GetComponent<CharacterController>();
-        playerCamera = GetComponentInChildren<Camera>();
-        playerCamera.transform.position = new Vector3(
-            transform.position.x,
-            transform.position.y + cameraYOffset,
-            transform.position.z
-        );
-
-        playerCamera.transform.SetParent(transform);
-        // Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
     void Update()
     {
-        if (!_avatar.IsMe)
-            return;
-
-        bool isRunning = false;
-
-        // Press Left Shift to run
-        isRunning = Input.GetKey(KeyCode.LeftShift);
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = transform.TransformDirection(Vector3.forward);
