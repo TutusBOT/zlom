@@ -18347,6 +18347,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1986281182232142823, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
+      propertyPath: <SceneId>k__BackingField
+      value: 4294933279
+      objectReference: {fileID: 0}
     - target: {fileID: 3551952761251280130, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
       propertyPath: m_Name
       value: Cube
@@ -18358,6 +18362,10 @@ PrefabInstance:
     - target: {fileID: 3551952761251280130, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
       propertyPath: m_TagString
       value: Valuable
+      objectReference: {fileID: 0}
+    - target: {fileID: 5027226845931058824, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
+      propertyPath: m_Mass
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7452423281411795829, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
       propertyPath: m_IsTrigger

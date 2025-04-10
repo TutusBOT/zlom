@@ -17,6 +17,7 @@ public class PickUpItem : NetworkBehaviour
     private bool isHoldingItem = false;
     private float itemDistance;
     private Vector3 objectAttachPoint;
+    private bool isApplyingForce = false;
 
     public override void OnStartClient()
     {
@@ -128,55 +129,88 @@ public class PickUpItem : NetworkBehaviour
         }
 
         isHoldingItem = true;
-        currentRigidbody.useGravity = true;
+        isApplyingForce = true;
 
         // Find the nearest attachment point on the object
         objectAttachPoint = hit.point;
 
-        // Create a SpringJoint for smooth movement
+        // Create SpringJoint locally - for responsiveness & feel only
         springJoint = currentItem.AddComponent<SpringJoint>();
         springJoint.autoConfigureConnectedAnchor = false;
-
-        // Dynamic attachment points
         springJoint.anchor = currentItem.transform.InverseTransformPoint(objectAttachPoint);
         springJoint.connectedAnchor = playerHand.position;
 
         float massFactor = Mathf.Clamp(1 / currentRigidbody.mass, 0.1f, 1f);
-        springJoint.spring = maxSpringForce * massFactor;
-        springJoint.damper = 10f;
-        springJoint.maxDistance = itemDistance;
 
-        float massDampingFactor = Mathf.Lerp(3f, 15f, Mathf.Clamp01(currentRigidbody.mass / 10f));
-        currentRigidbody.linearDamping = massDampingFactor;
-        currentRigidbody.angularDamping = massDampingFactor;
+        // Adjusted for better feel
+        springJoint.spring = maxSpringForce * 0.4f * massFactor;
+        springJoint.damper = 15f;
+        springJoint.maxDistance = itemDistance * 1.1f;
+    }
+
+    [ServerRpc]
+    private void ApplyPhysicsPropertiesServerRpc(int objectId)
+    {
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                float massDampingFactor = Mathf.Lerp(2f, 10f, Mathf.Clamp01(rb.mass / 10f));
+                rb.linearDamping = massDampingFactor;
+                rb.angularDamping = massDampingFactor;
+            }
+        }
     }
 
     private void HandleHeldItem()
     {
-        if (currentRigidbody == null || springJoint == null)
+        if (currentRigidbody == null || springJoint == null || !isApplyingForce)
             return;
 
-        // Dynamically update attachment point on player
+        // Update local joint for responsive feel
         springJoint.connectedAnchor = playerHand.position;
 
-        Vector3 mouseWorldPos = playerCamera.ScreenToWorldPoint(
-            new Vector3(Input.mousePosition.x, Input.mousePosition.y, itemDistance)
+        // Calculate target position
+        Vector3 targetPos =
+            playerCamera.transform.position + playerCamera.transform.forward * itemDistance;
+
+        Vector3 forceDirection = targetPos - currentRigidbody.position;
+
+        // SIMPLIFIED: Just use a constant force value without all the distance checks
+        float forceMagnitude = moveForce * 0.7f;
+
+        // Apply force directly - no stabilizing forces
+        ApplyForceServerRpc(
+            currentItem.GetComponent<NetworkObject>().ObjectId,
+            forceDirection.normalized,
+            forceMagnitude
         );
 
-        Vector3 forceDirection = mouseWorldPos - currentRigidbody.position;
-
-        float massAdjustedForce = moveForce;
-        currentRigidbody.AddForce(forceDirection * massAdjustedForce, ForceMode.Force);
-
-        // Heavier objects need stiffer springs
-        float massFactor = Mathf.Clamp(currentRigidbody.mass, 0.1f, 10f);
-        springJoint.spring = maxSpringForce * massFactor;
-        springJoint.damper = 10f * massFactor;
-
+        // Update line renderer
         if (lineRenderer != null)
         {
             lineRenderer.SetPosition(0, playerHand.position);
-            lineRenderer.SetPosition(1, currentItem.transform.TransformPoint(springJoint.anchor));
+            lineRenderer.SetPosition(1, currentItem.transform.position);
+        }
+    }
+
+    [ServerRpc]
+    private void ApplyForceServerRpc(int objectId, Vector3 direction, float force)
+    {
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                float serverForceFactor = 0.15f;
+                rb.AddForce(direction * (force * serverForceFactor), ForceMode.Force);
+
+                rb.linearVelocity *= 0.97f;
+                rb.angularVelocity *= 0.97f;
+            }
         }
     }
 
@@ -190,20 +224,21 @@ public class PickUpItem : NetworkBehaviour
         if (currentItem == null)
             return;
 
+        // Stop applying force when dropped
+        isApplyingForce = false;
+
         CleanupHeldItem();
 
+        // Reset physics properties on drop
         if (currentRigidbody != null)
         {
-            currentRigidbody.useGravity = true;
+            ResetPhysicsPropertiesServerRpc(currentItem.GetComponent<NetworkObject>().ObjectId);
 
-            currentRigidbody.linearDamping = 0f;
-            currentRigidbody.angularDamping = 0.05f;
-
-            if (isForced)
+            if (isForced && IsOwner)
             {
-                currentRigidbody.AddForce(
-                    Vector3.down * 2f + Random.insideUnitSphere * 2f,
-                    ForceMode.Impulse
+                ApplyImpulseServerRpc(
+                    currentItem.GetComponent<NetworkObject>().ObjectId,
+                    Vector3.down * 2f + Random.insideUnitSphere * 2f
                 );
             }
         }
@@ -216,6 +251,35 @@ public class PickUpItem : NetworkBehaviour
 
         currentRigidbody = null;
         currentItem = null;
+    }
+
+    [ServerRpc]
+    private void ResetPhysicsPropertiesServerRpc(int objectId)
+    {
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearDamping = 0.05f;
+                rb.angularDamping = 0.05f;
+            }
+        }
+    }
+
+    [ServerRpc]
+    private void ApplyImpulseServerRpc(int objectId, Vector3 impulse)
+    {
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.AddForce(impulse, ForceMode.Impulse);
+            }
+        }
     }
 
     private void CleanupHeldItem()
