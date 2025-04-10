@@ -97,6 +97,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 625792e56c9414f4eb1eec3f312e3e9c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
   initialCashValue: 100
   minDamageMultiplier: 0.05
   maxDamageMultiplier: 0.5

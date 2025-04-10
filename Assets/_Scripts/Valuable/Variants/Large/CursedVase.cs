@@ -9,9 +9,9 @@ public class CursedVase : Valuable
     [SerializeField]
     private GameObject curseEffectPrefab;
 
-    protected override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
+        base.OnStartServer();
 
         size = ValuableSize.Large;
         breakThreshold = 0f;

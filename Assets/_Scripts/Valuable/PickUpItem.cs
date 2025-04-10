@@ -1,10 +1,9 @@
 using FishNet.Object;
-using FishNet.Object.Synchronizing;
 using UnityEngine;
 
-public class PickUpItem : NetworkBehaviour // Changed to match filename and inherit from NetworkBehaviour
+public class PickUpItem : NetworkBehaviour
 {
-    public Camera playerCamera;
+    private Camera playerCamera;
     public float pickupRange = 5f;
     public LayerMask interactableLayer;
     public LineRenderer lineRenderer;
@@ -23,6 +22,21 @@ public class PickUpItem : NetworkBehaviour // Changed to match filename and inhe
     {
         base.OnStartClient();
         enabled = IsOwner;
+
+        if (IsOwner)
+        {
+            playerCamera = Camera.main;
+
+            if (playerCamera == null)
+            {
+                Debug.LogError("PickUpItem: Could not find main camera!");
+
+                playerCamera = GetComponentInChildren<Camera>();
+
+                if (playerCamera == null)
+                    Debug.LogError("PickUpItem: No camera found at all!");
+            }
+        }
     }
 
     void OnEnable()
@@ -48,15 +62,11 @@ public class PickUpItem : NetworkBehaviour // Changed to match filename and inhe
         if (!IsOwner)
             return;
 
-        if (playerCamera == null)
-        {
-            playerCamera = Camera.main;
-            if (playerCamera == null)
-                return;
-        }
+        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
+
+        Debug.DrawRay(ray.origin, ray.direction * pickupRange, Color.green);
 
         RaycastHit hit;
-        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out hit, pickupRange, interactableLayer))
         {

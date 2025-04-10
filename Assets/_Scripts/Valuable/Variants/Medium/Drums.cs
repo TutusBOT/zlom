@@ -6,9 +6,9 @@ public class Drums : Valuable
     [SerializeField]
     private string drumSoundId = "drum_hit";
 
-    protected override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
+        base.OnStartServer();
 
         size = ValuableSize.Medium;
     }

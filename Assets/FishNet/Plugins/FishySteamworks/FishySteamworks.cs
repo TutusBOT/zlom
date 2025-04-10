@@ -109,6 +109,8 @@ namespace FishySteamworks
 
         private void Update()
         {
+            if (!SteamManager.Initialized)
+        return;
             _clientHost.CheckSetStarted();
         }
 

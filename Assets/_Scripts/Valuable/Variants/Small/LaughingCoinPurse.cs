@@ -40,9 +40,9 @@ public class LaughingCoinPurse : Valuable
     private Renderer faceRenderer;
     private bool hasBeenDiscovered = false;
 
-    protected override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
+        base.OnStartServer();
 
         // Set as small valuable
         size = ValuableSize.Small;
@@ -81,7 +81,7 @@ public class LaughingCoinPurse : Valuable
             laughTimer += Time.deltaTime;
 
             // Check if being held and shaken
-            if (isBeingHeld)
+            if (_isBeingHeld.Value)
             {
                 CheckForShaking();
             }

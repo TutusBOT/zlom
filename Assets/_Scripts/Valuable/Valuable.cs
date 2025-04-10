@@ -67,17 +67,20 @@ public class Valuable : NetworkBehaviour
                 return;
             }
 
-            activeValueDisplay.transform.position =
-                transform.position + Vector3.up * (1.0f * SizeScale);
-
-            if (Camera.main != null)
+            if (activeValueDisplay != null)
             {
-                activeValueDisplay.transform.forward = Camera.main.transform.forward;
-            }
+                activeValueDisplay.transform.position =
+                    transform.position + Vector3.up * (1.0f * SizeScale);
 
-            if (valueText != null)
-            {
-                valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
+                if (Camera.main != null)
+                {
+                    activeValueDisplay.transform.forward = Camera.main.transform.forward;
+                }
+
+                if (valueText != null)
+                {
+                    valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
+                }
             }
         }
     }
@@ -88,6 +91,7 @@ public class Valuable : NetworkBehaviour
             return;
 
         float impactForce = collision.relativeVelocity.magnitude;
+        Debug.Log($"Impact force: {impactForce}");
 
         if (impactForce >= breakThreshold)
         {
@@ -96,11 +100,11 @@ public class Valuable : NetworkBehaviour
                 maxDamageMultiplier,
                 impactForce / 20f
             );
+            Debug.Log($"Damage percent: {damagePercent}");
             ApplyDamage(damagePercent);
         }
     }
 
-    [Server]
     void ApplyDamage(float damagePercent)
     {
         int damageAmount = Mathf.RoundToInt(initialCashValue * damagePercent);
@@ -128,9 +132,16 @@ public class Valuable : NetworkBehaviour
         AudioManager.Instance.PlaySound(damageSoundId, transform.position);
     }
 
-    [Server]
     protected virtual void Break()
     {
+        if (!IsServerInitialized)
+        {
+            Debug.LogWarning(
+                "Attempted to break an item from client-side, use BreakServerRpc instead"
+            );
+            return;
+        }
+
         Debug.Log($"Item broken! Value lost: {initialCashValue}");
         PlayBreakEffectsRpc();
         DestroyValuable();
@@ -147,7 +158,6 @@ public class Valuable : NetworkBehaviour
         AudioManager.Instance.PlaySound(breakSoundId, transform.position);
     }
 
-    [Server]
     public void DestroyValuable()
     {
         OnItemBroke?.Invoke(gameObject);
@@ -162,7 +172,6 @@ public class Valuable : NetworkBehaviour
 
     public virtual void OnPickedUp()
     {
-        // If we're not the server, request pickup via RPC
         if (!IsServerInitialized)
             PickUpServerRpc();
         else
@@ -170,7 +179,6 @@ public class Valuable : NetworkBehaviour
 
         tooltipTimer = 0f;
 
-        // Only show UI on the local client
         if (IsOwner || IsClientInitialized)
         {
             ShowValueTooltip();

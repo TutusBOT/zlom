@@ -42,9 +42,9 @@ public class Soulstone : Valuable
         stoneLight = GetComponentInChildren<Light>();
     }
 
-    protected override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
+        base.OnStartServer();
 
         size = ValuableSize.Small;
 

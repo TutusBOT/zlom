@@ -26,7 +26,7 @@ public class PlayerController : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        if (base.IsOwner)
+        if (IsOwner)
         {
             if (Camera.main != null)
             {

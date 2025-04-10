@@ -24,9 +24,7 @@ public class CrosshairController : MonoBehaviour
 
     private void Start()
     {
-        playerCamera = GetComponentInChildren<Camera>();
-        if (playerCamera == null)
-            playerCamera = Camera.main;
+        playerCamera = Camera.main;
 
         CreateCrosshairCanvas();
         CreateCrosshairImage();

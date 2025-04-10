@@ -1,3 +1,5 @@
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 public class BlisterheartRelic : Valuable
@@ -31,18 +33,24 @@ public class BlisterheartRelic : Valuable
     [SerializeField]
     private Color heatedColor = Color.red;
 
-    private float heldTime = 0f;
-    private bool isCoolingDown = false;
-    private float cooldownRemaining = 0f;
+    // Add SyncVars for networked state
+    private readonly SyncVar<float> _heldTime = new SyncVar<float>(0f);
+    private readonly SyncVar<bool> _isCoolingDown = new SyncVar<bool>(false);
+    private readonly SyncVar<float> _cooldownRemaining = new SyncVar<float>(0f);
+    private readonly SyncVar<float> _heatIntensity = new SyncVar<float>(0f);
+
     private GameObject heatGlowEffect;
     private Material[] materials;
-    private float heatIntensity = 0f;
 
-    protected override void Start()
+    public override void OnStartServer()
     {
-        base.Start();
-
+        base.OnStartServer();
         size = ValuableSize.Medium;
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
 
         // Store all materials for color changing
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
@@ -52,7 +60,7 @@ public class BlisterheartRelic : Valuable
         }
 
         // Create heat glow effect
-        if (curseEffectPrefab != null)
+        if (curseEffectPrefab != null && heatGlowEffect == null)
         {
             heatGlowEffect = Instantiate(curseEffectPrefab, transform);
             heatGlowEffect.transform.localPosition = Vector3.zero;
@@ -63,49 +71,60 @@ public class BlisterheartRelic : Valuable
                 emission.enabled = false; // Start with no emission
             }
         }
+
+        // Initialize heat visuals based on current state
+        UpdateHeatVisuals(_heatIntensity.Value);
     }
 
     protected override void Update()
     {
         base.Update();
-        if (isBeingHeld)
+
+        // Server-side logic
+        if (IsServerInitialized)
         {
-            heldTime += Time.deltaTime;
-
-            // Calculate heat percentage (0-1)
-            heatIntensity = Mathf.Clamp01(heldTime / maxHoldTime);
-
-            UpdateHeatVisuals(heatIntensity);
-
-            // Play heating sound at intervals
-            if (heldTime % 0.75f < 0.05f && AudioManager.Instance != null)
+            if (_isBeingHeld.Value)
             {
-                AudioManager.Instance.PlaySound(
-                    heatupSoundId,
-                    transform.position,
-                    heatIntensity * 0.5f
-                );
+                _heldTime.Value += Time.deltaTime;
+
+                // Calculate heat percentage (0-1)
+                _heatIntensity.Value = Mathf.Clamp01(_heldTime.Value / maxHoldTime);
+
+                // Play heating sound at intervals via RPC
+                if (_heldTime.Value % 0.75f < 0.05f)
+                {
+                    PlayHeatSoundRpc(_heatIntensity.Value * 0.5f);
+                }
+
+                if (_heldTime.Value >= maxHoldTime)
+                {
+                    BurnPlayer();
+                }
             }
-
-            if (heldTime >= maxHoldTime)
+            else if (_isCoolingDown.Value)
             {
-                BurnPlayer();
+                // Cool down over time
+                _cooldownRemaining.Value -= Time.deltaTime;
+                _heatIntensity.Value = Mathf.Clamp01(_cooldownRemaining.Value / cooldownTime);
+
+                if (_cooldownRemaining.Value <= 0)
+                {
+                    _isCoolingDown.Value = false;
+                    _heatIntensity.Value = 0f;
+                }
             }
         }
-        else if (isCoolingDown)
+
+        // Client-side visuals - all clients update visuals based on synced values
+        UpdateHeatVisuals(_heatIntensity.Value);
+    }
+
+    [ObserversRpc]
+    private void PlayHeatSoundRpc(float volume)
+    {
+        if (AudioManager.Instance != null)
         {
-            // Cool down over time
-            cooldownRemaining -= Time.deltaTime;
-            heatIntensity = Mathf.Clamp01(cooldownRemaining / cooldownTime);
-
-            UpdateHeatVisuals(heatIntensity);
-
-            if (cooldownRemaining <= 0)
-            {
-                isCoolingDown = false;
-                heatIntensity = 0f;
-                UpdateHeatVisuals(0f);
-            }
+            AudioManager.Instance.PlaySound(heatupSoundId, transform.position, volume);
         }
     }
 
@@ -113,13 +132,16 @@ public class BlisterheartRelic : Valuable
     {
         base.OnPickedUp();
 
-        if (isCoolingDown)
+        if (IsServerInitialized)
         {
-            heldTime = heatIntensity * maxHoldTime;
-        }
-        else
-        {
-            heldTime = 0f;
+            if (_isCoolingDown.Value)
+            {
+                _heldTime.Value = _heatIntensity.Value * maxHoldTime;
+            }
+            else
+            {
+                _heldTime.Value = 0f;
+            }
         }
     }
 
@@ -127,34 +149,69 @@ public class BlisterheartRelic : Valuable
     {
         base.OnDropped();
 
-        isCoolingDown = true;
-        cooldownRemaining = cooldownTime * heatIntensity;
+        if (IsServerInitialized)
+        {
+            _isCoolingDown.Value = true;
+            _cooldownRemaining.Value = cooldownTime * _heatIntensity.Value;
+        }
     }
 
+    [Server]
     private void BurnPlayer()
     {
-        ObjectPickup pickupController = FindFirstObjectByType<ObjectPickup>();
-        if (pickupController != null)
+        // Force drop on all clients
+        ForceDrop();
+
+        // Play burn effects on all clients
+        PlayBurnEffectsRpc();
+
+        // Find the player that was holding this (likely the owner)
+        foreach (var conn in NetworkManager.ServerManager.Clients.Values)
         {
-            pickupController.ForceDrop();
+            var player = conn.FirstObject;
+            if (
+                player != null
+                && Vector3.Distance(player.transform.position, transform.position) < 2f
+            )
+            {
+                // Apply damage to the player's health controller
+                HealthController healthController = player.GetComponent<HealthController>();
+                if (healthController != null)
+                {
+                    // healthController.TakeDamageServerRpc(damageAmount);
+                    Debug.Log(
+                        $"Player {conn.ClientId} burned by BlisterheartRelic! Damage: {damageAmount}"
+                    );
+                }
+            }
         }
 
-        // Play burn sound
+        _heldTime.Value = 0f;
+        _isCoolingDown.Value = true;
+        _cooldownRemaining.Value = cooldownTime;
+    }
+
+    [ObserversRpc]
+    private void PlayBurnEffectsRpc()
+    {
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySound(burnSoundId, transform.position);
         }
 
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            // TODO: Implement player damage logic
-            Debug.Log($"Player burned by BlisterheartRelic! Damage: {damageAmount}");
-        }
+        // You could also add particle effects here
+    }
 
-        heldTime = 0f;
-        isCoolingDown = true;
-        cooldownRemaining = cooldownTime;
+    // Method to force all clients to drop the item
+    [ObserversRpc]
+    private void ForceDrop()
+    {
+        // Find local pickup controller on each client and drop
+        PickUpItem pickupController = FindObjectOfType<PickUpItem>();
+        if (pickupController != null)
+        {
+            pickupController.ForceDrop();
+        }
     }
 
     private void UpdateHeatVisuals(float intensity)
