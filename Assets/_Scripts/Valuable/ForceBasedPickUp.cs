@@ -1,45 +1,75 @@
-using System.Collections.Generic;
 using FishNet.Component.Transforming;
 using FishNet.Object;
 using UnityEngine;
 
-public class PickUpItem : NetworkBehaviour
+public class ForceBasedPickUp : NetworkBehaviour
 {
     private Camera playerCamera;
     public float pickupRange = 5f;
     public LayerMask interactableLayer;
     public LineRenderer lineRenderer;
-    public float moveForce = 10f;
-    public float maxSpringForce = 20f;
     public Transform playerHand;
+
+    // Force-based parameters (tunable)
+    [Header("Force Parameters")]
+    [Tooltip("Base force applied to move object toward target")]
+    public float springForce = 20f;
+
+    [Tooltip("How strongly to counter existing velocity (prevents oscillation)")]
+    public float dampingCoefficient = 5f;
+
+    [Tooltip("Multiplier for mass - how strongly heavy objects resist movement")]
+    public float massInfluence = 1f;
+
+    [Tooltip("Maximum velocity magnitude allowed")]
+    public float maxVelocity = 10f;
+
+    [Tooltip("How quickly force diminishes with distance")]
+    [Range(0f, 1f)]
+    public float distanceInfluence = 0.1f;
 
     private GameObject currentItem;
     private Rigidbody currentRigidbody;
-    private SpringJoint springJoint;
     private bool isHoldingItem = false;
     private float itemDistance;
     private Vector3 objectAttachPoint;
-    private bool isApplyingForce = false;
-    private Dictionary<int, GameObject> serverSpringAnchors = new Dictionary<int, GameObject>();
 
     public override void OnStartClient()
     {
         base.OnStartClient();
         enabled = IsOwner;
 
-
         if (IsOwner)
         {
+            // First try to find main camera
             playerCamera = Camera.main;
 
+            // If no main camera found, try to find any camera in the scene
             if (playerCamera == null)
             {
-                Debug.LogError("PickUpItem: Could not find main camera!");
+                Debug.LogWarning(
+                    "ForceBasedPickUp: Could not find main camera, searching for alternatives..."
+                );
 
+                // Try to find camera in children
                 playerCamera = GetComponentInChildren<Camera>();
 
+                // Try to find any camera in the scene
                 if (playerCamera == null)
-                    Debug.LogError("PickUpItem: No camera found at all!");
+                {
+                    Camera[] allCameras = FindObjectsOfType<Camera>();
+                    if (allCameras.Length > 0)
+                    {
+                        playerCamera = allCameras[0];
+                        Debug.LogWarning(
+                            $"ForceBasedPickUp: Using fallback camera: {playerCamera.name}"
+                        );
+                    }
+                    else
+                    {
+                        Debug.LogError("ForceBasedPickUp: No cameras found in the scene!");
+                    }
+                }
             }
         }
     }
@@ -68,7 +98,6 @@ public class PickUpItem : NetworkBehaviour
             return;
 
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
-
         Debug.DrawRay(ray.origin, ray.direction * pickupRange, Color.green);
 
         RaycastHit hit;
@@ -123,8 +152,7 @@ public class PickUpItem : NetworkBehaviour
         if (currentRigidbody == null)
             return;
 
-        // Add debug logging
-        Debug.Log($"Trying to pick up {currentItem.name}");
+        Debug.Log($"Trying to pick up {currentItem.name} using force-based approach");
 
         // Check if object has NetworkObject component
         NetworkObject netObj = currentItem.GetComponent<NetworkObject>();
@@ -135,46 +163,20 @@ public class PickUpItem : NetworkBehaviour
         }
 
         itemDistance = Vector3.Distance(playerHand.position, currentItem.transform.position);
-
-        // Set flags first
-        isHoldingItem = true;
-        isApplyingForce = true;
-
-        // Find the nearest attachment point on the object
         objectAttachPoint = hit.point;
+        isHoldingItem = true;
 
-        // Create SpringJoint locally
-        springJoint = currentItem.AddComponent<SpringJoint>();
-        springJoint.autoConfigureConnectedAnchor = false;
-        springJoint.anchor = currentItem.transform.InverseTransformPoint(objectAttachPoint);
-        springJoint.connectedAnchor = playerHand.position;
-
-        float massFactor = Mathf.Clamp(1 / currentRigidbody.mass, 0.1f, 1f);
-        springJoint.spring = maxSpringForce * 0.4f * massFactor;
-        springJoint.damper = 15f;
-        springJoint.maxDistance = itemDistance * 1.1f;
-
-        // Create server SpringJoint BEFORE notifying the Valuable
+        // Apply physics properties on server
         if (IsOwner)
-        {
-            // Create server-side spring joint first
-            CreateServerSpringJointRpc(
-                netObj.ObjectId,
-                currentItem.transform.InverseTransformPoint(objectAttachPoint),
-                playerHand.position,
-                springJoint.spring,
-                springJoint.damper,
-                springJoint.maxDistance
-            );
+    {
+        // Disable gravity when picking up
+        SetGravityStateServerRpc(netObj.ObjectId, false);
+        
+        ApplyPhysicsPropertiesServerRpc(netObj.ObjectId);
+        NotifyItemMovementRpc(netObj.ObjectId);
+    }
 
-            // Then apply physics properties
-            ApplyPhysicsPropertiesServerRpc(netObj.ObjectId);
-
-            // Then notify clients about movement frequency
-            NotifyItemMovementRpc(netObj.ObjectId);
-        }
-
-        // Tell the valuable it's picked up LAST (to avoid state conflicts)
+        // Tell the valuable it's picked up
         Valuable valuable = currentItem.GetComponent<Valuable>();
         if (valuable != null)
         {
@@ -201,7 +203,6 @@ public class PickUpItem : NetworkBehaviour
             }
         }
     }
-    
 
     [ServerRpc]
     private void ApplyPhysicsPropertiesServerRpc(int objectId)
@@ -219,119 +220,21 @@ public class PickUpItem : NetworkBehaviour
         }
     }
 
-[ServerRpc]
-private void CreateServerSpringJointRpc(
-    int objectId,
-    Vector3 localAnchor,
-    Vector3 connectedAnchor,
-    float spring,
-    float damper,
-    float maxDistance
-)
-{
-    Debug.Log($"SERVER: Creating SpringJoint for object {objectId}");
-    
-    NetworkObject netObj;
-    if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
-    {
-        // First clean up any existing springs and anchors
-        CleanupServerSpringJoint(objectId, netObj.gameObject);
-        
-        // Create the server-side SpringJoint
-        SpringJoint serverSpring = netObj.gameObject.AddComponent<SpringJoint>();
-        serverSpring.autoConfigureConnectedAnchor = false;
-        serverSpring.anchor = localAnchor;
-        serverSpring.connectedAnchor = connectedAnchor;
-        serverSpring.spring = spring;
-        serverSpring.damper = damper;
-        serverSpring.maxDistance = maxDistance;
-        
-        // Create and track the anchor object
-        GameObject anchorObject = new GameObject($"SpringAnchor_{objectId}");
-        anchorObject.transform.position = connectedAnchor;
-        
-        Rigidbody anchorRb = anchorObject.AddComponent<Rigidbody>();
-        anchorRb.isKinematic = true; // Won't move by physics
-        
-        // Connect and track
-        serverSpring.connectedBody = anchorRb;
-        serverSpringAnchors[objectId] = anchorObject;
-        
-        Debug.Log($"SERVER: Successfully created SpringJoint with strength {spring}");
-    }
-    else
-    {
-        Debug.LogError($"SERVER: Failed to find NetworkObject with ID {objectId}");
-    }
-}
-
-// Helper method to clean up existing springs and anchors
-private void CleanupServerSpringJoint(int objectId, GameObject gameObj)
-{
-    // Clean up existing spring joint
-    SpringJoint[] joints = gameObj.GetComponents<SpringJoint>();
-    foreach (SpringJoint joint in joints)
-    {
-        Destroy(joint);
-    }
-    
-    // Clean up existing anchor if any
-    if (serverSpringAnchors.ContainsKey(objectId))
-    {
-        GameObject oldAnchor = serverSpringAnchors[objectId];
-        if (oldAnchor != null)
-        {
-            Destroy(oldAnchor);
-        }
-        serverSpringAnchors.Remove(objectId);
-    }
-}
-
-[ServerRpc]
-private void UpdateServerSpringAnchorRpc(int objectId, Vector3 newAnchorPos) 
-{
-    // Simply update the anchor object's position directly
-    if (serverSpringAnchors.TryGetValue(objectId, out GameObject anchorObject))
-    {
-        if (anchorObject != null)
-        {
-            anchorObject.transform.position = newAnchorPos;
-        }
-        else
-        {
-            Debug.LogError($"SERVER: Spring anchor object for {objectId} is null!");
-            serverSpringAnchors.Remove(objectId); // Clean up dictionary
-        }
-    }
-    else
-    {
-        Debug.LogError($"SERVER: No spring anchor found for object {objectId}");
-    }
-}
-
-[ServerRpc]
-private void DestroyServerSpringJointRpc(int objectId)
-{
-    NetworkObject netObj;
-    if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
-    {
-        CleanupServerSpringJoint(objectId, netObj.gameObject);
-    }
-}
-
     private void HandleHeldItem()
     {
-        if (currentRigidbody == null || springJoint == null || !isApplyingForce)
+        if (currentRigidbody == null || !isHoldingItem)
             return;
 
-        // Update local joint for responsive feel
-        springJoint.connectedAnchor = playerHand.position;
+        // Calculate target position - where we want the object to be
+        Vector3 targetPosition =
+            playerCamera.transform.position + playerCamera.transform.forward * itemDistance;
 
-        // Update the server's spring joint anchor - this is key to prevent orbiting
+        // Apply force-based movement on the server
         if (IsOwner && currentItem != null)
         {
-            UpdateServerSpringAnchorRpc(
+            ApplyForceToTargetServerRpc(
                 currentItem.GetComponent<NetworkObject>().ObjectId,
+                targetPosition,
                 playerHand.position
             );
         }
@@ -341,6 +244,69 @@ private void DestroyServerSpringJointRpc(int objectId)
         {
             lineRenderer.SetPosition(0, playerHand.position);
             lineRenderer.SetPosition(1, currentItem.transform.position);
+        }
+    }
+
+    [ServerRpc]
+    private void ApplyForceToTargetServerRpc(
+        int objectId,
+        Vector3 targetPosition,
+        Vector3 handPosition
+    )
+    {
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                // Calculate spring-like force
+                Vector3 toTarget = targetPosition - rb.position;
+                float distance = toTarget.magnitude;
+
+                // Spring force is stronger at greater distances (like a real spring)
+                float forceMagnitude =
+                    springForce * Mathf.Clamp01(distance * distanceInfluence + 0.1f);
+                Vector3 springForceVec = toTarget.normalized * forceMagnitude;
+
+                // Calculate mass influence - heavier objects are harder to move
+                float massEffect = Mathf.Clamp(1f / (rb.mass * massInfluence), 0.1f, 1f);
+                springForceVec *= massEffect;
+
+                // Add damping force to prevent oscillation
+                Vector3 dampingForce = -rb.linearVelocity * dampingCoefficient * rb.mass;
+
+                // Apply combined forces
+                rb.AddForce(springForceVec + dampingForce, ForceMode.Force);
+
+                // Prevent excessive velocities
+                if (rb.linearVelocity.magnitude > maxVelocity)
+                {
+                    rb.linearVelocity = rb.linearVelocity.normalized * maxVelocity;
+                }
+
+                // Always zero out angular velocity for stability
+                rb.angularVelocity = Vector3.zero;
+
+                // Point attachment point toward hand - optional visual effect
+                if (distance > 0.1f)
+                {
+                    // Calculate direction from object to hand
+                    Vector3 toHand = handPosition - rb.position;
+
+                    // Only rotate if we have a significant direction
+                    if (toHand.magnitude > 0.1f)
+                    {
+                        // Apply a small corrective torque to align object with hand
+                        Vector3 desiredUp = toHand.normalized;
+                        Vector3 currentUp = rb.transform.up;
+
+                        // Apply a gentle corrective torque
+                        Vector3 torqueDirection = Vector3.Cross(currentUp, desiredUp);
+                        rb.AddTorque(torqueDirection * 0.5f, ForceMode.Force);
+                    }
+                }
+            }
         }
     }
 
@@ -354,25 +320,24 @@ private void DestroyServerSpringJointRpc(int objectId)
         if (currentItem == null)
             return;
 
-        // Stop applying force when dropped
-        isApplyingForce = false;
-
         CleanupHeldItem();
 
         // Reset physics properties on drop
         if (currentRigidbody != null)
         {
-            // Remove server's spring joint when dropping
-            DestroyServerSpringJointRpc(currentItem.GetComponent<NetworkObject>().ObjectId);
-
-            ResetPhysicsPropertiesServerRpc(currentItem.GetComponent<NetworkObject>().ObjectId);
-
-            if (isForced && IsOwner)
+            NetworkObject netObj = currentItem.GetComponent<NetworkObject>();
+            if (netObj != null)
             {
-                ApplyImpulseServerRpc(
-                    currentItem.GetComponent<NetworkObject>().ObjectId,
-                    Vector3.down * 2f + Random.insideUnitSphere * 2f
-                );
+                SetGravityStateServerRpc(netObj.ObjectId, true);
+                ResetPhysicsPropertiesServerRpc(netObj.ObjectId);
+
+                if (isForced && IsOwner)
+                {
+                    ApplyImpulseServerRpc(
+                        netObj.ObjectId,
+                        Vector3.down * 2f + Random.insideUnitSphere * 2f
+                    );
+                }
             }
         }
 
@@ -415,15 +380,29 @@ private void DestroyServerSpringJointRpc(int objectId)
         }
     }
 
+    [ServerRpc]
+private void SetGravityStateServerRpc(int objectId, bool useGravity)
+{
+    NetworkObject netObj;
+    if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+    {
+        Rigidbody rb = netObj.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.useGravity = useGravity;
+            
+            // When disabling gravity, also zero out velocity for stability
+            if (!useGravity)
+            {
+                rb.linearVelocity = Vector3.zero;
+            }
+        }
+    }
+}
+
     private void CleanupHeldItem()
     {
         isHoldingItem = false;
-
-        if (springJoint != null)
-        {
-            Destroy(springJoint);
-            springJoint = null;
-        }
 
         if (lineRenderer != null)
         {

@@ -1,4 +1,5 @@
 using System;
+using FishNet.Component.Transforming;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using TMPro;
@@ -47,6 +48,31 @@ public class Valuable : NetworkBehaviour
                 _ => 1.0f,
             };
         }
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        NetworkTransform netTransform = GetComponent<NetworkTransform>();
+        if (netTransform == null)
+        {
+            Debug.LogError(
+                $"NetworkTransform missing on valuable {gameObject.name}! Add it to the prefab."
+            );
+            return;
+        }
+
+        // Configure for continuous physics synchronization
+        netTransform.SetSynchronizePosition(true);
+        netTransform.SetSynchronizeRotation(true);
+        netTransform.SetSynchronizeScale(false);
+
+        // Update more frequently when being manipulated - improves smoothness
+        netTransform.SetInterval(1);
+
+        // Make sure settings prioritize smooth movement
+        netTransform.SetSendToOwner(true);
     }
 
     public override void OnStartServer()
@@ -179,6 +205,11 @@ public class Valuable : NetworkBehaviour
 
         tooltipTimer = 0f;
 
+        // Force sync transform when picked up
+        NetworkTransform netTransform = GetComponent<NetworkTransform>();
+        if (netTransform != null)
+            netTransform.ForceSend();
+
         if (IsOwner || IsClientInitialized)
         {
             ShowValueTooltip();
@@ -234,4 +265,6 @@ public class Valuable : NetworkBehaviour
             valueText = null;
         }
     }
+
+    
 }
