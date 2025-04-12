@@ -12,17 +12,13 @@ public class SmoothPickUp : NetworkBehaviour
     public float followSpeed = 12f;
     public float rotationSpeed = 5f;
 
-    // Private variables
-    private GameObject heldObject;
-    private Rigidbody heldRigidbody;
-    private NetworkObject heldNetObj;
-    private Camera playerCamera;
-    private bool isHolding = false;
-    private float pickupDistance;
-
-    // Add this to store the original NetworkTransform settings
-    private FishNet.Component.Transforming.NetworkTransform heldNetTransform;
-    private bool originalKinematicState;
+    private GameObject _heldObject;
+    private Rigidbody _heldRigidbody;
+    private NetworkObject _heldNetObj;
+    private Camera _playerCamera;
+    private bool _isHolding = false;
+    private float _pickupDistance;
+    private FishNet.Component.Transforming.NetworkTransform _heldNetTransform;
 
     [Header("Mass Settings")]
     [Tooltip("How much object mass affects handling (0 = no effect, 1 = full effect)")]
@@ -42,7 +38,7 @@ public class SmoothPickUp : NetworkBehaviour
     [Tooltip("Drag factor for objects too heavy to lift")]
     [Range(0.01f, 0.5f)]
     public float heavyDragFactor = 0.05f;
-    private bool isObjectTooHeavyToLift = false;
+    private bool _isObjectTooHeavyToLift = false;
 
     public override void OnStartClient()
     {
@@ -50,9 +46,7 @@ public class SmoothPickUp : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        playerCamera = Camera.main;
-        if (playerCamera == null)
-            playerCamera = GetComponentInChildren<Camera>();
+        _playerCamera = GetComponentInChildren<Camera>();
     }
 
     void Update()
@@ -60,18 +54,15 @@ public class SmoothPickUp : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        // Raycast to find interactable objects
-        if (!isHolding && Input.GetMouseButtonDown(0))
+        if (!_isHolding && Input.GetMouseButtonDown(0))
         {
             TryPickUp();
         }
 
-        // Handle held object
-        if (isHolding)
+        if (_isHolding)
         {
-            MoveHeldObject();
+            Move_HeldObject();
 
-            // Drop on mouse release
             if (Input.GetMouseButtonUp(0))
             {
                 DropObject();
@@ -81,14 +72,14 @@ public class SmoothPickUp : NetworkBehaviour
 
     void TryPickUp()
     {
-        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
+        Ray ray = _playerCamera.ScreenPointToRay(Input.mousePosition);
+
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, pickupRange, interactableLayer))
         {
             GameObject target = hit.collider.gameObject;
 
-            // Validate tags
             if (!target.CompareTag("Valuable"))
             {
                 Debug.Log("This item cannot be picked up - not valuable.");
@@ -96,58 +87,43 @@ public class SmoothPickUp : NetworkBehaviour
             }
 
             // Get required components
-            pickupDistance = Vector3.Distance(playerCamera.transform.position, hit.point);
+            _pickupDistance = Vector3.Distance(_playerCamera.transform.position, hit.point);
             Rigidbody rb = target.GetComponent<Rigidbody>();
             NetworkObject netObj = target.GetComponent<NetworkObject>();
-            heldNetTransform =
+            _heldNetTransform =
                 target.GetComponent<FishNet.Component.Transforming.NetworkTransform>();
             Valuable valuable = target.GetComponent<Valuable>();
 
-            // Check if the object is too heavy to interact with at all
             if (rb != null && rb.mass > absoluteMaxMass)
             {
                 Debug.Log($"Object is too heavy to move: {rb.mass}kg");
-                return; // Can't interact at all
+                return;
             }
 
-            // Check if object is too heavy to fully lift (can only drag)
-            isObjectTooHeavyToLift = (rb != null && rb.mass > maxLiftableMass);
+            _isObjectTooHeavyToLift = rb != null && rb.mass > maxLiftableMass;
 
-            // Validate the object can be picked up
-            if (rb != null && netObj != null && heldNetTransform != null)
+            if (rb != null && netObj != null && _heldNetTransform != null)
             {
-                Debug.Log($"Picking up {target.name}");
+                _heldObject = target;
+                _heldRigidbody = rb;
+                _heldNetObj = netObj;
 
-                // Store references
-                heldObject = target;
-                heldRigidbody = rb;
-                heldNetObj = netObj;
-                originalKinematicState = heldRigidbody.isKinematic;
-
-                // Configure object physics differently based on weight
-                if (!isObjectTooHeavyToLift)
+                if (!_isObjectTooHeavyToLift)
                 {
-                    // Normal pickup - make kinematic for full control
-                    SetObjectKinematicStateRpc(heldNetObj.ObjectId, true);
-                    heldRigidbody.useGravity = false;
-                    heldRigidbody.isKinematic = true;
+                    SetObjectKinematicStateServerRpc(_heldNetObj.ObjectId, true);
+                    _heldRigidbody.useGravity = false;
                 }
                 else
                 {
-                    // Heavy object - keep physics active but reduce gravity
-                    SetHeavyObjectPhysicsRpc(heldNetObj.ObjectId, true);
-                    heldRigidbody.useGravity = true;
-                    heldRigidbody.isKinematic = false;
+                    SetHeavyObjectPhysicsServerRpc(_heldNetObj.ObjectId, true);
+                    _heldRigidbody.useGravity = true;
                 }
 
-                // Configure for high-frequency updates
-                heldNetTransform.SetInterval(1);
-                heldRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+                _heldNetTransform.SetInterval(1);
+                _heldRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
-                // Mark as holding
-                isHolding = true;
+                _isHolding = true;
 
-                // Notify the valuable it's being picked up
                 if (valuable != null)
                 {
                     valuable.OnPickedUp();
@@ -156,6 +132,72 @@ public class SmoothPickUp : NetworkBehaviour
             else
             {
                 Debug.LogError($"Cannot pick up {target.name} - missing required components.");
+            }
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void MoveObjectServerRpc(
+        int objectId,
+        Vector3 targetPosition,
+        Quaternion targetRotation,
+        bool isLightObject
+    )
+    {
+        // Server-side implementation
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                if (isLightObject)
+                {
+                    // Light object - direct velocity control
+                    Vector3 moveDirection = targetPosition - netObj.transform.position;
+                    float distance = moveDirection.magnitude;
+
+                    // Calculate velocity based on distance (server implementation)
+                    Vector3 targetVelocity = moveDirection.normalized * distance * followSpeed;
+
+                    // Apply velocity with smoothing
+                    rb.linearVelocity = Vector3.Lerp(
+                        rb.linearVelocity,
+                        targetVelocity,
+                        Time.deltaTime * 10f
+                    );
+
+                    // Prevent excessive speeds
+                    if (rb.linearVelocity.magnitude > 10f)
+                    {
+                        rb.linearVelocity = rb.linearVelocity.normalized * 10f;
+                    }
+
+                    // Apply rotation via torque or direct rotation
+                    netObj.transform.rotation = Quaternion.Slerp(
+                        netObj.transform.rotation,
+                        targetRotation,
+                        Time.deltaTime * rotationSpeed
+                    );
+                }
+                else
+                {
+                    // Heavy object - apply limited force
+                    Vector3 toTarget = targetPosition - netObj.transform.position;
+
+                    // Only allow horizontal movement (dragging on ground) and limit upward pull
+                    toTarget.y = Mathf.Min(toTarget.y, 0.1f);
+
+                    // Apply force
+                    Vector3 dragForce = toTarget.normalized * heavyDragFactor * rb.mass;
+                    rb.AddForce(dragForce, ForceMode.Force);
+
+                    // Limit velocity
+                    if (rb.linearVelocity.magnitude > 2f)
+                    {
+                        rb.linearVelocity = rb.linearVelocity.normalized * 2f;
+                    }
+                }
             }
         }
     }
@@ -169,20 +211,15 @@ public class SmoothPickUp : NetworkBehaviour
             Rigidbody rb = netObj.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                // Keep non-kinematic for heavy objects
-                rb.isKinematic = false;
                 rb.useGravity = true;
 
-                // Adjust physics properties to make dragging possible but difficult
                 if (isBeingDragged)
                 {
-                    // Increase drag to make movement difficult
                     rb.linearDamping = 10f;
                     rb.angularDamping = 10f;
                 }
                 else
                 {
-                    // Reset drag when released
                     rb.linearDamping = 0.05f;
                     rb.angularDamping = 0.05f;
                 }
@@ -194,117 +231,141 @@ public class SmoothPickUp : NetworkBehaviour
         }
     }
 
-    void MoveHeldObject()
+    private Vector3 targetMovementPosition;
+    private float lastUpdateTime = 0f;
+    private float updateInterval = 0.05f;
+
+    // df
+    void Move_HeldObject()
     {
-        if (heldObject == null || playerCamera == null || !isHolding)
+        if (_heldObject == null || _playerCamera == null || !_isHolding)
             return;
 
         // Calculate target position in front of camera/player
+        targetMovementPosition =
+            _playerCamera.transform.position + _playerCamera.transform.forward * _pickupDistance;
         Vector3 targetPosition =
-            playerCamera.transform.position + playerCamera.transform.forward * pickupDistance;
+            _playerCamera.transform.position + _playerCamera.transform.forward * _pickupDistance;
 
-        if (!isObjectTooHeavyToLift)
+        if (!_isObjectTooHeavyToLift)
         {
-            // NORMAL OBJECT HANDLING - existing code with mass factor
             float massFactor = 1f;
-            if (massInfluence > 0 && heldRigidbody != null)
+            if (massInfluence > 0 && _heldRigidbody != null)
             {
-                // Calculate how "heavy" the object feels
                 float massReference = 5f;
                 massFactor = Mathf.Lerp(
                     1f,
                     minSpeedFactor,
-                    Mathf.Clamp01(heldRigidbody.mass / massReference * massInfluence)
+                    Mathf.Clamp01(_heldRigidbody.mass / massReference * massInfluence)
                 );
             }
 
-            // Direct position control for normal objects
-            heldObject.transform.position = Vector3.Lerp(
-                heldObject.transform.position,
-                targetPosition,
-                Time.deltaTime * followSpeed * massFactor
+            Vector3 moveDirection = targetPosition - _heldObject.transform.position;
+            float distance = moveDirection.magnitude;
+
+            // Calculate velocity based on distance
+            // The further away, the faster it tries to catch up
+            Vector3 targetVelocity = moveDirection.normalized * distance * followSpeed * massFactor;
+
+            // Apply velocity with smoothing
+            _heldRigidbody.linearVelocity = Vector3.Lerp(
+                _heldRigidbody.linearVelocity,
+                targetVelocity,
+                Time.deltaTime * 10f
             );
 
-            // Apply rotation for normal objects
-            Quaternion targetRotation = Quaternion.Lerp(
-                heldObject.transform.rotation,
-                playerCamera.transform.rotation,
+            // Prevent excessive speeds
+            if (_heldRigidbody.linearVelocity.magnitude > 10f)
+            {
+                _heldRigidbody.linearVelocity = _heldRigidbody.linearVelocity.normalized * 10f;
+            }
+
+            // Zero out angular velocity to prevent spinning
+            _heldRigidbody.angularVelocity = Vector3.zero;
+
+            // Apply rotation via torque or direct rotation depending on your needs
+            Quaternion targetRotation = Quaternion.Slerp(
+                _heldObject.transform.rotation,
+                _playerCamera.transform.rotation,
                 Time.deltaTime * rotationSpeed * massFactor
             );
-            heldObject.transform.rotation = targetRotation;
+            _heldObject.transform.rotation = targetRotation;
         }
         else
         {
             // HEAVY OBJECT HANDLING - apply limited force instead of direct movement
-            Vector3 toTarget = targetPosition - heldObject.transform.position;
+            Vector3 toTarget = targetPosition - _heldObject.transform.position;
 
             // Only allow horizontal movement (dragging on ground) and limit upward pull
             toTarget.y = Mathf.Min(toTarget.y, 0.1f);
 
             // Apply very limited force
-            Vector3 dragForce = toTarget.normalized * heavyDragFactor * heldRigidbody.mass;
-            heldRigidbody.AddForce(dragForce, ForceMode.Force);
+            Vector3 dragForce = toTarget.normalized * heavyDragFactor * _heldRigidbody.mass;
+            _heldRigidbody.AddForce(dragForce, ForceMode.Force);
 
             // Limit velocity to prevent accumulation of momentum
-            if (heldRigidbody.linearVelocity.magnitude > 2f)
+            if (_heldRigidbody.linearVelocity.magnitude > 2f)
             {
-                heldRigidbody.linearVelocity = heldRigidbody.linearVelocity.normalized * 2f;
+                _heldRigidbody.linearVelocity = _heldRigidbody.linearVelocity.normalized * 2f;
             }
+        }
+
+        if (Time.time > lastUpdateTime + updateInterval)
+        {
+            // Send intent to server
+            MoveObjectServerRpc(
+                _heldNetObj.ObjectId,
+                targetMovementPosition,
+                _playerCamera.transform.rotation,
+                !_isObjectTooHeavyToLift
+            );
+
+            lastUpdateTime = Time.time;
         }
 
         // Update line renderer (for both normal and heavy objects)
         if (lineRenderer != null)
         {
             lineRenderer.SetPosition(0, holdPoint.position);
-            lineRenderer.SetPosition(1, heldObject.transform.position);
+            lineRenderer.SetPosition(1, _heldObject.transform.position);
         }
     }
 
     void DropObject()
     {
-        if (heldObject == null)
+        if (_heldObject == null)
             return;
 
-        if (!isObjectTooHeavyToLift)
+        if (!_isObjectTooHeavyToLift)
         {
-            // Normal object - restore kinematic state
-            SetObjectKinematicStateRpc(heldNetObj.ObjectId, false);
-
-            // Restore physics state locally
-            heldRigidbody.useGravity = true;
-            heldRigidbody.isKinematic = originalKinematicState;
+            SetObjectKinematicStateServerRpc(_heldNetObj.ObjectId, false);
+            _heldRigidbody.useGravity = true;
         }
         else
         {
-            // Heavy object - reset drag properties
-            SetHeavyObjectPhysicsRpc(heldNetObj.ObjectId, false);
-
-            // Restore normal physics locally
-            heldRigidbody.linearDamping = 0.05f;
-            heldRigidbody.angularDamping = 0.05f;
+            SetHeavyObjectPhysicsServerRpc(_heldNetObj.ObjectId, false);
+            _heldRigidbody.linearDamping = 0.05f;
+            _heldRigidbody.angularDamping = 0.05f;
         }
 
         // Apply small release velocity based on movement
-        heldRigidbody.linearVelocity = playerCamera.transform.forward * 1f;
+        _heldRigidbody.linearVelocity = _playerCamera.transform.forward * 1f;
 
         // Notify the valuable it's been dropped
-        Valuable valuable = heldObject.GetComponent<Valuable>();
+        Valuable valuable = _heldObject.GetComponent<Valuable>();
         if (valuable != null)
         {
             valuable.OnDropped();
         }
 
-        // Reset state variable
-        isObjectTooHeavyToLift = false;
+        _isObjectTooHeavyToLift = false;
+        _isHolding = false;
 
-        // Clear references
-        heldObject = null;
-        heldRigidbody = null;
-        heldNetObj = null;
-        heldNetTransform = null;
-        isHolding = false;
+        _heldObject = null;
+        _heldRigidbody = null;
+        _heldNetObj = null;
+        _heldNetTransform = null;
 
-        // Hide line renderer
         if (lineRenderer != null)
         {
             lineRenderer.SetPosition(0, Vector3.zero);
@@ -312,7 +373,56 @@ public class SmoothPickUp : NetworkBehaviour
         }
     }
 
-    // **** NEW RPC TO SYNC KINEMATIC STATE ACROSS ALL CLIENTS ****
+    [ServerRpc(RequireOwnership = false)]
+    private void SetObjectKinematicStateServerRpc(int objectId, bool isKinematic)
+    {
+        // Server-side implementation
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                // Apply changes on server
+                rb.useGravity = !isKinematic;
+                if (isKinematic)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+
+                // Then broadcast to all clients
+                SetObjectKinematicStateRpc(objectId, isKinematic);
+            }
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SetHeavyObjectPhysicsServerRpc(int objectId, bool isBeingDragged)
+    {
+        NetworkObject netObj;
+        if (FishNet.InstanceFinder.ServerManager.Objects.Spawned.TryGetValue(objectId, out netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.useGravity = true;
+                if (isBeingDragged)
+                {
+                    rb.linearDamping = 10f;
+                    rb.angularDamping = 10f;
+                }
+                else
+                {
+                    rb.linearDamping = 0.05f;
+                    rb.angularDamping = 0.05f;
+                }
+
+                SetHeavyObjectPhysicsRpc(objectId, isBeingDragged);
+            }
+        }
+    }
+
     [ObserversRpc]
     private void SetObjectKinematicStateRpc(int objectId, bool isKinematic)
     {
@@ -322,7 +432,6 @@ public class SmoothPickUp : NetworkBehaviour
             Rigidbody rb = netObj.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.isKinematic = isKinematic;
                 rb.useGravity = !isKinematic;
 
                 if (isKinematic)
@@ -333,52 +442,6 @@ public class SmoothPickUp : NetworkBehaviour
 
                 Debug.Log($"Client: Set object {netObj.name} kinematic to {isKinematic}");
             }
-        }
-    }
-
-    // Configure NetworkTransform for local override or normal operation
-    private void ConfigureNetworkTransform(bool localControl)
-    {
-        if (heldNetTransform == null)
-            return;
-
-        if (localControl)
-        {
-            // Increase network update frequency for smooth replication
-            heldNetTransform.SetInterval(1); // Highest frequency
-        }
-        else
-        {
-            // Reset to default update frequency
-            heldNetTransform.SetInterval(20); // Default FishNet value
-        }
-    }
-
-    [ObserversRpc]
-    private void NotifyPickupRpc(int objectId)
-    {
-        if (IsOwner)
-            return;
-
-        NetworkObject netObj;
-        if (FishNet.InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(objectId, out netObj))
-        {
-            // Visual effects for pickup could go here
-            Debug.Log($"Client observed {gameObject.name} picking up object {objectId}");
-        }
-    }
-
-    [ObserversRpc]
-    private void NotifyDropRpc(int objectId)
-    {
-        if (IsOwner)
-            return;
-
-        NetworkObject netObj;
-        if (FishNet.InstanceFinder.ClientManager.Objects.Spawned.TryGetValue(objectId, out netObj))
-        {
-            // Visual effects for drop could go here
-            Debug.Log($"Client observed {gameObject.name} dropping object {objectId}");
         }
     }
 }

@@ -33,7 +33,6 @@ public class BlisterheartRelic : Valuable
     [SerializeField]
     private Color heatedColor = Color.red;
 
-    // Add SyncVars for networked state
     private readonly SyncVar<float> _heldTime = new SyncVar<float>(0f);
     private readonly SyncVar<bool> _isCoolingDown = new SyncVar<bool>(false);
     private readonly SyncVar<float> _cooldownRemaining = new SyncVar<float>(0f);
@@ -207,11 +206,11 @@ public class BlisterheartRelic : Valuable
     private void ForceDrop()
     {
         // Find local pickup controller on each client and drop
-        PickUpItem pickupController = FindObjectOfType<PickUpItem>();
-        if (pickupController != null)
-        {
-            pickupController.ForceDrop();
-        }
+        // SmoothPickUp pickupController = FindObjectOfType<PickUpItem>();
+        // if (pickupController != null)
+        // {
+        //     pickupController.ForceDrop();
+        // }
     }
 
     private void UpdateHeatVisuals(float intensity)

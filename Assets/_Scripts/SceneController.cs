@@ -1,4 +1,6 @@
 using System.Collections;
+using FishNet;
+using FishNet.Managing.Scened;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -43,136 +45,128 @@ public class SceneController : MonoBehaviour
         }
     }
 
-    // Load scene by name with optional callback when complete
     public void LoadScene(string sceneName, System.Action onComplete = null)
     {
-        if (_isLoading)
+        if (!InstanceFinder.IsServerStarted || _isLoading)
             return;
 
-        _currentlyLoadingScene = sceneName;
-        StartCoroutine(LoadSceneRoutine(sceneName, onComplete));
+        SceneLoadData sld = new SceneLoadData(sceneName);
+        InstanceFinder.SceneManager.LoadGlobalScenes(sld);
     }
 
-    // Load scene by build index
-    public void LoadScene(int sceneIndex, System.Action onComplete = null)
+    public void UnloadScene(string sceneName, System.Action onComplete = null)
     {
-        if (_isLoading)
+        if (!InstanceFinder.IsServerStarted || _isLoading)
             return;
 
-        _currentlyLoadingScene = SceneManager.GetSceneByBuildIndex(sceneIndex).name;
-        StartCoroutine(LoadSceneRoutine(sceneIndex, onComplete));
+        SceneUnloadData sud = new SceneUnloadData(sceneName);
+        InstanceFinder.SceneManager.UnloadGlobalScenes(sud);
     }
 
-    public void ReloadCurrentScene(System.Action onComplete = null)
-    {
-        LoadScene(SceneManager.GetActiveScene().name, onComplete);
-    }
+    // private IEnumerator LoadSceneRoutine(string sceneName, System.Action onComplete = null)
+    // {
+    //     _isLoading = true;
 
-    // Load scene with loading screen
-    private IEnumerator LoadSceneRoutine(string sceneName, System.Action onComplete = null)
-    {
-        _isLoading = true;
+    //     // Fade out current scene
+    //     yield return StartCoroutine(FadeRoutine(1));
 
-        // Fade out current scene
-        yield return StartCoroutine(FadeRoutine(1));
+    //     // Show loading screen if configured
+    //     if (showLoadingScreen && loadingScreen != null)
+    //         loadingScreen.SetActive(true);
 
-        // Show loading screen if configured
-        if (showLoadingScreen && loadingScreen != null)
-            loadingScreen.SetActive(true);
+    //     // Load the scene asynchronously
+    //     AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+    //     asyncLoad.allowSceneActivation = false;
 
-        // Load the scene asynchronously
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
-        asyncLoad.allowSceneActivation = false;
+    //     // Wait until it's almost done
+    //     while (asyncLoad.progress < 0.9f)
+    //     {
+    //         yield return null;
+    //     }
 
-        // Wait until it's almost done
-        while (asyncLoad.progress < 0.9f)
-        {
-            yield return null;
-        }
+    //     // Activate the scene
+    //     asyncLoad.allowSceneActivation = true;
 
-        // Activate the scene
-        asyncLoad.allowSceneActivation = true;
+    //     // Wait for scene to fully load
+    //     while (!asyncLoad.isDone)
+    //     {
+    //         yield return null;
+    //     }
 
-        // Wait for scene to fully load
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
+    //     // Hide loading screen
+    //     if (showLoadingScreen && loadingScreen != null)
+    //         loadingScreen.SetActive(false);
 
-        // Hide loading screen
-        if (showLoadingScreen && loadingScreen != null)
-            loadingScreen.SetActive(false);
+    //     // Fade in new scene
+    //     yield return StartCoroutine(FadeRoutine(0));
 
-        // Fade in new scene
-        yield return StartCoroutine(FadeRoutine(0));
+    //     _isLoading = false;
 
-        _isLoading = false;
+    //     // Execute callback if provided
+    //     onComplete?.Invoke();
+    // }
 
-        // Execute callback if provided
-        onComplete?.Invoke();
-    }
+    // // Overload for loading by index
+    // private IEnumerator LoadSceneRoutine(int sceneIndex, System.Action onComplete = null)
+    // {
+    //     _isLoading = true;
 
-    // Overload for loading by index
-    private IEnumerator LoadSceneRoutine(int sceneIndex, System.Action onComplete = null)
-    {
-        _isLoading = true;
+    //     // Same logic as above but with sceneIndex
+    //     yield return StartCoroutine(FadeRoutine(1));
 
-        // Same logic as above but with sceneIndex
-        yield return StartCoroutine(FadeRoutine(1));
+    //     if (showLoadingScreen && loadingScreen != null)
+    //         loadingScreen.SetActive(true);
 
-        if (showLoadingScreen && loadingScreen != null)
-            loadingScreen.SetActive(true);
+    //     AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
+    //     asyncLoad.allowSceneActivation = false;
 
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
-        asyncLoad.allowSceneActivation = false;
+    //     while (asyncLoad.progress < 0.9f)
+    //     {
+    //         yield return null;
+    //     }
 
-        while (asyncLoad.progress < 0.9f)
-        {
-            yield return null;
-        }
+    //     asyncLoad.allowSceneActivation = true;
 
-        asyncLoad.allowSceneActivation = true;
+    //     while (!asyncLoad.isDone)
+    //     {
+    //         yield return null;
+    //     }
 
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
+    //     if (showLoadingScreen && loadingScreen != null)
+    //         loadingScreen.SetActive(false);
 
-        if (showLoadingScreen && loadingScreen != null)
-            loadingScreen.SetActive(false);
+    //     yield return StartCoroutine(FadeRoutine(0));
 
-        yield return StartCoroutine(FadeRoutine(0));
+    //     _isLoading = false;
+    //     onComplete?.Invoke();
+    // }
 
-        _isLoading = false;
-        onComplete?.Invoke();
-    }
+    // private IEnumerator FadeRoutine(float targetAlpha)
+    // {
+    //     if (fadeCanvasGroup == null)
+    //         yield break;
 
-    private IEnumerator FadeRoutine(float targetAlpha)
-    {
-        if (fadeCanvasGroup == null)
-            yield break;
+    //     // If we're fading in (going transparent), we should eventually allow raycasts through
+    //     bool shouldBlockRaycasts = (targetAlpha > 0);
 
-        // If we're fading in (going transparent), we should eventually allow raycasts through
-        bool shouldBlockRaycasts = (targetAlpha > 0);
+    //     // If we're fading out to transparent, block raycasts during transition
+    //     if (targetAlpha == 0)
+    //         fadeCanvasGroup.blocksRaycasts = true;
 
-        // If we're fading out to transparent, block raycasts during transition
-        if (targetAlpha == 0)
-            fadeCanvasGroup.blocksRaycasts = true;
+    //     float startAlpha = fadeCanvasGroup.alpha;
+    //     float elapsedTime = 0;
 
-        float startAlpha = fadeCanvasGroup.alpha;
-        float elapsedTime = 0;
+    //     while (elapsedTime < fadeTime)
+    //     {
+    //         fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeTime);
+    //         elapsedTime += Time.deltaTime;
+    //         yield return null;
+    //     }
 
-        while (elapsedTime < fadeTime)
-        {
-            fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeTime);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
+    //     // Ensure we reach the exact target value
+    //     fadeCanvasGroup.alpha = targetAlpha;
 
-        // Ensure we reach the exact target value
-        fadeCanvasGroup.alpha = targetAlpha;
-
-        // Set final raycast blocking state
-        fadeCanvasGroup.blocksRaycasts = shouldBlockRaycasts;
-    }
+    //     // Set final raycast blocking state
+    //     fadeCanvasGroup.blocksRaycasts = shouldBlockRaycasts;
+    // }
 }

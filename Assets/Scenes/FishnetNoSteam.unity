@@ -879,7 +879,7 @@ Transform:
   m_GameObject: {fileID: 28858264}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.24, y: -0.25, z: -5.98}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8448,9 +8448,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843e7b59fde357949ac81023c3ec3f6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <OnStartServerCalled>k__BackingField: 0
+  <OnStartClientCalled>k__BackingField: 0
+  _onStartNetworkCalled: 0
+  _onStopNetworkCalled: 0
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 1693031353}
+  _transportManagerCache: {fileID: 0}
   _networkObjectCache: {fileID: 0}
+  _initializedOnceServer: 0
+  _initializedOnceClient: 0
+  <IsBehaviourReconciling>k__BackingField: 0
+  _remainingReplicateResends: 0
+  _remainingReconcileResends: 0
+  _lastReplicateReadRemoteTick: 0
+  _replicateStartTick: 0
+  _lastOrderedReplicatedTick: 0
+  _lastReadReplicateTick: 0
+  _lastReadReconcileRemoteTick: 0
+  _lastReconcileTick: 0
+  _lastTransformPosition: {x: 0, y: 0, z: 0}
+  _lastTransformRotation: {x: 0, y: 0, z: 0, w: 0}
+  _lastTransformScale: {x: 0, y: 0, z: 0}
+  _usesPrediction: 0
+  _rpcMethodCount: 0
+  _rpcHashSize: 1
+  SyncTypeDirty: 0
   initialCashValue: 100
   minDamageMultiplier: 0.05
   maxDamageMultiplier: 0.5
@@ -8459,6 +8482,11 @@ MonoBehaviour:
   breakSoundId: glass_break
   damageSoundId: glass_damage
   valueDisplayPrefab: {fileID: 0}
+  activeValueDisplay: {fileID: 0}
+  valueText: {fileID: 0}
+  tooltipDisplayTime: 1
+  tooltipTimer: 0
+  rb: {fileID: 0}
   sharedLiftForce: 15
   maxVelocity: 8
 --- !u!1 &1703985358
@@ -14346,6 +14374,7 @@ GameObject:
   - component: {fileID: 1818890336}
   - component: {fileID: 1818890335}
   - component: {fileID: 1818890338}
+  - component: {fileID: 1818890339}
   m_Layer: 9
   m_Name: ButtonBase
   m_TagString: Untagged
@@ -14465,13 +14494,37 @@ MonoBehaviour:
   activatedMaterial: {fileID: 2100000, guid: 999e336a1b03ebf40bb2aa0d8c18b9bf, type: 2}
   onButtonActivated:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1818890339}
+        m_TargetAssemblyTypeName: StartLevelButton, Assembly-CSharp
+        m_MethodName: OnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onButtonPressed:
     m_PersistentCalls:
       m_Calls: []
   onButtonReleased:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1818890339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1818890333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9935958b1da66bb4ca1f3261885aeef8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1857045523
 GameObject:
   m_ObjectHideFlags: 0
@@ -16873,7 +16926,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 897900669678639704, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
       propertyPath: _clientAuthoritative
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 897900669678639704, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
       propertyPath: _synchronizePosition
