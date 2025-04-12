@@ -1,4 +1,3 @@
-using FishNet.Connection;
 using FishNet.Object;
 using UnityEngine;
 
@@ -53,6 +52,10 @@ public class PlayerController : NetworkBehaviour
         {
             canMove = false;
             enabled = false;
+            foreach (Camera cam in GetComponentsInChildren<Camera>())
+            {
+                cam.gameObject.SetActive(false);
+            }
 
             Debug.Log($"Disabled control for non-owned player {gameObject.name}");
         }

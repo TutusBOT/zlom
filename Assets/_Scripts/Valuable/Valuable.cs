@@ -265,6 +265,4 @@ public class Valuable : NetworkBehaviour
             valueText = null;
         }
     }
-
-    
 }
