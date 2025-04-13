@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4286912790948540255}
   - component: {fileID: 3921108572199274389}
   - component: {fileID: 4735235392766103181}
+  - component: {fileID: 4261230266848846684}
   - component: {fileID: 2147728608480588975}
   - component: {fileID: -639547339833864361}
   - component: {fileID: 9221043243608676975}
@@ -314,6 +315,26 @@ MonoBehaviour:
   crankingAudioSource: {fileID: 294656319187813847}
   lowBatteryThreshold: 20
   flickerThreshold: 10
+--- !u!114 &4261230266848846684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a424c82f54f9b4c4882773e7deffaab2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
+  pushToTalkKey: 118
+  maxVoiceDistance: 15
+  voiceUpdateRate: 0.2
+  sampleRate: 16000
+  recordingLength: 1
 --- !u!114 &2147728608480588975
 MonoBehaviour:
   m_ObjectHideFlags: 0
