@@ -185,8 +185,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.Services.Core.Registr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.Behavior.Serialization.Editor", "Unity.Behavior.Serialization.Editor.csproj", "{99F0B239-5ECE-7184-1013-28216699FFEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{AAE819A3-5AED-9457-28BB-A828F4E52CD3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.Rendering.LightTransport.Editor", "Unity.Rendering.LightTransport.Editor.csproj", "{D86BA329-33E9-C32C-68D2-6A6DBED7EA39}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "com.rlabrecque.steamworks.net.editor", "com.rlabrecque.steamworks.net.editor.csproj", "{6EC90BF3-67B9-1EA9-E4AB-4F1F17DB14C9}"
@@ -587,10 +585,6 @@ Global
 		{99F0B239-5ECE-7184-1013-28216699FFEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99F0B239-5ECE-7184-1013-28216699FFEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99F0B239-5ECE-7184-1013-28216699FFEE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AAE819A3-5AED-9457-28BB-A828F4E52CD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AAE819A3-5AED-9457-28BB-A828F4E52CD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AAE819A3-5AED-9457-28BB-A828F4E52CD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AAE819A3-5AED-9457-28BB-A828F4E52CD3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D86BA329-33E9-C32C-68D2-6A6DBED7EA39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D86BA329-33E9-C32C-68D2-6A6DBED7EA39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D86BA329-33E9-C32C-68D2-6A6DBED7EA39}.Release|Any CPU.ActiveCfg = Release|Any CPU
