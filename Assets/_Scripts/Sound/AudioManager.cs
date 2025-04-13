@@ -67,4 +67,34 @@ public class AudioManager : MonoBehaviour
         Sound sound = new Sound(position, range);
         Sounds.MakeSound(sound);
     }
+
+    public void PlayLoopOnExistingSource(
+        AudioSource source,
+        // AudioClip clip,
+        float volumeScale = 1.0f
+    )
+    {
+        if (source == null)
+            return;
+
+        // source.clip = clip;
+        source.volume = globalVolume * volumeScale;
+        source.loop = true;
+        source.spatialBlend = 1.0f;
+
+        source.Play();
+
+        // Notify AI system about sound
+        float range = source.maxDistance;
+        Sound sound = new Sound(source.transform.position, range);
+        Sounds.MakeSound(sound);
+    }
+
+    public void StopLoopOnExistingSource(AudioSource source)
+    {
+        if (source != null && source.isPlaying)
+        {
+            source.Stop();
+        }
+    }
 }
