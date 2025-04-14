@@ -342,19 +342,23 @@ public class StressController : NetworkBehaviour
         }
 
         // Update audio effects
-        if (breathingSource != null)
+        if (breathingSound != null)
         {
-            breathingSource.volume = Mathf.Lerp(
-                minBreathingVolume,
-                maxBreathingVolume,
-                curvedStress
-            );
+            // breathingSource.volume = Mathf.Lerp(
+            //     minBreathingVolume,
+            //     maxBreathingVolume,
+            //     curvedStress
+            // );
         }
 
-        if (heartbeatSource != null)
+        if (heartbeatSound != null)
         {
-            heartbeatSource.pitch = Mathf.Lerp(minHeartRate, maxHeartRate, curvedStress);
-            heartbeatSource.volume = Mathf.Lerp(0.2f, 1f, curvedStress);
+            float pitch = Mathf.Lerp(minHeartRate, maxHeartRate, curvedStress);
+        heartbeatSource.pitch = pitch;
+        
+        // Set volume based on stress
+        float volume = Mathf.Lerp(0.2f, 1f, curvedStress);
+        heartbeatSource.volume = volume;
         }
 
         // Camera shake intensity
