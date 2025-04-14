@@ -60,7 +60,7 @@ public class VoiceChatManager : NetworkBehaviour
         source.loop = false; // IMPORTANT: Don't loop voice audio
 
         // Store reference to this player's voice source
-        _networkId.Value = (int)GetComponent<NetworkObject>().ObjectId;
+        _networkId.Value = GetComponent<NetworkObject>().ObjectId;
         _playerVoiceSources[_networkId.Value] = source;
         _playerIsSpeaking[_networkId.Value] = false;
         _lastPlayTime[_networkId.Value] = 0f;

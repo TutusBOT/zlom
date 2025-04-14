@@ -97,4 +97,34 @@ public class AudioManager : MonoBehaviour
             source.Stop();
         }
     }
+
+    public void PlayLocalSound(
+        AudioClip clip,
+        float volume = 1.0f,
+        float pitch = 1.0f,
+        bool loop = false,
+        float spatialBlend = 0f
+    )
+    {
+        if (clip == null)
+            return;
+
+        GameObject tempAudio = new GameObject("LocalAudio_" + clip.name);
+        tempAudio.transform.parent = Camera.main.transform;
+
+        AudioSource source = tempAudio.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.volume = volume * globalVolume;
+        source.pitch = pitch;
+        source.spatialBlend = spatialBlend;
+        source.playOnAwake = false;
+        source.loop = loop;
+
+        source.Play();
+
+        if (!loop)
+        {
+            Destroy(tempAudio, clip.length + 0.1f);
+        }
+    }
 }
