@@ -5,6 +5,7 @@ public class ParanoidAffliction : AbstractAffliction
 {
     private Coroutine voiceDisruptionCoroutine;
     private float disruptionChance = 0.001f;
+    private Coroutine _randomSoundCoroutine;
 
     public override StressController.AfflictionType Type =>
         StressController.AfflictionType.Paranoid;
@@ -24,6 +25,18 @@ public class ParanoidAffliction : AbstractAffliction
         }
     }
 
+    public override void OnAfflictionActivated()
+    {
+        base.OnAfflictionActivated();
+
+        // Start the random sound coroutine when affliction activates
+        if (_randomSoundCoroutine == null && IsOwner())
+        {
+            _randomSoundCoroutine = stressController.StartCoroutine(PlayRandomSoundsRoutine());
+            Debug.Log("Started random paranoia sound effects");
+        }
+    }
+
     public override void OnAfflictionDeactivated()
     {
         base.OnAfflictionDeactivated();
@@ -33,6 +46,21 @@ public class ParanoidAffliction : AbstractAffliction
         {
             stressController.StopCoroutine(voiceDisruptionCoroutine);
             voiceDisruptionCoroutine = null;
+        }
+    }
+
+    private IEnumerator PlayRandomSoundsRoutine()
+    {
+        while (isActive && IsOwner())
+        {
+            // Wait for random interval between 10-60 seconds
+            float waitTime = Random.Range(10f, 60f);
+            yield return new WaitForSeconds(waitTime);
+
+            if (!isActive)
+                break;
+
+            PlayIllusionarySound();
         }
     }
 
@@ -50,6 +78,21 @@ public class ParanoidAffliction : AbstractAffliction
         yield return new WaitForSeconds(muteDuration);
 
         // voiceChat.SetTemporarilyMuted(false);
+    }
+
+    private void PlayIllusionarySound()
+    {
+        if (player == null)
+            return;
+
+        // Get random position around player
+        Vector3 randomDir = Random.insideUnitSphere.normalized;
+        float distance = Random.Range(3f, 8f);
+        Vector3 soundPosition = player.transform.position + randomDir * distance;
+
+        AudioManager.Instance.PlayRandomSound(true, soundPosition, 0.7f);
+
+        Debug.Log("Playing random paranoia sound");
     }
 
     public override GameObject CreateVisualIndicator(Transform parent)

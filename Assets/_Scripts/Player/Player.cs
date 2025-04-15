@@ -40,7 +40,6 @@ public class Player : NetworkBehaviour
     {
         base.OnStartClient();
 
-        // Register with player manager
         if (PlayerManager.Instance != null)
         {
             PlayerManager.Instance.RegisterPlayer(this);
@@ -49,19 +48,16 @@ public class Player : NetworkBehaviour
 
     private void OnDestroy()
     {
-        // Unregister from player manager
         if (PlayerManager.Instance != null)
         {
             PlayerManager.Instance.UnregisterPlayer(this);
         }
     }
 
-    // Public getters for controllers
     public StressController GetStressController() => stressController;
 
     public VoiceChatManager GetVoiceChatManager() => voiceChatManager;
 
-    // Utility methods for common player actions
     public bool IsIsolated(float distance)
     {
         return !PlayerManager.Instance.IsAnyPlayerInRange(transform.position, distance, this);

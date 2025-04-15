@@ -24,7 +24,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // Play by sound ID
     public void PlaySound(string soundId, Vector3 position, float volumeScale = 1.0f)
     {
         AudioClip clip = soundBank.GetSound(soundId);
@@ -34,7 +33,6 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // Direct play with clip
     public void PlaySoundAtPosition(
         AudioClip clip,
         Vector3 position,
@@ -68,16 +66,11 @@ public class AudioManager : MonoBehaviour
         Sounds.MakeSound(sound);
     }
 
-    public void PlayLoopOnExistingSource(
-        AudioSource source,
-        // AudioClip clip,
-        float volumeScale = 1.0f
-    )
+    public void PlayLoopOnExistingSource(AudioSource source, float volumeScale = 1.0f)
     {
         if (source == null)
             return;
 
-        // source.clip = clip;
         source.volume = globalVolume * volumeScale;
         source.loop = true;
         source.spatialBlend = 1.0f;
@@ -98,7 +91,7 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public void PlayLocalSound(
+    public AudioSource PlayLocalSound(
         AudioClip clip,
         float volume = 1.0f,
         float pitch = 1.0f,
@@ -107,7 +100,7 @@ public class AudioManager : MonoBehaviour
     )
     {
         if (clip == null)
-            return;
+            throw new System.ArgumentNullException(nameof(clip), "AudioClip cannot be null.");
 
         GameObject tempAudio = new GameObject("LocalAudio_" + clip.name);
         tempAudio.transform.parent = Camera.main.transform;
@@ -126,5 +119,25 @@ public class AudioManager : MonoBehaviour
         {
             Destroy(tempAudio, clip.length + 0.1f);
         }
+
+        return source;
+    }
+
+    public void PlayRandomSound(bool asLocal, Vector3 position, float volumeScale = 1.0f)
+    {
+        string randomSoundId = soundBank.GetRandomSoundId();
+        if (string.IsNullOrEmpty(randomSoundId))
+        {
+            Debug.LogWarning("No sound ID found in the sound bank.");
+            return;
+        }
+
+        if (asLocal)
+        {
+            PlayLocalSound(soundBank.GetSound(randomSoundId), volumeScale, 1.0f, false, 1f);
+            return;
+        }
+
+        PlaySound(randomSoundId, position, volumeScale);
     }
 }

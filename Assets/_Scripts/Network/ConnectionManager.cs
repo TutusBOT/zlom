@@ -66,10 +66,10 @@ public class ConnectionManager : MonoBehaviour
         if (networkManager == null)
             return;
 
-        if (networkManager.IsServer)
+        if (networkManager.IsServerStarted)
             networkManager.ServerManager.StopConnection(true);
 
-        if (networkManager.IsClient)
+        if (networkManager.IsClientStarted)
             networkManager.ClientManager.StopConnection();
 
         Debug.Log("Connection stopped");

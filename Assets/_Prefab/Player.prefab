@@ -414,8 +414,8 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   cameraTransform: {fileID: 0}
-  heartbeatSource: {fileID: 4214760729355928606}
-  breathingSource: {fileID: 0}
+  heartbeatSound: {fileID: 8300000, guid: e022777422cfcd345aa05961bd8cab15, type: 3}
+  breathingSound: {fileID: 0}
   minBreathingVolume: 0
   maxBreathingVolume: 1
   minHeartRate: 0.5

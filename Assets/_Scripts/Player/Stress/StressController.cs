@@ -74,7 +74,7 @@ public class StressController : NetworkBehaviour
     private float minHeartRate = 0.5f;
 
     [SerializeField]
-    private float maxHeartRate = 2f;
+    private float maxHeartRate = 1f;
 
     [Header("Stress Sources Configuration")]
     [SerializeField]
@@ -151,6 +151,11 @@ public class StressController : NetworkBehaviour
     private Vector3 _originalCameraPosition;
     private bool _isStageComplete = false;
 
+    // Heartbeat sound
+    private AudioSource _heartbeatSource;
+    private bool _isHeartbeatPlaying = false;
+    private float _lastHeartbeatStressLevel = 0f;
+
     #endregion
 
     #region Initialization and Updates
@@ -218,8 +223,9 @@ public class StressController : NetworkBehaviour
         // Handle affliction effects if active
         if (_isAfflictionActive && _currentAffliction.Value != AfflictionType.None)
             ApplyAfflictionEffects();
-
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         DebugControls();
+#endif
     }
 
     private void LateUpdate()
@@ -353,16 +359,51 @@ public class StressController : NetworkBehaviour
 
         if (heartbeatSound != null)
         {
-            float pitch = Mathf.Lerp(minHeartRate, maxHeartRate, curvedStress);
-        heartbeatSource.pitch = pitch;
-        
-        // Set volume based on stress
-        float volume = Mathf.Lerp(0.2f, 1f, curvedStress);
-        heartbeatSource.volume = volume;
+            if (curvedStress > 0.5f && !_isHeartbeatPlaying)
+            {
+                // Start heartbeat when stress exceeds 50%
+                _heartbeatSource = AudioManager.Instance.PlayLocalSound(
+                    heartbeatSound, // The actual AudioClip
+                    0.2f, // Initial volume
+                    minHeartRate,
+                    true
+                ); // Initial pitch
+
+                _isHeartbeatPlaying = true;
+            }
+            else if (curvedStress <= 0.4f && _isHeartbeatPlaying) // Hysteresis to prevent rapid on/off
+            {
+                // Stop heartbeat when stress falls below 40%
+                if (_heartbeatSource != null)
+                {
+                    _heartbeatSource.Stop();
+                    Destroy(_heartbeatSource.gameObject);
+                    _heartbeatSource = null;
+                }
+                _isHeartbeatPlaying = false;
+            }
+
+            // Update heartbeat parameters if playing
+            if (_isHeartbeatPlaying && _heartbeatSource != null)
+            {
+                // Only update if stress changed significantly (optimization)
+                if (Mathf.Abs(curvedStress - _lastHeartbeatStressLevel) > 0.05f)
+                {
+                    _lastHeartbeatStressLevel = curvedStress;
+
+                    // Adjust pitch based on stress
+                    float pitch = Mathf.Lerp(minHeartRate, maxHeartRate, curvedStress);
+                    _heartbeatSource.pitch = pitch;
+
+                    // Adjust volume based on stress
+                    float volume = Mathf.Lerp(0.2f, 1f, curvedStress);
+                    _heartbeatSource.volume = volume;
+                }
+            }
         }
 
         // Camera shake intensity
-        _cameraShakeIntensity = curvedStress * 0.05f;
+        _cameraShakeIntensity = curvedStress * 0.01f;
     }
 
     #endregion
@@ -407,10 +448,6 @@ public class StressController : NetworkBehaviour
     [ServerRpc]
     private void TriggerAfflictionServerRpc()
     {
-        Debug.Log(
-            $"TriggerAfflictionServerRpc called. Current affliction: {_currentAffliction.Value}"
-        );
-
         if (_currentAffliction.Value == AfflictionType.None)
         {
             // Only select afflictions we have implementations for
@@ -422,8 +459,6 @@ public class StressController : NetworkBehaviour
 
             int randomIndex = Random.Range(0, implementedTypes.Count);
             AfflictionType selectedType = implementedTypes[randomIndex];
-
-            Debug.Log($"Selected affliction: {selectedType}");
 
             // Set the affliction - this triggers OnAfflictionChanged
             _currentAffliction.Value = selectedType;
@@ -486,14 +521,9 @@ public class StressController : NetworkBehaviour
         bool asServer
     )
     {
-        Debug.Log($"OnAfflictionChanged: {oldValue} -> {newValue}, asServer: {asServer}");
-
         // Clean up old implementation first
         if (_currentAfflictionImplementation != null)
         {
-            Debug.Log(
-                $"Cleaning up previous implementation of type {_currentAfflictionImplementation.Type}"
-            );
             _currentAfflictionImplementation.OnAfflictionDeactivated();
             _currentAfflictionImplementation = null;
         }
@@ -501,7 +531,6 @@ public class StressController : NetworkBehaviour
         // Create new implementation if needed
         if (newValue != AfflictionType.None)
         {
-            Debug.Log($"Creating implementation for {newValue}");
             _currentAfflictionImplementation = AfflictionFactory.CreateAffliction(
                 newValue,
                 this,
@@ -510,11 +539,6 @@ public class StressController : NetworkBehaviour
 
             if (_currentAfflictionImplementation != null)
             {
-                Debug.Log(
-                    $"Successfully created implementation of type {_currentAfflictionImplementation.Type}"
-                );
-
-                // Verify types match
                 if (_currentAfflictionImplementation.Type != newValue)
                 {
                     Debug.LogError(
