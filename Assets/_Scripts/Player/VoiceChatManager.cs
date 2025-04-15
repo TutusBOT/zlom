@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
-using FishNet.Object.Synchronizing;
 using UnityEngine;
 
 public class VoiceChatManager : NetworkBehaviour
@@ -15,15 +13,14 @@ public class VoiceChatManager : NetworkBehaviour
     private float maxVoiceDistance = 15f;
 
     [SerializeField]
-    private float voiceUpdateRate = 0.05f; // REDUCED: 50ms for more real-time feel
+    private float voiceUpdateRate = 0.05f;
 
     [SerializeField]
-    private int sampleRate = 16000; // 16kHz - good for voice
+    private int sampleRate = 16000;
 
     [SerializeField]
-    private int recordingLength = 1; // 1 second clips
+    private int recordingLength = 1;
 
-    // Voice processing
     private AudioClip _recordingClip;
     private bool _isRecording = false;
     private float _recordingTimer = 0f;
@@ -35,7 +32,7 @@ public class VoiceChatManager : NetworkBehaviour
 
     // Track speaking state
     private Dictionary<int, bool> _playerIsSpeaking = new Dictionary<int, bool>();
-    private readonly SyncVar<int> _networkId = new SyncVar<int>(0);
+    private int _networkId = 0;
 
     public override void OnStartClient()
     {
@@ -46,24 +43,23 @@ public class VoiceChatManager : NetworkBehaviour
             InitializeMicrophone();
         }
 
-        // Create audio source for this player's voice
         GameObject voiceObj = new GameObject($"Voice_{gameObject.name}");
         voiceObj.transform.SetParent(transform);
         voiceObj.transform.localPosition = Vector3.zero;
 
         AudioSource source = voiceObj.AddComponent<AudioSource>();
-        source.spatialBlend = 1.0f; // Full 3D
+        source.spatialBlend = 1.0f;
         source.minDistance = 1f;
         source.maxDistance = maxVoiceDistance;
         source.rolloffMode = AudioRolloffMode.Linear;
         source.playOnAwake = false;
-        source.loop = false; // IMPORTANT: Don't loop voice audio
+        source.loop = false;
 
         // Store reference to this player's voice source
-        _networkId.Value = (int)GetComponent<NetworkObject>().ObjectId;
-        _playerVoiceSources[_networkId.Value] = source;
-        _playerIsSpeaking[_networkId.Value] = false;
-        _lastPlayTime[_networkId.Value] = 0f;
+        _networkId = GetComponent<NetworkObject>().ObjectId;
+        _playerVoiceSources[_networkId] = source;
+        _playerIsSpeaking[_networkId] = false;
+        _lastPlayTime[_networkId] = 0f;
     }
 
     private void InitializeMicrophone()
@@ -75,7 +71,6 @@ public class VoiceChatManager : NetworkBehaviour
             Debug.Log($"Microphone initialized: {_deviceName}");
             _recordingClip = Microphone.Start(_deviceName, true, recordingLength, sampleRate);
 
-            // Wait until microphone starts recording
             while (!(Microphone.GetPosition(_deviceName) > 0)) { }
         }
         else
@@ -108,13 +103,11 @@ public class VoiceChatManager : NetworkBehaviour
         {
             if (wasTalking)
             {
-                // Just stopped talking - send the stop talking signal
                 StopTalkingServerRpc();
             }
             _recordingTimer = 0;
         }
 
-        // Clean up voice playback
         CleanupVoiceSources();
     }
 
@@ -182,24 +175,20 @@ public class VoiceChatManager : NetworkBehaviour
     [ServerRpc]
     private void SendVoiceDataServerRpc(byte[] audioData)
     {
-        // On server, distribute to nearby players
-        foreach (var player in Object.FindObjectsOfType<VoiceChatManager>())
+        var players = PlayerManager.Instance.GetAllPlayers();
+        foreach (var player in players)
         {
-            // Skip sending to self
-            if (player == this)
+            var voiceChatManager = player.GetVoiceChatManager();
+            if (voiceChatManager == this)
                 continue;
 
-            // Calculate distance between players
             float distance = Vector3.Distance(transform.position, player.transform.position);
 
-            // Only send to players in range
             if (distance <= maxVoiceDistance)
             {
-                // Calculate volume falloff based on distance
                 float volumeScale = 1f - (distance / maxVoiceDistance);
 
-                // Send to that player
-                player.ReceiveVoiceDataClientRpc(audioData, _networkId.Value, volumeScale);
+                voiceChatManager.ReceiveVoiceDataClientRpc(audioData, _networkId, volumeScale);
             }
         }
     }
@@ -207,8 +196,7 @@ public class VoiceChatManager : NetworkBehaviour
     [ServerRpc]
     private void StopTalkingServerRpc()
     {
-        // Tell everyone this player stopped talking
-        StopTalkingClientRpc(_networkId.Value);
+        StopTalkingClientRpc(_networkId);
     }
 
     [ObserversRpc]
@@ -228,14 +216,13 @@ public class VoiceChatManager : NetworkBehaviour
     [ObserversRpc]
     private void ReceiveVoiceDataClientRpc(byte[] audioData, int senderId, float volumeScale)
     {
-        if (IsOwner && senderId == _networkId.Value)
-            return; // Don't play your own voice back
+        if (IsOwner && senderId == _networkId)
+            return;
 
         // Update last play time
         _lastPlayTime[senderId] = Time.time;
         _playerIsSpeaking[senderId] = true;
 
-        // Convert bytes back to audio
         float[] samples = ConvertBytesToAudio(audioData);
 
         // Create audio clip from samples
@@ -253,7 +240,7 @@ public class VoiceChatManager : NetworkBehaviour
             source.maxDistance = maxVoiceDistance;
             source.rolloffMode = AudioRolloffMode.Linear;
             source.playOnAwake = false;
-            source.loop = false; // IMPORTANT: Don't loop voice
+            source.loop = false;
             _playerVoiceSources[senderId] = source;
             _playerIsSpeaking[senderId] = true;
             _lastPlayTime[senderId] = Time.time;
@@ -262,13 +249,11 @@ public class VoiceChatManager : NetworkBehaviour
         // Get the appropriate audio source
         AudioSource playerSource = _playerVoiceSources[senderId];
 
-        // Stop if it was already playing
         if (playerSource.isPlaying)
         {
             playerSource.Stop();
         }
 
-        // Play the voice directly (NO LOOPING)
         playerSource.clip = voiceClip;
         playerSource.volume = volumeScale;
         playerSource.Play();
@@ -277,14 +262,13 @@ public class VoiceChatManager : NetworkBehaviour
     // Helper methods for audio processing
     private bool HasSound(float[] samples)
     {
-        // More sensitive volume detection
         float sum = 0;
         for (int i = 0; i < samples.Length; i++)
         {
             sum += Mathf.Abs(samples[i]);
         }
         float average = sum / samples.Length;
-        return average > 0.005f; // Lowered threshold for better sensitivity
+        return average > 0.005f;
     }
 
     private byte[] ConvertAudioToBytes(float[] samples)

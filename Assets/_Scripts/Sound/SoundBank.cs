@@ -58,6 +58,23 @@ public class SoundBank : ScriptableObject
         return null;
     }
 
+    public string GetRandomSoundId()
+    {
+        if (_soundLookup == null)
+        {
+            InitializeLookup();
+        }
+
+        if (_soundLookup.Count > 0)
+        {
+            List<string> allSoundIds = new List<string>(_soundLookup.Keys);
+            return allSoundIds[Random.Range(0, allSoundIds.Count)];
+        }
+
+        Debug.LogWarning("Sound bank is empty!");
+        return null;
+    }
+
     private void InitializeLookup()
     {
         _soundLookup = new Dictionary<string, SoundEntry>();

@@ -4311,6 +4311,7 @@ MonoBehaviour:
   - {fileID: 7590157624810557479, guid: f73ebcf4651073f48a3183e604e9d761, type: 3}
   - {fileID: 8171001556097400531, guid: fe9642f201cc4bd4c8f20c5c8c84ae8b, type: 3}
   - {fileID: 4567546734140320367, guid: 0c904818678aa9e4981818e6c21a034d, type: 3}
+  - {fileID: 5420541285710718128, guid: 0e0af78c8bd1e504f8901bd9b89e005e, type: 3}
 --- !u!4 &549266608
 Transform:
   m_ObjectHideFlags: 0
@@ -9515,17 +9516,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3551952761251280130, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
   m_PrefabInstance: {fileID: 1092741543825368280}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1693031353 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1986281182232142823, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
-  m_PrefabInstance: {fileID: 1092741543825368280}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1693031351}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1693031358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9538,19 +9528,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 843e7b59fde357949ac81023c3ec3f6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 1693031353}
-  _networkObjectCache: {fileID: 0}
-  initialCashValue: 100
-  minDamageMultiplier: 0.05
-  maxDamageMultiplier: 0.5
-  breakThreshold: 5
-  size: 0
-  breakSoundId: glass_break
-  damageSoundId: glass_damage
-  valueDisplayPrefab: {fileID: 0}
-  sharedLiftForce: 15
-  maxVelocity: 8
 --- !u!1 &1703985358
 GameObject:
   m_ObjectHideFlags: 0
