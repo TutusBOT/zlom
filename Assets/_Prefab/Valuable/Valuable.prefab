@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3343481669615595820}
   - component: {fileID: 1986281182232142823}
   - component: {fileID: 897900669678639704}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Valuable
   m_TagString: Valuable
   m_Icon: {fileID: 0}
@@ -151,7 +151,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 3
+  <PrefabId>k__BackingField: 4
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 4183899602975669758
   <SceneId>k__BackingField: 0
@@ -214,7 +214,7 @@ GameObject:
   - component: {fileID: 6213492739747101098}
   - component: {fileID: 3599658302507467268}
   - component: {fileID: 76974061085444961}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}

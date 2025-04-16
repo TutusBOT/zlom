@@ -288,6 +288,7 @@ GameObject:
   - component: {fileID: 1180316802}
   - component: {fileID: 1180316804}
   - component: {fileID: 1180316805}
+  - component: {fileID: 1180316806}
   m_Layer: 0
   m_Name: Generator
   m_TagString: Untagged
@@ -322,6 +323,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f103caadec83ad4eb7469fef173321a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1180316806}
+  _networkObjectCache: {fileID: 0}
   valuableSpawner: {fileID: 1180316805}
   gridUnitSize: 20
   gridSizeX: 50
@@ -347,6 +351,7 @@ MonoBehaviour:
   minEnemiesPerRoom: 0
   maxEnemiesPerRoom: 3
   skipEnemiesInStartRoom: 1
+  seed: 69
 --- !u!114 &1180316805
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -359,10 +364,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53b8b0c30611bbd449e70d83d2bd751c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 1180316806}
+  _networkObjectCache: {fileID: 0}
   valuablePrefabs:
   - prefab: {fileID: 3551952761251280130, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
-    size: 1
-    spawnWeight: 1
+    size: 0
+    spawnWeight: 100
   - prefab: {fileID: 3551952761251280130, guid: a58b777b939d64a49b4ad58cf84cd59a, type: 3}
     size: 0
     spawnWeight: 1
@@ -389,6 +397,56 @@ MonoBehaviour:
     spawnWeight: 1
   spawnDensity: 1
   debug: 1
+--- !u!114 &1180316806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1180316800}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26b716c41e9b56b4baafaf13a523ba2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <IsNested>k__BackingField: 0
+  <ComponentIndex>k__BackingField: 0
+  <PredictedSpawn>k__BackingField: {fileID: 0}
+  <PredictedOwner>k__BackingField: {fileID: 0}
+  NetworkBehaviours: []
+  InitializedParentNetworkBehaviour: {fileID: 0}
+  InitializedNestedNetworkObjects: []
+  RuntimeParentNetworkBehaviour: {fileID: 0}
+  RuntimeChildNetworkBehaviours: []
+  _isNetworked: 1
+  _isSpawnable: 1
+  _isGlobal: 0
+  _initializeOrder: 0
+  _preventDespawnOnDisconnect: 0
+  _defaultDespawnType: 0
+  NetworkObserver: {fileID: 0}
+  _enablePrediction: 0
+  _predictionType: 0
+  _graphicalObject: {fileID: 0}
+  _detachGraphicalObject: 0
+  _enableStateForwarding: 1
+  _networkTransform: {fileID: 0}
+  _ownerInterpolation: 1
+  _ownerSmoothedProperties: 255
+  _adaptiveInterpolation: 3
+  _spectatorSmoothedProperties: 255
+  _spectatorInterpolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  <PrefabId>k__BackingField: 65535
+  <SpawnableCollectionId>k__BackingField: 0
+  <AssetPathHash>k__BackingField: 0
+  <SceneId>k__BackingField: 3991666399
+  SerializedTransformProperties:
+    Position: {x: 0, y: 0, z: 0}
+    Rotation: {x: 0, y: 0, z: 0, w: 0}
+    Scale: {x: 0, y: 0, z: 0}
+    IsValid: 0
 --- !u!1 &1630119738
 GameObject:
   m_ObjectHideFlags: 0
