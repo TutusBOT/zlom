@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using FishNet;
+using FishNet.Object;
 using UnityEngine;
 
-public class ValuableSpawner : MonoBehaviour
+public class ValuableSpawner : NetworkBehaviour
 {
     [System.Serializable]
     public class ValuablePrefab
@@ -59,7 +61,12 @@ public class ValuableSpawner : MonoBehaviour
             return;
         }
 
-        // Find all spawn points in this room
+        if (!IsServerInitialized)
+        {
+            Debug.LogWarning("Attempted to spawn valuables from client");
+            return;
+        }
+
         ValuableSpawnPoint[] spawnPoints = roomObject.GetComponentsInChildren<ValuableSpawnPoint>();
 
         if (spawnPoints.Length == 0)
@@ -72,7 +79,6 @@ public class ValuableSpawner : MonoBehaviour
 
         // Determine how many to fill based on density
         int pointsToFill = Mathf.FloorToInt(spawnPoints.Length * spawnDensity);
-        Debug.Log($"Filling {pointsToFill} spawn points in room: {roomObject.name}");
 
         for (int i = 0; i < pointsToFill; i++)
         {
@@ -89,12 +95,27 @@ public class ValuableSpawner : MonoBehaviour
 
             if (valuablePrefab != null)
             {
-                // Instantiate valuable with random rotation
+                // First instantiate locally
                 GameObject valuable = Instantiate(
                     valuablePrefab,
                     spawnPoint.transform.position,
                     Quaternion.Euler(0, Random.Range(0, 360), 0)
                 );
+
+                valuable.layer = LayerMask.NameToLayer("Interactable");
+
+                // Then spawn on the network
+                NetworkObject networkObject = valuable.GetComponent<NetworkObject>();
+                if (networkObject != null)
+                {
+                    InstanceFinder.ServerManager.Spawn(valuable);
+                }
+                else
+                {
+                    Debug.LogError(
+                        $"Valuable prefab {valuablePrefab.name} does not have a NetworkObject component!"
+                    );
+                }
 
                 // Track spawned valuable
                 spawnedValuables.Add(valuable);

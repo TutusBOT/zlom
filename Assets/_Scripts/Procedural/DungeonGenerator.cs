@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using FishNet.Object;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
@@ -47,7 +48,7 @@ public struct ConnectionPoint
     public Direction direction;
 }
 
-public class DungeonGenerator : MonoBehaviour
+public class DungeonGenerator : NetworkBehaviour
 {
     public const int DEFAULT_GRID_SIZE_X = 50;
     public const int DEFAULT_GRID_SIZE_Z = 50;
@@ -118,6 +119,9 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField]
     private bool skipEnemiesInStartRoom = true;
 
+    [SerializeField]
+    private int seed;
+
     void Start()
     {
         Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
@@ -170,17 +174,27 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
-
-        GenerateDungeon();
-        if (spawnEnemiesInRooms && enemySpawner != null)
-        {
-            StartCoroutine(GenerateNavMeshDelayed());
-            SpawnEnemiesInRooms();
-        }
     }
 
-    void GenerateDungeon()
+    public override void OnStartClient()
     {
+        base.OnStartClient();
+
+        if (!IsServerInitialized)
+            return;
+
+        if (seed == 0)
+        {
+            seed = Random.Range(1, 100000);
+        }
+
+        GenerateDungeon(seed);
+    }
+
+    [ObserversRpc(BufferLast = true)]
+    void GenerateDungeon(int seed)
+    {
+        Random.InitState(seed);
         grid = new CellType[gridSizeX, gridSizeZ];
         rooms.Clear();
 
@@ -194,21 +208,18 @@ public class DungeonGenerator : MonoBehaviour
         ConnectRooms();
         RenderDungeon();
 
-        if (valuableSpawner != null)
+        if (valuableSpawner != null && IsServerInitialized)
         {
             valuableSpawner.SpawnValuablesInRooms();
         }
 
-        // foreach (Room room in rooms)
-        // {
-        //     Debug.Log(
-        //         $"Room at ({room.xOrigin}, {room.zOrigin}) with size {room.width}x{room.length}"
-        //     );
-        //     foreach (Room connection in room.connections)
-        //     {
-        //         Debug.Log($"  Connected to room at ({connection.xOrigin}, {connection.zOrigin})");
-        //     }
-        // }
+        if (spawnEnemiesInRooms && enemySpawner != null)
+        {
+            StartCoroutine(GenerateNavMeshDelayed());
+            SpawnEnemiesInRooms();
+        }
+
+        Random.InitState((int)DateTime.Now.Ticks);
     }
 
     void PlaceRooms()

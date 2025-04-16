@@ -16,7 +16,7 @@ public class CrosshairController : MonoBehaviour
     public float scaleSpeed = 8f;
     public float hoverScale = 1.2f;
 
-    private Camera playerCamera;
+    private Camera _playerCamera;
     private Image crosshairImage;
     private Canvas crosshairCanvas;
     private Vector3 defaultScale;
@@ -24,7 +24,12 @@ public class CrosshairController : MonoBehaviour
 
     private void Start()
     {
-        playerCamera = Camera.main;
+        _playerCamera = GetComponentInChildren<Camera>();
+        if (_playerCamera == null)
+        {
+            Debug.LogError("No camera found. Please assign a camera to the CrosshairController.");
+            return;
+        }
 
         CreateCrosshairCanvas();
         CreateCrosshairImage();
@@ -75,7 +80,7 @@ public class CrosshairController : MonoBehaviour
 
     private void DetectTarget()
     {
-        Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        Ray ray = _playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, detectionRange, interactableLayers))
