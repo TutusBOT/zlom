@@ -5,7 +5,6 @@ public class SellZone : MonoBehaviour
 {
     [Header("Settings")]
     public float interactionRange = 2f;
-    public KeyCode sellKey = KeyCode.E;
 
     [Tooltip("Bonus percentage (1.0 = normal price, 1.5 = 50% bonus)")]
     public float valueMultiplier = 1.2f;
@@ -35,6 +34,17 @@ public class SellZone : MonoBehaviour
             sellPromptUI.SetActive(false);
     }
 
+    private void Update()
+    {
+        if (!playerInRange)
+            return;
+
+        if (InputBindingManager.Instance.IsActionTriggered(InputActions.Interact))
+        {
+            HandleSellKeyPressed();
+        }
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         Valuable valuable = other.GetComponent<Valuable>();
@@ -47,8 +57,6 @@ public class SellZone : MonoBehaviour
         {
             playerInRange = true;
             playerTransform = other.transform;
-
-            EnableKeyDetection(true);
 
             // Show prompt if we have items to sell
             if (sellPromptUI != null && valuablesInZone.Count > 0)
@@ -68,22 +76,8 @@ public class SellZone : MonoBehaviour
         {
             playerInRange = false;
 
-            EnableKeyDetection(false);
-
             if (sellPromptUI != null)
                 sellPromptUI.SetActive(false);
-        }
-    }
-
-    private void EnableKeyDetection(bool enable)
-    {
-        if (enable)
-        {
-            PlayerInputHandler.OnSellKeyPressed += HandleSellKeyPressed;
-        }
-        else
-        {
-            PlayerInputHandler.OnSellKeyPressed -= HandleSellKeyPressed;
         }
     }
 

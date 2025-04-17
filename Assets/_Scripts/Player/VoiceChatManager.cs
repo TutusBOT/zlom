@@ -6,8 +6,6 @@ public class VoiceChatManager : NetworkBehaviour
 {
     // Voice chat settings
     [Header("Voice Settings")]
-    [SerializeField]
-    private KeyCode pushToTalkKey = KeyCode.V;
 
     [SerializeField]
     private float maxVoiceDistance = 15f;
@@ -85,7 +83,7 @@ public class VoiceChatManager : NetworkBehaviour
             return;
 
         bool wasTalking = _recordingTimer > 0;
-        bool isTalking = Input.GetKey(pushToTalkKey);
+        bool isTalking = InputBindingManager.Instance.IsActionPressed(InputActions.VoiceChat);
 
         // Push to talk implementation
         if (isTalking)

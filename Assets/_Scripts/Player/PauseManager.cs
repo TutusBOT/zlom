@@ -68,7 +68,7 @@ public class PauseManager : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (InputBindingManager.Instance.IsActionTriggered(InputActions.Pause))
         {
             TogglePause();
         }
