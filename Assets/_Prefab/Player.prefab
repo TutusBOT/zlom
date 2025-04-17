@@ -12,14 +12,13 @@ GameObject:
   - component: {fileID: 7875680374012518474}
   - component: {fileID: 2616860343818222958}
   - component: {fileID: 7707114347477242969}
-  - component: {fileID: 1560814385129430009}
+  - component: {fileID: 1551341732592336864}
   - component: {fileID: 4313134647026765314}
   - component: {fileID: 4286912790948540255}
   - component: {fileID: 3921108572199274389}
   - component: {fileID: 4735235392766103181}
   - component: {fileID: 4261230266848846684}
   - component: {fileID: 8522427719167573054}
-  - component: {fileID: 2147728608480588975}
   - component: {fileID: -639547339833864361}
   - component: {fileID: 9221043243608676975}
   - component: {fileID: 294656319187813847}
@@ -113,14 +112,14 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 9221043243608676975}
   _networkObjectCache: {fileID: 9221043243608676975}
   walkingSpeed: 7.5
-  runningSpeed: 11.5
+  sprintSpeed: 11.5
   jumpSpeed: 8
   gravity: 20
   lookSpeed: 2
   lookXLimit: 90
   canMove: 1
   cameraYOffset: 0.4
---- !u!114 &1560814385129430009
+--- !u!114 &1551341732592336864
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,29 +128,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 457794671632602189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25fb4fe14a9a89742833be5e95270202, type: 3}
+  m_Script: {fileID: 11500000, guid: 639e65bb4a3c35546a54cf8812077402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
   maxHealth: 100
-  currentHealth: 0
-  OnDeath:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHealthChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 11500000, guid: 60cfd98c426744f409cbb27aa23727a5, type: 3}
-        m_TargetAssemblyTypeName: UnityEngine.Object, UnityEngine
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  godModeOnStart: 0
+  damageSound: {fileID: 8300000, guid: d7c8c412d5b670d4aa890059b1523abc, type: 3}
+  healSound: {fileID: 0}
+  deathSound: {fileID: 0}
 --- !u!114 &4313134647026765314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,7 +340,6 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 9221043243608676975}
   _networkObjectCache: {fileID: 0}
-  pushToTalkKey: 118
   maxVoiceDistance: 15
   voiceUpdateRate: 0.2
   sampleRate: 16000
@@ -431,19 +417,6 @@ MonoBehaviour:
   afflictions: []
   afflictionCooldown: 5
   shakyEyesPrefab: {fileID: 0}
---- !u!114 &2147728608480588975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 457794671632602189}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4122abbd34be354f9da2c3e0e7eabe1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sellKey: 101
 --- !u!114 &-639547339833864361
 MonoBehaviour:
   m_ObjectHideFlags: 0

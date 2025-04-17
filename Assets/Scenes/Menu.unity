@@ -1328,6 +1328,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 745254680863901373, guid: 6d96955ef39372b4e879f591986246e6, type: 3}
+      propertyPath: systemPrefabs.Array.size
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 745254680863901373, guid: 6d96955ef39372b4e879f591986246e6, type: 3}
+      propertyPath: 'systemPrefabs.Array.data[8]'
+      value: 
+      objectReference: {fileID: 8523248088317076065, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
     - target: {fileID: 6393336092877279700, guid: 6d96955ef39372b4e879f591986246e6, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.7784622
