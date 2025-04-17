@@ -205,26 +205,30 @@ public class FlashlightController : NetworkBehaviour
     private void HandleInput()
     {
         // Toggle flashlight on/off
-        if (Input.GetKeyDown(KeyCode.F))
+        if (InputBindingManager.Instance.IsActionTriggered(InputActions.Flashlight))
         {
             ToggleFlashlight();
         }
 
         // Flash
-        if (Input.GetKeyDown(KeyCode.Q) && _canFlash && _isOn)
+        if (
+            InputBindingManager.Instance.IsActionTriggered(InputActions.Flash)
+            && _canFlash
+            && _isOn
+        )
         {
             UseFlash();
         }
 
-        // Recharge (hold)
-        _isRecharging = Input.GetKey(KeyCode.R);
+        _isRecharging = InputBindingManager.Instance.IsActionPressed(
+            InputActions.RechargeFlashlight
+        );
     }
 
-    // Update the UpdateBattery method
     private void UpdateBattery()
     {
         if (!IsOwner)
-            return; // Only owner updates battery
+            return;
 
         float oldBatteryLevel = _currentBatteryLevel;
 
@@ -416,6 +420,7 @@ public class FlashlightController : NetworkBehaviour
 
     private void UseFlash()
     {
+        Debug.Log("Flashlight used flash");
         if (_currentBatteryLevel < flashDrainAmount || !IsOwner)
             return;
 

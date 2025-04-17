@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 1
-  _addedNetworkObject: {fileID: 1986281182232142823, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
+  _addedNetworkObject: {fileID: 0}
   _networkObjectCache: {fileID: 0}
   _componentConfiguration: 0
   _synchronizeParent: 0
