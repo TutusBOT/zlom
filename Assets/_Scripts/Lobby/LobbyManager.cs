@@ -331,8 +331,12 @@ public class LobbyManager : NetworkBehaviour
     {
         try
         {
-            Vector3 spawnPosition = new Vector3(0, 1, 0);
-            GameObject playerObj = Instantiate(_storedPlayerPrefab, spawnPosition, Quaternion.identity);
+            Vector3 spawnPosition = new Vector3(0, 2, 0);
+            GameObject playerObj = Instantiate(
+                _storedPlayerPrefab,
+                spawnPosition,
+                Quaternion.identity
+            );
             NetworkObject nob = playerObj.GetComponent<NetworkObject>();
             if (nob != null)
             {
