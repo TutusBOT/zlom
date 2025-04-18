@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using FishNet;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Managing.Scened;
@@ -78,9 +77,6 @@ public class LobbyManager : NetworkBehaviour
         {
             NetworkManager.ServerManager.OnRemoteConnectionState +=
                 ServerManager_OnRemoteConnectionState;
-
-            // Disable automatic spawning when the server starts
-            ConfigureSpawning(false);
         }
 
         // Set up local player on startup
@@ -105,20 +101,6 @@ public class LobbyManager : NetworkBehaviour
 
         // Remove callback to prevent memory leaks
         _connectedPlayers.OnChange -= OnPlayerListChanged;
-    }
-
-    private void ConfigureSpawning(bool enable)
-    {
-        if (enable)
-        {
-            Debug.Log("Enabling player spawning");
-            // If you need to re-enable automatic player spawning, implement here
-        }
-        else
-        {
-            Debug.Log("Disabling player spawning");
-            // If you need to disable automatic player spawning, implement here
-        }
     }
 
     private void ConfigureUI()
@@ -289,10 +271,7 @@ public class LobbyManager : NetworkBehaviour
         if (!IsServerInitialized)
             return;
 
-        // Notify all clients to load the game scene
         StartGameClientRpc();
-
-        // Enable player spawning
         EnablePlayerSpawning();
     }
 
@@ -304,17 +283,14 @@ public class LobbyManager : NetworkBehaviour
         SceneManager.LoadGlobalScenes(sld);
     }
 
-    // Re-enable player spawning before switching scenes
     private void EnablePlayerSpawning()
     {
+        Debug.Log("Enabling player spawning");
         if (_storedPlayerPrefab == null)
         {
             Debug.LogError("No stored player prefab found! Players won't spawn.");
             return;
         }
-
-        // Enable player spawning
-        ConfigureSpawning(true);
 
         // Manually spawn players - implementation depends on your FishNet setup
         if (IsServerInitialized)
@@ -331,7 +307,7 @@ public class LobbyManager : NetworkBehaviour
     {
         try
         {
-            Vector3 spawnPosition = new Vector3(0, 2, 0);
+            Vector3 spawnPosition = new Vector3(0, 3, 0);
             GameObject playerObj = Instantiate(
                 _storedPlayerPrefab,
                 spawnPosition,
