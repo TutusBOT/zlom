@@ -36,11 +36,13 @@ public class InputBindingManager : MonoBehaviour
         _defaultBindings[InputActions.Crouch] = KeyCode.LeftControl;
         _defaultBindings[InputActions.Sprint] = KeyCode.LeftShift;
         _defaultBindings[InputActions.VoiceChat] = KeyCode.V;
-        _defaultBindings[InputActions.Pause] = KeyCode.Escape;
+        _defaultBindings[InputActions.TextChat] = KeyCode.Slash;
+        _defaultBindings[InputActions.Cancel] = KeyCode.Escape;
         _defaultBindings[InputActions.Flashlight] = KeyCode.F;
         _defaultBindings[InputActions.RechargeFlashlight] = KeyCode.R;
         _defaultBindings[InputActions.Flash] = KeyCode.Q;
         _defaultBindings[InputActions.Interact] = KeyCode.E;
+        _defaultBindings[InputActions.Confirm] = KeyCode.Return;
 
         foreach (var binding in _defaultBindings)
         {

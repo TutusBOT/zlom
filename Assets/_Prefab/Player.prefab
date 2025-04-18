@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4313134647026765314}
   - component: {fileID: 4286912790948540255}
   - component: {fileID: 3921108572199274389}
+  - component: {fileID: 1176229741873664378}
   - component: {fileID: 4735235392766103181}
   - component: {fileID: 4261230266848846684}
   - component: {fileID: 8522427719167573054}
@@ -96,6 +97,8 @@ MonoBehaviour:
   flashlightController: {fileID: 4735235392766103181}
   pauseManager: {fileID: 9050383292164517933}
   crosshairController: {fileID: 3921108572199274389}
+  playerController: {fileID: 7707114347477242969}
+  playerChatDisplay: {fileID: 1176229741873664378}
 --- !u!114 &7707114347477242969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -295,6 +298,26 @@ MonoBehaviour:
   animateCrosshair: 1
   scaleSpeed: 8
   hoverScale: 1.2
+--- !u!114 &1176229741873664378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0369891c0d5449f4d9f2c8091beddb71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
+  chatTextPrefab: {fileID: 8872921308598174555, guid: 2e69d36fc24f5a1458c5b76ffe360042, type: 3}
+  displayDuration: 5
+  fadeOutDuration: 0.5
+  maxVisibleMessages: 3
+  messageSpacing: 0.5
 --- !u!114 &4735235392766103181
 MonoBehaviour:
   m_ObjectHideFlags: 0
