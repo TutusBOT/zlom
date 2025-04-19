@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -58,10 +59,28 @@ public class ChatInputManager : MonoBehaviour
         _isChatActive = true;
         chatInputPanel.SetActive(true);
         chatInputField.text = "";
+
+        StartCoroutine(FocusInputField());
+
+        _player.ToggleControls(false);
+    }
+
+    private IEnumerator FocusInputField()
+    {
+        // Wait for the end of the frame for UI to update
+        yield return new WaitForEndOfFrame();
+
+        // Now focus the input field
         chatInputField.Select();
         chatInputField.ActivateInputField();
 
-        _player.ToggleControls(false);
+        // Set the caret position to the end
+        chatInputField.caretPosition = chatInputField.text.Length;
+
+        // Force the UI to update
+        UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(
+            chatInputField.gameObject
+        );
     }
 
     private void CloseChat()
@@ -75,6 +94,7 @@ public class ChatInputManager : MonoBehaviour
     private void SendMessage()
     {
         string message = chatInputField.text.Trim();
+        Debug.Log($"Sending chat message: {message}");
 
         if (!string.IsNullOrEmpty(message))
         {
