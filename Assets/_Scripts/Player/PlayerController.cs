@@ -110,15 +110,12 @@ public class PlayerController : NetworkBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
         }
 
-        // Move the controller
         CollisionFlags collisions = characterController.Move(moveDirection * Time.deltaTime);
 
         if ((collisions & CollisionFlags.Above) != 0)
         {
-            // Apply stronger downward force when hitting ceiling while moving
             float horizontalSpeed = new Vector2(moveDirection.x, moveDirection.z).magnitude;
 
-            // If we're moving horizontally, apply stronger downward push
             if (horizontalSpeed > 0.1f)
             {
                 // Stronger downward force when moving to prevent ceiling gliding
