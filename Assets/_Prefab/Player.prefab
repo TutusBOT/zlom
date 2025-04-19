@@ -19,11 +19,11 @@ GameObject:
   - component: {fileID: 4735235392766103181}
   - component: {fileID: 4261230266848846684}
   - component: {fileID: 8522427719167573054}
-  - component: {fileID: 2147728608480588975}
   - component: {fileID: -639547339833864361}
   - component: {fileID: 9221043243608676975}
   - component: {fileID: 294656319187813847}
   - component: {fileID: 4214760729355928606}
+  - component: {fileID: 7561023080675721101}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -113,7 +113,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 9221043243608676975}
   _networkObjectCache: {fileID: 9221043243608676975}
   walkingSpeed: 7.5
-  runningSpeed: 11.5
+  sprintSpeed: 11.5
   jumpSpeed: 8
   gravity: 20
   lookSpeed: 2
@@ -353,7 +353,6 @@ MonoBehaviour:
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 9221043243608676975}
   _networkObjectCache: {fileID: 0}
-  pushToTalkKey: 118
   maxVoiceDistance: 15
   voiceUpdateRate: 0.2
   sampleRate: 16000
@@ -431,19 +430,6 @@ MonoBehaviour:
   afflictions: []
   afflictionCooldown: 5
   shakyEyesPrefab: {fileID: 0}
---- !u!114 &2147728608480588975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 457794671632602189}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4122abbd34be354f9da2c3e0e7eabe1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sellKey: 101
 --- !u!114 &-639547339833864361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -735,6 +721,24 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &7561023080675721101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8026e37ea5fee14093de7ced2474c36, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
+  pushForce: 1.5
+  massLimit: 150
+  pushCooldown: 0.2
 --- !u!1 &2369446905339070106
 GameObject:
   m_ObjectHideFlags: 0
@@ -1096,6 +1100,7 @@ GameObject:
   - component: {fileID: 3586463853288794276}
   - component: {fileID: 7311723212778914267}
   - component: {fileID: 4980317515956912107}
+  - component: {fileID: 4709247610456879112}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -1112,9 +1117,9 @@ Transform:
   m_GameObject: {fileID: 7185114819071801053}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.735, z: 0.443}
-  m_LocalScale: {x: 0.5, y: 0.10751206, z: 0.2358842}
-  m_ConstrainProportionsScale: 1
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1187098632651654046}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1194,6 +1199,33 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &4709247610456879112
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7185114819071801053}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1001 &6043391683414593706
 PrefabInstance:
   m_ObjectHideFlags: 0
