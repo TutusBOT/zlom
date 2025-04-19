@@ -948,7 +948,7 @@ public class DungeonGenerator : NetworkBehaviour
 
             // Mark the door position as occupied
             occupiedDoorPositions.Add(doorAnchor.position);
-            Vector3 adjustedPosition = doorAnchor.position + new Vector3(0, 0.5f, 0);
+            Vector3 adjustedPosition = doorAnchor.position + new Vector3(0, 1.5f, 0);
             // Spawn door at this anchor
             GameObject door = Instantiate(doorPrefab, adjustedPosition, doorAnchor.rotation);
 
