@@ -69,10 +69,8 @@ public class GameBootstrap : MonoBehaviour
             // Use the first MonoBehaviour as the system type
             System.Type systemType = components[0].GetType();
 
-            // Check if this system already exists
             if (FindObjectOfType(systemType) == null)
             {
-                // System doesn't exist, create it
                 GameObject instance = Instantiate(prefab);
                 instance.name = prefab.name;
 

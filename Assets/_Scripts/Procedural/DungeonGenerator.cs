@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using FishNet;
 using FishNet.Object;
 using Unity.AI.Navigation;
 using UnityEngine;
@@ -122,6 +123,9 @@ public class DungeonGenerator : NetworkBehaviour
     [SerializeField]
     private int seed;
 
+    [SerializeField]
+    GameObject doorPrefab;
+
     void Start()
     {
         Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
@@ -132,15 +136,6 @@ public class DungeonGenerator : NetworkBehaviour
 
             if (!debug)
                 continue;
-
-            Debug.Log(
-                $"Room {size.width}x{size.length}: "
-                    + $"allowDoorsAnywhere={data.allowDoorsAnywhere}, "
-                    + $"N:{data.allowedNorthDoors?.Count ?? 0}, "
-                    + $"S:{data.allowedSouthDoors?.Count ?? 0}, "
-                    + $"E:{data.allowedEastDoors?.Count ?? 0}, "
-                    + $"W:{data.allowedWestDoors?.Count ?? 0}"
-            );
 
             if (data.allowedNorthDoors != null)
             {
@@ -198,14 +193,13 @@ public class DungeonGenerator : NetworkBehaviour
         grid = new CellType[gridSizeX, gridSizeZ];
         rooms.Clear();
 
-        // Clear any existing dungeon objects. Important to do this when regenerating.
         foreach (Transform child in transform)
         {
             Destroy(child.gameObject);
         }
 
         PlaceRooms();
-        ConnectRooms();
+
         RenderDungeon();
 
         if (valuableSpawner != null && IsServerInitialized)
@@ -230,13 +224,12 @@ public class DungeonGenerator : NetworkBehaviour
         List<RoomSize> availableSizes = new List<RoomSize>(roomVariantsWrapper.ToDictionary().Keys);
         if (availableSizes.Count == 0)
         {
-            Debug.LogWarning("No room variants defined. Using 1x1 rooms as fallback.");
             availableSizes.Add(new RoomSize { width = 1, length = 1 });
         }
 
         Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
 
-        RoomSize startingSize = new RoomSize { width = 1, length = 1 }; // Default starting room size
+        RoomSize startingSize = new RoomSize { width = 1, length = 1 };
         int startX = (gridSizeX - startingSize.width) / 2;
         int startZ = 0;
 
@@ -244,11 +237,6 @@ public class DungeonGenerator : NetworkBehaviour
         rooms.Add(startingRoom);
         MarkRoomInGrid(startingRoom);
 
-        Debug.Log(
-            $"Placed starting room at ({startX}, {startZ}) with size {startingSize.width}x{startingSize.length}"
-        );
-
-        // Place the first room connected to the starting room
         List<PossibleRoomPlacement> startingRoomPlacements = GetPossibleRoomPlacements(
             startingRoom,
             availableSizes
@@ -256,21 +244,18 @@ public class DungeonGenerator : NetworkBehaviour
 
         if (startingRoomPlacements.Count > 0)
         {
-            // For the second room placement, verify door restrictions explicitly
             List<PossibleRoomPlacement> validPlacements = new List<PossibleRoomPlacement>();
 
             foreach (var placement in startingRoomPlacements)
             {
                 RoomSize placementSize = placement.size;
 
-                // Check if this room placement would violate door restrictions
                 bool isValidPlacement = true;
                 if (
                     roomVariants.TryGetValue(placementSize, out RoomVariantData variantData)
                     && !variantData.allowDoorsAnywhere
                 )
                 {
-                    // Verify this room can actually have a door in the direction needed
                     switch (GetOppositeDirection(placement.direction))
                     {
                         case Direction.North:
@@ -302,14 +287,12 @@ public class DungeonGenerator : NetworkBehaviour
                 }
             }
 
-            // Only use valid placements that respect door restrictions
             if (validPlacements.Count > 0)
             {
                 PossibleRoomPlacement placement = validPlacements[
                     Random.Range(0, validPlacements.Count)
                 ];
 
-                // CREATE AND PLACE THE SECOND ROOM FIRST
                 Room secondRoom = new Room(
                     placement.x,
                     placement.z,
@@ -319,12 +302,7 @@ public class DungeonGenerator : NetworkBehaviour
                 rooms.Add(secondRoom);
                 MarkRoomInGrid(secondRoom);
 
-                // Connect the first and second rooms
                 CreateRoomConnection(startingRoom, secondRoom, placement);
-
-                Debug.Log(
-                    $"Placed second room at ({placement.x},{placement.z}) with size {placement.size.width}x{placement.size.length}"
-                );
 
                 int placedRooms = 2;
                 int attempts = 0;
@@ -334,7 +312,6 @@ public class DungeonGenerator : NetworkBehaviour
                 {
                     attempts++;
 
-                    // IMPORTANT: Select a random room EXCEPT the starting room (index 1 and above)
                     Room currentRoom = rooms[Random.Range(1, rooms.Count)];
 
                     List<PossibleRoomPlacement> possiblePlacements = GetPossibleRoomPlacements(
@@ -343,12 +320,10 @@ public class DungeonGenerator : NetworkBehaviour
                     );
                     validPlacements.Clear();
 
-                    // Filter placements to only those that respect door restrictions
                     foreach (var p in possiblePlacements)
                     {
                         RoomSize placementSize = p.size;
 
-                        // Check if this room placement would violate door restrictions
                         bool isValidPlacement = true;
                         if (
                             roomVariants.TryGetValue(
@@ -357,7 +332,6 @@ public class DungeonGenerator : NetworkBehaviour
                             ) && !pVariantData.allowDoorsAnywhere
                         )
                         {
-                            // Verify this room can actually have a door in the direction needed
                             switch (GetOppositeDirection(p.direction))
                             {
                                 case Direction.North:
@@ -393,11 +367,6 @@ public class DungeonGenerator : NetworkBehaviour
                     {
                         placement = validPlacements[Random.Range(0, validPlacements.Count)];
 
-                        Debug.Log(
-                            $"Placing room {placedRooms + 1}: {placement.size.width}x{placement.size.length} "
-                                + $"at ({placement.x},{placement.z}) with connection on {placement.direction} wall"
-                        );
-
                         Room newRoom = new Room(
                             placement.x,
                             placement.z,
@@ -410,7 +379,6 @@ public class DungeonGenerator : NetworkBehaviour
 
                         CreateRoomConnection(currentRoom, newRoom, placement);
 
-                        // Double-check that no room has doors it shouldn't have
                         if (
                             roomVariants.TryGetValue(
                                 new RoomSize { width = newRoom.width, length = newRoom.length },
@@ -418,7 +386,6 @@ public class DungeonGenerator : NetworkBehaviour
                             ) && !checkVariantData.allowDoorsAnywhere
                         )
                         {
-                            // Check all connection points to ensure they're allowed
                             foreach (ConnectionPoint cp in newRoom.connectionPoints)
                             {
                                 bool isAllowed = false;
@@ -509,32 +476,25 @@ public class DungeonGenerator : NetworkBehaviour
         switch (placement.direction)
         {
             case Direction.North:
-                targetLocalPos = new Vector2Int(
-                    placement.connectionPoint.x - placement.x,
-                    0 // Bottom edge of target room
-                );
+                targetLocalPos = new Vector2Int(placement.connectionPoint.x - placement.x, 0);
                 break;
             case Direction.South:
                 targetLocalPos = new Vector2Int(
                     placement.connectionPoint.x - placement.x,
-                    placement.size.length - 1 // Top edge of target room
+                    placement.size.length - 1
                 );
                 break;
             case Direction.East:
-                targetLocalPos = new Vector2Int(
-                    0, // Left edge of target room
-                    placement.connectionPoint.y - placement.z
-                );
+                targetLocalPos = new Vector2Int(0, placement.connectionPoint.y - placement.z);
                 break;
             case Direction.West:
                 targetLocalPos = new Vector2Int(
-                    placement.size.width - 1, // Right edge of target room
+                    placement.size.width - 1,
                     placement.connectionPoint.y - placement.z
                 );
                 break;
         }
 
-        // Add connection points to both rooms
         sourceRoom.connectionPoints.Add(
             new ConnectionPoint
             {
@@ -589,7 +549,6 @@ public class DungeonGenerator : NetworkBehaviour
             return false;
         }
 
-        // Check if all cells are empty
         for (int i = x; i < x + width; i++)
         {
             for (int j = z; j < z + length; j++)
@@ -609,15 +568,10 @@ public class DungeonGenerator : NetworkBehaviour
         List<PossibleRoomPlacement> placements = new List<PossibleRoomPlacement>();
         Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
 
-        Debug.Log(
-            $"Getting room placements for room at ({room.xOrigin}, {room.zOrigin}) with {availableSizes.Count} possible sizes"
-        );
-
         foreach (RoomSize size in availableSizes)
         {
             bool hasVariantData = roomVariants.TryGetValue(size, out RoomVariantData variantData);
 
-            // Check door restrictions UP FRONT for entire walls
             bool canPlaceNorth = true;
             bool canPlaceSouth = true;
             bool canPlaceEast = true;
@@ -625,7 +579,6 @@ public class DungeonGenerator : NetworkBehaviour
 
             if (hasVariantData && !variantData.allowDoorsAnywhere)
             {
-                // If doors not allowed anywhere, check if each wall has ANY allowed door positions
                 canPlaceNorth =
                     variantData.allowedNorthDoors != null
                     && variantData.allowedNorthDoors.Count > 0;
@@ -636,10 +589,6 @@ public class DungeonGenerator : NetworkBehaviour
                     variantData.allowedEastDoors != null && variantData.allowedEastDoors.Count > 0;
                 canPlaceWest =
                     variantData.allowedWestDoors != null && variantData.allowedWestDoors.Count > 0;
-
-                Debug.Log(
-                    $"For size {size.width}x{size.length}: N={canPlaceNorth}, S={canPlaceSouth}, E={canPlaceEast}, W={canPlaceWest}"
-                );
             }
 
             if (canPlaceNorth)
@@ -648,7 +597,6 @@ public class DungeonGenerator : NetworkBehaviour
                 {
                     int z = room.zOrigin + room.length;
 
-                    // Source room door position check
                     Vector2Int localPos = new Vector2Int(x - room.xOrigin, room.length - 1);
                     if (
                         hasVariantData
@@ -661,32 +609,26 @@ public class DungeonGenerator : NetworkBehaviour
                         continue;
                     }
 
-                    // Calculate new room position
                     int newRoomX = x - (size.width / 2);
                     newRoomX = Mathf.Clamp(newRoomX, 0, gridSizeX - size.width);
 
-                    // Connection point is on the top edge of current room
                     Vector2Int connectionPoint = new Vector2Int(x, z - 1);
 
-                    // Target room door position check
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            x - newRoomX,
-                            0 // Bottom edge (South wall) of target
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(x - newRoomX, 0);
 
                         if (
                             variantData.allowedSouthDoors == null
                             || variantData.allowedSouthDoors.Count == 0
                         )
                         {
-                            targetRoomValid = false; // No south doors allowed at all
+                            targetRoomValid = false;
                         }
                         else if (!variantData.allowedSouthDoors.Contains(targetLocalPos))
                         {
-                            targetRoomValid = false; // This position isn't in the allowed list
+                            targetRoomValid = false;
                         }
                     }
 
@@ -712,7 +654,6 @@ public class DungeonGenerator : NetworkBehaviour
                 {
                     int z = room.zOrigin - size.length;
 
-                    // Source room door position check
                     Vector2Int localPos = new Vector2Int(x - room.xOrigin, 0);
                     if (
                         hasVariantData
@@ -725,32 +666,26 @@ public class DungeonGenerator : NetworkBehaviour
                         continue;
                     }
 
-                    // Calculate new room position
                     int newRoomX = x - (size.width / 2);
                     newRoomX = Mathf.Clamp(newRoomX, 0, gridSizeX - size.width);
 
-                    // Connection point is on the bottom edge of current room
                     Vector2Int connectionPoint = new Vector2Int(x, room.zOrigin);
 
-                    // Target room door position check
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            x - newRoomX,
-                            size.length - 1 // Top edge (North wall) of target
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(x - newRoomX, size.length - 1);
 
                         if (
                             variantData.allowedNorthDoors == null
                             || variantData.allowedNorthDoors.Count == 0
                         )
                         {
-                            targetRoomValid = false; // No north doors allowed at all
+                            targetRoomValid = false;
                         }
                         else if (!variantData.allowedNorthDoors.Contains(targetLocalPos))
                         {
-                            targetRoomValid = false; // This position isn't in the allowed list
+                            targetRoomValid = false;
                         }
                     }
 
@@ -776,7 +711,6 @@ public class DungeonGenerator : NetworkBehaviour
                 {
                     int x = room.xOrigin + room.width;
 
-                    // Source room door position check
                     Vector2Int localPos = new Vector2Int(room.width - 1, z - room.zOrigin);
                     if (
                         hasVariantData
@@ -789,32 +723,26 @@ public class DungeonGenerator : NetworkBehaviour
                         continue;
                     }
 
-                    // Calculate new room position
                     int newRoomZ = z - (size.length / 2);
                     newRoomZ = Mathf.Clamp(newRoomZ, 0, gridSizeZ - size.length);
 
-                    // Connection point is on the right edge of current room
                     Vector2Int connectionPoint = new Vector2Int(x - 1, z);
 
-                    // Target room door position check
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            0, // Left edge (West wall) of target
-                            z - newRoomZ
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(0, z - newRoomZ);
 
                         if (
                             variantData.allowedWestDoors == null
                             || variantData.allowedWestDoors.Count == 0
                         )
                         {
-                            targetRoomValid = false; // No west doors allowed at all
+                            targetRoomValid = false;
                         }
                         else if (!variantData.allowedWestDoors.Contains(targetLocalPos))
                         {
-                            targetRoomValid = false; // This position isn't in the allowed list
+                            targetRoomValid = false;
                         }
                     }
 
@@ -840,7 +768,6 @@ public class DungeonGenerator : NetworkBehaviour
                 {
                     int x = room.xOrigin - size.width;
 
-                    // Source room door position check
                     Vector2Int localPos = new Vector2Int(0, z - room.zOrigin);
                     if (
                         hasVariantData
@@ -853,32 +780,26 @@ public class DungeonGenerator : NetworkBehaviour
                         continue;
                     }
 
-                    // Calculate new room position
                     int newRoomZ = z - (size.length / 2);
                     newRoomZ = Mathf.Clamp(newRoomZ, 0, gridSizeZ - size.length);
 
-                    // Connection point is on the left edge of current room
                     Vector2Int connectionPoint = new Vector2Int(room.xOrigin, z);
 
-                    // Target room door position check
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            size.width - 1, // Right edge (East wall) of target
-                            z - newRoomZ
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(size.width - 1, z - newRoomZ);
 
                         if (
                             variantData.allowedEastDoors == null
                             || variantData.allowedEastDoors.Count == 0
                         )
                         {
-                            targetRoomValid = false; // No east doors allowed at all
+                            targetRoomValid = false;
                         }
                         else if (!variantData.allowedEastDoors.Contains(targetLocalPos))
                         {
-                            targetRoomValid = false; // This position isn't in the allowed list
+                            targetRoomValid = false;
                         }
                     }
 
@@ -899,211 +820,16 @@ public class DungeonGenerator : NetworkBehaviour
             }
         }
 
-        Debug.Log($"Found {placements.Count} possible placements");
         return placements;
     }
 
-    void ConnectRooms()
-    {
-        return;
-        // This should ONLY connect rooms that meet the door placement requirements
-        // foreach (Room roomA in rooms) {
-        //   foreach (Room roomB in rooms) {
-        //     if (roomA != roomB && !roomA.connections.Contains(roomB)) {
-        //       // Check if they're adjacent
-        //       if (AreRoomsAdjacent(roomA, roomB)) {
-        //         // Don't automatically connect - check if doors are allowed here
-        //         Vector2Int connectionPoint = GetAdjacentConnectionPoint(roomA, roomB);
-
-        //         // Only connect if BOTH rooms allow doors at these positions
-        //         if (IsValidDoorPosition(roomA, connectionPoint, GetDirectionFromRoomToRoom(roomA, roomB)) &&
-        //             IsValidDoorPosition(roomB, connectionPoint, GetDirectionFromRoomToRoom(roomB, roomA))) {
-
-        //           roomA.connections.Add(roomB);
-        //           roomB.connections.Add(roomA);
-
-        //           // Also add connection points for these automatically connected rooms
-        //           Direction dirFromAtoB = GetDirectionFromRoomToRoom(roomA, roomB);
-        //           Direction dirFromBtoA = GetOppositeDirection(dirFromAtoB);
-
-        //           // Add connection points
-        //           Vector2Int localPosInA = GetLocalPosition(connectionPoint, roomA);
-        //           Vector2Int localPosInB = GetLocalPosition(connectionPoint, roomB);
-
-        //           roomA.connectionPoints.Add(new ConnectionPoint {
-        //             connectedRoom = roomB,
-        //             localPosition = localPosInA,
-        //             direction = dirFromAtoB
-        //           });
-
-        //           roomB.connectionPoints.Add(new ConnectionPoint {
-        //             connectedRoom = roomA,
-        //             localPosition = localPosInB,
-        //             direction = dirFromBtoA
-        //           });
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
-    }
-
-    Direction GetDirectionFromRoomToRoom(Room source, Room target)
-    {
-        if (source.zOrigin + source.length == target.zOrigin)
-            return Direction.North;
-        if (target.zOrigin + target.length == source.zOrigin)
-            return Direction.South;
-        if (source.xOrigin + source.width == target.xOrigin)
-            return Direction.East;
-        if (target.xOrigin + target.width == source.xOrigin)
-            return Direction.West;
-
-        // Default (shouldn't happen for adjacent rooms)
-        return Direction.North;
-    }
-
-    bool IsValidDoorPosition(Room room, Vector2Int worldPosition, Direction direction)
-    {
-        Vector2Int localPos = GetLocalPosition(worldPosition, room);
-
-        RoomSize size = new RoomSize { width = room.width, length = room.length };
-        bool hasVariantData = roomVariantsWrapper
-            .ToDictionary()
-            .TryGetValue(size, out RoomVariantData variantData);
-
-        if (!hasVariantData || variantData.allowDoorsAnywhere)
-            return true;
-
-        switch (direction)
-        {
-            case Direction.North:
-                return variantData.allowedNorthDoors != null
-                    && variantData.allowedNorthDoors.Count > 0
-                    && variantData.allowedNorthDoors.Contains(localPos);
-            case Direction.South:
-                return variantData.allowedSouthDoors != null
-                    && variantData.allowedSouthDoors.Count > 0
-                    && variantData.allowedSouthDoors.Contains(localPos);
-            case Direction.East:
-                return variantData.allowedEastDoors != null
-                    && variantData.allowedEastDoors.Count > 0
-                    && variantData.allowedEastDoors.Contains(localPos);
-            case Direction.West:
-                return variantData.allowedWestDoors != null
-                    && variantData.allowedWestDoors.Count > 0
-                    && variantData.allowedWestDoors.Contains(localPos);
-            default:
-                return false;
-        }
-    }
-
-    Vector2Int GetLocalPosition(Vector2Int worldPosition, Room room)
-    {
-        return new Vector2Int(worldPosition.x - room.xOrigin, worldPosition.y - room.zOrigin);
-    }
-
-    Vector2Int GetAdjacentConnectionPoint(Room roomA, Room roomB)
-    {
-        // North/South connection
-        if (roomA.zOrigin + roomA.length == roomB.zOrigin)
-        {
-            // Find overlapping x range
-            int minX = Mathf.Max(roomA.xOrigin, roomB.xOrigin);
-            int maxX = Mathf.Min(roomA.xOrigin + roomA.width, roomB.xOrigin + roomB.width) - 1;
-            int x = (minX + maxX) / 2;
-            return new Vector2Int(x, roomA.zOrigin + roomA.length - 1);
-        }
-
-        // South/North connection
-        if (roomB.zOrigin + roomB.length == roomA.zOrigin)
-        {
-            int minX = Mathf.Max(roomA.xOrigin, roomB.xOrigin);
-            int maxX = Mathf.Min(roomA.xOrigin + roomA.width, roomB.xOrigin + roomB.width) - 1;
-            int x = (minX + maxX) / 2;
-            return new Vector2Int(x, roomA.zOrigin);
-        }
-
-        // East/West connection
-        if (roomA.xOrigin + roomA.width == roomB.xOrigin)
-        {
-            int minZ = Mathf.Max(roomA.zOrigin, roomB.zOrigin);
-            int maxZ = Mathf.Min(roomA.zOrigin + roomA.length, roomB.zOrigin + roomB.length) - 1;
-            int z = (minZ + maxZ) / 2;
-            return new Vector2Int(roomA.xOrigin + roomA.width - 1, z);
-        }
-
-        // West/East connection
-        if (roomB.xOrigin + roomB.width == roomA.xOrigin)
-        {
-            int minZ = Mathf.Max(roomA.zOrigin, roomB.zOrigin);
-            int maxZ = Mathf.Min(roomA.zOrigin + roomA.length, roomB.zOrigin + roomB.length) - 1;
-            int z = (minZ + maxZ) / 2;
-            return new Vector2Int(roomA.xOrigin, z);
-        }
-
-        // Default fallback (shouldn't reach here)
-        return new Vector2Int(0, 0);
-    }
-
-    bool AreRoomsAdjacent(Room roomA, Room roomB)
-    {
-        // Check if roomB is to the right of roomA
-        if (
-            roomA.xOrigin + roomA.width == roomB.xOrigin
-            && !(
-                roomA.zOrigin + roomA.length <= roomB.zOrigin
-                || roomB.zOrigin + roomB.length <= roomA.zOrigin
-            )
-        )
-        {
-            return true;
-        }
-
-        // Check if roomB is to the left of roomA
-        if (
-            roomB.xOrigin + roomB.width == roomA.xOrigin
-            && !(
-                roomA.zOrigin + roomA.length <= roomB.zOrigin
-                || roomB.zOrigin + roomB.length <= roomA.zOrigin
-            )
-        )
-        {
-            return true;
-        }
-
-        // Check if roomB is in front of roomA
-        if (
-            roomA.zOrigin + roomA.length == roomB.zOrigin
-            && !(
-                roomA.xOrigin + roomA.width <= roomB.xOrigin
-                || roomB.xOrigin + roomB.width <= roomA.xOrigin
-            )
-        )
-        {
-            return true;
-        }
-
-        // Check if roomB is behind roomA
-        if (
-            roomB.zOrigin + roomB.length == roomA.zOrigin
-            && !(
-                roomA.xOrigin + roomA.width <= roomB.xOrigin
-                || roomB.xOrigin + roomB.width <= roomA.xOrigin
-            )
-        )
-        {
-            return true;
-        }
-
-        return false; // Not adjacent
-    }
+    // Add a reference to the Door Prefab(s) for instantiation
+    // or an array of door prefabs for variety
 
     void RenderDungeon()
     {
         Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
 
-        // Calculate offset to place starting room at world origin
         Room startingRoom = rooms[0];
         float offsetX = -((startingRoom.xOrigin + (startingRoom.width / 2f)) * gridUnitSize);
         float offsetZ = -((startingRoom.zOrigin + (startingRoom.length / 2f)) * gridUnitSize);
@@ -1114,13 +840,13 @@ public class DungeonGenerator : NetworkBehaviour
             bool isStartingRoom = (i == 0);
             GameObject renderedRoom = null;
 
-            // Calculate the scaled room center position with offset
             Vector3 roomCenter = new Vector3(
                 (room.xOrigin + (room.width / 2f)) * gridUnitSize + offsetX,
                 0,
                 (room.zOrigin + (room.length / 2f)) * gridUnitSize + offsetZ
             );
 
+            // Create the room prefab (starting room or normal room)
             if (isStartingRoom && startingRoomPrefab != null)
             {
                 renderedRoom = Instantiate(
@@ -1168,12 +894,17 @@ public class DungeonGenerator : NetworkBehaviour
                 }
             }
 
+            // After the room prefab is instantiated, place doors based on connections
             if (renderedRoom != null)
             {
                 RoomController controller = renderedRoom.GetComponent<RoomController>();
                 if (controller != null)
                 {
                     controller.SetupDoorsFromConnections(room.connectionPoints);
+
+                    // Spawn doors at the connection points
+                    if (IsServerInitialized)
+                        SpawnDoors(room, renderedRoom);
                 }
                 else
                 {
@@ -1185,9 +916,63 @@ public class DungeonGenerator : NetworkBehaviour
         }
     }
 
+    // This method handles door spawning for the room based on its connection points
+
+
+    private HashSet<Vector3> occupiedDoorPositions = new HashSet<Vector3>();
+
+    void SpawnDoors(Room room, GameObject roomObject)
+    {
+        if (room.connectionPoints == null || room.connectionPoints.Count == 0)
+            return;
+
+        foreach (ConnectionPoint cp in room.connectionPoints)
+        {
+            string dirName = cp.direction.ToString(); // "North", "South", etc.
+            Transform doorAnchor = roomObject.transform.Find($"Doors/{dirName}");
+
+            if (doorAnchor == null)
+            {
+                Debug.LogWarning($"Missing door anchor '{dirName}' in room: {roomObject.name}");
+                continue;
+            }
+
+            // Check if any doors exist within a radius of 5 units
+            if (IsDoorInRadius(doorAnchor.position, 5f))
+            {
+                Debug.Log(
+                    $"Skipping door instantiation, nearby door already exists within 5 units."
+                );
+                continue;
+            }
+
+            // Mark the door position as occupied
+            occupiedDoorPositions.Add(doorAnchor.position);
+            Vector3 adjustedPosition = doorAnchor.position + new Vector3(0, 1.5f, 0);
+            // Spawn door at this anchor
+            GameObject door = Instantiate(doorPrefab, adjustedPosition, doorAnchor.rotation);
+
+            NetworkObject networkObject = door.GetComponent<NetworkObject>();
+            InstanceFinder.ServerManager.Spawn(networkObject);
+            door.name = $"Door_{dirName}";
+        }
+    }
+
+    bool IsDoorInRadius(Vector3 position, float radius)
+    {
+        foreach (Vector3 occupiedPosition in occupiedDoorPositions)
+        {
+            // If any door is within the radius, return true
+            if (Vector3.Distance(position, occupiedPosition) < radius)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private IEnumerator GenerateNavMeshDelayed()
     {
-        // Small delay to ensure all colliders are properly set up
         yield return new WaitForSeconds(0.5f);
 
         NavMeshSurface surface = gameObject.AddComponent<NavMeshSurface>();
@@ -1236,8 +1021,6 @@ public class DungeonGenerator : NetworkBehaviour
         Gizmos.DrawLine(bottomRight, topRight);
         Gizmos.DrawLine(topRight, topLeft);
         Gizmos.DrawLine(topLeft, bottomLeft);
-
-        // Draw grid cells
         for (int x = 0; x <= gridSizeX; x++)
         {
             Gizmos.DrawLine(
@@ -1254,20 +1037,15 @@ public class DungeonGenerator : NetworkBehaviour
             );
         }
 
-        // Draw rooms with different colors
         if (rooms != null)
         {
             for (int i = 0; i < rooms.Count; i++)
             {
                 Room room = rooms[i];
-
-                // Starting room is yellow, others are green
                 Gizmos.color = (i == 0) ? Color.yellow : Color.green;
-
-                // Draw room area
                 Vector3 roomCenter = new Vector3(
                     (room.xOrigin + room.width / 2f) * gridUnitSize,
-                    0.01f, // Slightly above grid
+                    0.01f,
                     (room.zOrigin + room.length / 2f) * gridUnitSize
                 );
                 Vector3 roomSize = new Vector3(
@@ -1277,8 +1055,6 @@ public class DungeonGenerator : NetworkBehaviour
                 );
 
                 Gizmos.DrawCube(roomCenter, roomSize);
-
-                // Draw room outline in black
                 Gizmos.color = Color.black;
                 Vector3 roomMin = new Vector3(
                     room.xOrigin * gridUnitSize,
@@ -1301,22 +1077,15 @@ public class DungeonGenerator : NetworkBehaviour
                     new Vector3(roomMin.x, roomMin.y, roomMax.z)
                 );
                 Gizmos.DrawLine(new Vector3(roomMin.x, roomMin.y, roomMax.z), roomMin);
-
-                // Draw doors with red spheres
                 Gizmos.color = Color.red;
                 foreach (ConnectionPoint cp in room.connectionPoints)
                 {
-                    // Calculate world position of door
                     Vector3 doorPos = new Vector3(
                         (room.xOrigin + cp.localPosition.x) * gridUnitSize,
                         0.05f,
                         (room.zOrigin + cp.localPosition.y) * gridUnitSize
                     );
-
-                    // Draw door position
                     Gizmos.DrawSphere(doorPos, 0.2f * gridUnitSize);
-
-                    // Draw a line showing the door direction
                     Vector3 dirVector = Vector3.zero;
                     switch (cp.direction)
                     {

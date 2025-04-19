@@ -5,7 +5,7 @@ public class PlayerController : NetworkBehaviour
 {
     [Header("Base setup")]
     public float walkingSpeed = 7.5f;
-    public float runningSpeed = 11.5f;
+    public float sprintSpeed = 11.5f;
     public float jumpSpeed = 8.0f;
     public float gravity = 20.0f;
     public float lookSpeed = 2.0f;
@@ -70,7 +70,7 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        bool isSprinting = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
 
         // We are grounded, so recalculate move direction based on axis
         Vector3 forward = transform.TransformDirection(Vector3.forward);
@@ -86,13 +86,17 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Apply normalized values
-        float curSpeedX = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputVector.x : 0;
-        float curSpeedY = canMove ? (isRunning ? runningSpeed : walkingSpeed) * inputVector.y : 0;
+        float curSpeedX = canMove ? (isSprinting ? sprintSpeed : walkingSpeed) * inputVector.x : 0;
+        float curSpeedY = canMove ? (isSprinting ? sprintSpeed : walkingSpeed) * inputVector.y : 0;
 
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
 
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
+        if (
+            InputBindingManager.Instance.IsActionPressed(InputActions.Jump)
+            && canMove
+            && characterController.isGrounded
+        )
         {
             moveDirection.y = jumpSpeed;
         }
@@ -106,16 +110,46 @@ public class PlayerController : NetworkBehaviour
             moveDirection.y -= gravity * Time.deltaTime;
         }
 
-        // Move the controller
-        characterController.Move(moveDirection * Time.deltaTime);
+        CollisionFlags collisions = characterController.Move(moveDirection * Time.deltaTime);
 
-        // Player and Camera rotation
+        if ((collisions & CollisionFlags.Above) != 0)
+        {
+            float horizontalSpeed = new Vector2(moveDirection.x, moveDirection.z).magnitude;
+
+            if (horizontalSpeed > 0.1f)
+            {
+                // Stronger downward force when moving to prevent ceiling gliding
+                moveDirection.y = -2.0f;
+            }
+            else
+            {
+                // Normal downward force when not moving horizontally
+                moveDirection.y = -0.1f;
+            }
+        }
+
         if (canMove && playerCamera != null)
         {
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
             rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
             transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
+        }
+    }
+
+    public void ToggleControls(bool enabled)
+    {
+        canMove = enabled;
+
+        if (enabled)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 }

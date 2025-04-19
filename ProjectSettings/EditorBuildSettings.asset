@@ -6,17 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/Menu.unity
-    guid: 5a460066ccc63964c804a0fe5660b52c
-  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 0
-    path: Assets/Scenes/Lobby.unity
-    guid: 7397a3802a3f17045bdac0fe8ee5a172
   - enabled: 1
     path: Assets/Scenes/FishnetNoSteam.unity
     guid: 6a259e1e502dd494c84b9929dd663cae
+  - enabled: 1
+    path: Assets/Scenes/Menu.unity
+    guid: 5a460066ccc63964c804a0fe5660b52c
+  - enabled: 1
+    path: Assets/Scenes/Lobby.unity
+    guid: 7397a3802a3f17045bdac0fe8ee5a172
   - enabled: 1
     path: Assets/Scenes/Dungeon3D.unity
     guid: 92f85b828b7d47442bb4c92b6dc246b5

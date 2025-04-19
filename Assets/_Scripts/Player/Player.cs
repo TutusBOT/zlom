@@ -18,6 +18,12 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private CrosshairController crosshairController;
 
+    [SerializeField]
+    private PlayerController playerController;
+
+    [SerializeField]
+    private PlayerChatDisplay playerChatDisplay;
+
     private void Awake()
     {
         if (stressController == null)
@@ -34,6 +40,12 @@ public class Player : NetworkBehaviour
 
         if (crosshairController == null)
             Debug.LogError("CrosshairController is not assigned in the inspector.");
+
+        if (playerController == null)
+            Debug.LogError("PlayerController is not assigned in the inspector.");
+
+        if (playerChatDisplay == null)
+            Debug.LogError("PlayerChatDisplay is not assigned in the inspector.");
     }
 
     public override void OnStartClient()
@@ -58,8 +70,25 @@ public class Player : NetworkBehaviour
 
     public VoiceChatManager GetVoiceChatManager() => voiceChatManager;
 
+    public FlashlightController GetFlashlightController() => flashlightController;
+
+    public PauseManager GetPauseManager() => pauseManager;
+
+    public CrosshairController GetCrosshairController() => crosshairController;
+
+    public PlayerController GetPlayerController() => playerController;
+
+    public PlayerChatDisplay GetPlayerChatDisplay() => playerChatDisplay;
+
     public bool IsIsolated(float distance)
     {
         return !PlayerManager.Instance.IsAnyPlayerInRange(transform.position, distance, this);
+    }
+
+    public void ToggleControls(bool enable)
+    {
+        flashlightController.enabled = enable;
+        playerController.ToggleControls(enable);
+        voiceChatManager.enabled = enable;
     }
 }
