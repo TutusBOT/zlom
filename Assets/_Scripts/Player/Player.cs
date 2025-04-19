@@ -88,7 +88,7 @@ public class Player : NetworkBehaviour
     public void ToggleControls(bool enable)
     {
         flashlightController.enabled = enable;
-        playerController.enabled = enable;
+        playerController.ToggleControls(enable);
         voiceChatManager.enabled = enable;
     }
 }

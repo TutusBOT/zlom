@@ -79,22 +79,17 @@ public class PauseManager : NetworkBehaviour
         if (_isPaused)
         {
             ResumeGame();
-            transform.parent.GetComponent<Player>().ToggleControls(true);
         }
         else
         {
             PauseGame();
-            transform.parent.GetComponent<Player>().ToggleControls(false);
         }
     }
 
     public void PauseGame()
     {
         _isPaused = true;
-
-        // Show cursor
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        transform.parent.GetComponent<Player>().ToggleControls(false);
 
         // Show pause menu
         if (_pauseMenuPanel != null)
@@ -104,10 +99,7 @@ public class PauseManager : NetworkBehaviour
     public void ResumeGame()
     {
         _isPaused = false;
-
-        // Hide cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        transform.parent.GetComponent<Player>().ToggleControls(true);
 
         // Hide pause menu
         if (_pauseMenuPanel != null)
