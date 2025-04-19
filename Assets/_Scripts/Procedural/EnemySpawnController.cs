@@ -3,8 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using FishNet.Managing;
+using FishNet;
 
-public class EnemySpawnController : MonoBehaviour
+
+public class EnemySpawnController : NetworkBehaviour
 {
     [Tooltip("Enemy spawn configurations")]
     [SerializeField]
@@ -65,6 +70,9 @@ public class EnemySpawnController : MonoBehaviour
         }
     }
 
+    
+
+
     private IEnumerator SpawnRoutine()
     {
         isSpawning = true;
@@ -106,39 +114,39 @@ public class EnemySpawnController : MonoBehaviour
         }
     }
 
+
     private void TrySpawnEnemy()
     {
+
         if (playerTransform == null)
             return;
 
-        // Find a valid spawn position
         Vector3 spawnPosition = FindSpawnPosition();
 
         if (spawnPosition != Vector3.zero)
         {
-            // Select a random enemy based on spawn chances
             GameObject enemyPrefab = SelectRandomEnemyPrefab();
 
-            if (enemyPrefab != null)
+            GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+
+            var enemyNetObj = enemy.GetComponent<NetworkObject>();
+
+            InstanceFinder.ServerManager.Spawn(enemyNetObj);
+
+            activeEnemies.Add(enemy);
+
+            foreach (var config in enemyPrefabs)
             {
-                // Spawn the enemy
-                GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
-                activeEnemies.Add(enemy);
-
-                // Update the count for this enemy type
-                foreach (var config in enemyPrefabs)
+                if (config.enemyPrefab == enemyPrefab)
                 {
-                    if (config.enemyPrefab == enemyPrefab)
-                    {
-                        config.currentCount++;
-                        break;
-                    }
+                    config.currentCount++;
+                    break;
                 }
+            }
 
-                if (debugMode)
-                {
-                    Debug.Log($"Enemy spawned: {enemy.name} at {spawnPosition}");
-                }
+            if (debugMode)
+            {
+                Debug.Log($"[Server] Enemy spawned: {enemy.name} at {spawnPosition}");
             }
         }
     }
@@ -246,39 +254,47 @@ public class EnemySpawnController : MonoBehaviour
         return null;
     }
 
-    // Optional: Method to spawn enemies at specific room positions for integration with your DungeonGenerator
     public void SpawnEnemiesInRoom(Transform roomTransform, int minEnemies, int maxEnemies)
     {
+
         int enemiesToSpawn = Random.Range(minEnemies, maxEnemies + 1);
+        Debug.Log("Enemies to spawn: " + enemiesToSpawn);
 
         // Get the room bounds
         Bounds roomBounds = new Bounds(roomTransform.position, Vector3.zero);
-        foreach (Renderer r in roomTransform.GetComponentsInChildren<Renderer>())
+        var renderers = roomTransform.GetComponentsInChildren<Renderer>();
+
+        foreach (Renderer r in renderers)
         {
-            roomBounds.Encapsulate(r.bounds);
+            if (r != null)
+                roomBounds.Encapsulate(r.bounds);
         }
 
         for (int i = 0; i < enemiesToSpawn; i++)
         {
             Vector3 spawnPosition = FindPositionInRoom(roomBounds);
-
-            if (spawnPosition != Vector3.zero)
+            if (spawnPosition == Vector3.zero)
             {
-                GameObject enemyPrefab = SelectRandomEnemyPrefab();
-                if (enemyPrefab != null)
-                {
-                    GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
-                    activeEnemies.Add(enemy);
+                continue;  // If invalid position, skip this enemy spawn
+            }
 
-                    // Update the count for this enemy type
-                    foreach (var config in enemyPrefabs)
-                    {
-                        if (config.enemyPrefab == enemyPrefab)
-                        {
-                            config.currentCount++;
-                            break;
-                        }
-                    }
+            GameObject enemyPrefab = SelectRandomEnemyPrefab();
+            if (enemyPrefab == null)
+            {
+                continue;
+            }
+
+            GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+            enemy.SetActive(true); // Ensure the enemy is active
+            base.Spawn(enemy);
+            activeEnemies.Add(enemy);
+
+            foreach (var config in enemyPrefabs)
+            {
+                if (config.enemyPrefab == enemyPrefab)
+                {
+                    config.currentCount++;
+                    break;
                 }
             }
         }
@@ -309,6 +325,7 @@ public class EnemySpawnController : MonoBehaviour
             }
         }
 
-        return Vector3.zero; // No valid position found
+        Debug.LogWarning($"[FindPositionInRoom] Nie znaleziono pozycji w pokoju: {roomBounds}. Sprawdź NavMesh!");
+        return Vector3.zero;
     }
 }

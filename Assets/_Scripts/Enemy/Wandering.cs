@@ -22,21 +22,30 @@ public class WanderingAI : MonoBehaviour {
         timer += Time.deltaTime;
 
         if (timer >= wanderTimer) {
-            Vector3 newPos = RandomNavSphere(transform.position, wanderRadius, -1);
-            agent.SetDestination(newPos);
-            timer = 0;
+            Vector3 newPos = GetRandomPointOnNavMesh();
+
+            NavMeshPath path = new NavMeshPath();
+            if (agent.CalculatePath(newPos, path) && path.status == NavMeshPathStatus.PathComplete) {
+                agent.SetDestination(newPos);
+                timer = 0;
+            }
         }
     }
 
-    public static Vector3 RandomNavSphere(Vector3 origin, float dist, int layermask) {
-        Vector3 randDirection = Random.insideUnitSphere * dist;
 
-        randDirection += origin;
+    public static Vector3 GetRandomPointOnNavMesh()
+    {
+        NavMeshTriangulation navMeshData = NavMesh.CalculateTriangulation();
 
-        NavMeshHit navHit;
+        int vertexIndex = Random.Range(0, navMeshData.vertices.Length);
+        Vector3 randomPoint = navMeshData.vertices[vertexIndex];
 
-        NavMesh.SamplePosition (randDirection, out navHit, dist, layermask);
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomPoint, out hit, 2.0f, NavMesh.AllAreas))
+        {
+            return hit.position;
+        }
 
-        return navHit.position;
+        return GetRandomPointOnNavMesh();
     }
 }

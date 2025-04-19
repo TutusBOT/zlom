@@ -992,8 +992,11 @@ public class DungeonGenerator : NetworkBehaviour
         }
     }
 
-    private void SpawnEnemiesInRooms()
+    private IEnumerator SpawnEnemiesInRooms()
     {
+
+        yield return new WaitForSeconds(0.6f); 
+        
         int startIndex = skipEnemiesInStartRoom ? 1 : 0;
 
         for (int i = startIndex; i < transform.childCount; i++)
