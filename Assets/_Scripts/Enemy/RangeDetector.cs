@@ -6,6 +6,7 @@ public class RangeDetector : MonoBehaviour
     [SerializeField] private LayerMask detectionMask;
     [SerializeField] private bool showDebugVisuals = true;
 
+    //bagnoi
     public GameObject DetectedTarget
     {
         get;
