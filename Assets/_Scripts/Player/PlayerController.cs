@@ -111,9 +111,26 @@ public class PlayerController : NetworkBehaviour
         }
 
         // Move the controller
-        characterController.Move(moveDirection * Time.deltaTime);
+        CollisionFlags collisions = characterController.Move(moveDirection * Time.deltaTime);
 
-        // Player and Camera rotation
+        if ((collisions & CollisionFlags.Above) != 0)
+        {
+            // Apply stronger downward force when hitting ceiling while moving
+            float horizontalSpeed = new Vector2(moveDirection.x, moveDirection.z).magnitude;
+
+            // If we're moving horizontally, apply stronger downward push
+            if (horizontalSpeed > 0.1f)
+            {
+                // Stronger downward force when moving to prevent ceiling gliding
+                moveDirection.y = -2.0f;
+            }
+            else
+            {
+                // Normal downward force when not moving horizontally
+                moveDirection.y = -0.1f;
+            }
+        }
+
         if (canMove && playerCamera != null)
         {
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
