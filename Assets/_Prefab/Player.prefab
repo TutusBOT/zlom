@@ -12,10 +12,11 @@ GameObject:
   - component: {fileID: 7875680374012518474}
   - component: {fileID: 2616860343818222958}
   - component: {fileID: 7707114347477242969}
-  - component: {fileID: 1560814385129430009}
+  - component: {fileID: 1551341732592336864}
   - component: {fileID: 4313134647026765314}
   - component: {fileID: 4286912790948540255}
   - component: {fileID: 3921108572199274389}
+  - component: {fileID: 1176229741873664378}
   - component: {fileID: 4735235392766103181}
   - component: {fileID: 4261230266848846684}
   - component: {fileID: 8522427719167573054}
@@ -97,6 +98,8 @@ MonoBehaviour:
   flashlightController: {fileID: 4735235392766103181}
   pauseManager: {fileID: 9050383292164517933}
   crosshairController: {fileID: 3921108572199274389}
+  playerController: {fileID: 7707114347477242969}
+  playerChatDisplay: {fileID: 1176229741873664378}
 --- !u!114 &7707114347477242969
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -120,7 +123,7 @@ MonoBehaviour:
   lookXLimit: 90
   canMove: 1
   cameraYOffset: 0.4
---- !u!114 &1560814385129430009
+--- !u!114 &1551341732592336864
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,29 +132,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 457794671632602189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25fb4fe14a9a89742833be5e95270202, type: 3}
+  m_Script: {fileID: 11500000, guid: 639e65bb4a3c35546a54cf8812077402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
   maxHealth: 100
-  currentHealth: 0
-  OnDeath:
-    m_PersistentCalls:
-      m_Calls: []
-  OnHealthChanged:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 11500000, guid: 60cfd98c426744f409cbb27aa23727a5, type: 3}
-        m_TargetAssemblyTypeName: UnityEngine.Object, UnityEngine
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  godModeOnStart: 0
+  damageSound: {fileID: 8300000, guid: d7c8c412d5b670d4aa890059b1523abc, type: 3}
+  healSound: {fileID: 0}
+  deathSound: {fileID: 0}
 --- !u!114 &4313134647026765314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,6 +299,26 @@ MonoBehaviour:
   animateCrosshair: 1
   scaleSpeed: 8
   hoverScale: 1.2
+--- !u!114 &1176229741873664378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0369891c0d5449f4d9f2c8091beddb71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
+  chatTextPrefab: {fileID: 8872921308598174555, guid: 2e69d36fc24f5a1458c5b76ffe360042, type: 3}
+  displayDuration: 5
+  fadeOutDuration: 0.5
+  maxVisibleMessages: 3
+  messageSpacing: 0.5
 --- !u!114 &4735235392766103181
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,43 +1,78 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DamageZone : MonoBehaviour
 {
-    [Header("Damage Settings")]
-    [SerializeField] private float damageAmount = 20f; // Set damage in Inspector
-    [SerializeField] private float damageCooldown = 1f; // Time between damage ticks
+    [Tooltip("Damage applied per second")]
+    [SerializeField]
+    private float damagePerSecond = 10f;
+
+    [Tooltip("How often to apply damage")]
+    [SerializeField]
+    private float damageInterval = 0.5f;
+
+    [Header("Visual")]
+    [SerializeField]
+    private Color zoneColor = new Color(1, 0, 0, 0.2f);
+
+    private List<PlayerHealth> playersInZone = new List<PlayerHealth>();
+    private float damageTimer;
+
+    private void Start()
+    {
+        // Set zone visuals
+        Renderer rend = GetComponent<Renderer>();
+        if (rend != null)
+        {
+            rend.material.color = zoneColor;
+        }
+
+        // Make sure we have a trigger collider
+        Collider col = GetComponent<Collider>();
+        if (col != null && !col.isTrigger)
+        {
+            col.isTrigger = true;
+            Debug.LogWarning("DamageZone collider set to trigger mode");
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Triggered");
-        if (other.CompareTag("Player")) // Ensure the player has the correct tag
+        PlayerHealth health = other.GetComponent<PlayerHealth>();
+        if (health != null && !playersInZone.Contains(health))
         {
-            HealthController health = other.GetComponent<HealthController>();
-            if (health != null)
-            {
-                health.TakeDamage(damageAmount);
-                InvokeRepeating(nameof(ApplyDamage), damageCooldown, damageCooldown);
-            }
+            playersInZone.Add(health);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
+        PlayerHealth health = other.GetComponent<PlayerHealth>();
+        if (health != null)
         {
-            CancelInvoke(nameof(ApplyDamage)); // Stop applying damage when the player leaves
+            playersInZone.Remove(health);
         }
     }
 
-    private void ApplyDamage()
+    private void Update()
     {
-        // Find player and apply damage again
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        if (playersInZone.Count == 0)
+            return;
+
+        damageTimer -= Time.deltaTime;
+
+        if (damageTimer <= 0f)
         {
-            HealthController health = player.GetComponent<HealthController>();
-            if (health != null)
+            damageTimer = damageInterval;
+
+            // Apply damage to all players in zone
+            foreach (PlayerHealth health in playersInZone)
             {
-                health.TakeDamage(damageAmount);
+                // Calculate damage for this interval
+                float damage = damagePerSecond * damageInterval;
+
+                // Apply damage (NetworkBehaviour handles server authority)
+                health.TakeDamage(damage, gameObject);
             }
         }
     }

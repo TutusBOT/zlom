@@ -68,7 +68,7 @@ public class PauseManager : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        if (InputBindingManager.Instance.IsActionTriggered(InputActions.Pause))
+        if (InputBindingManager.Instance.IsActionTriggered(InputActions.Cancel))
         {
             TogglePause();
         }
@@ -77,9 +77,15 @@ public class PauseManager : NetworkBehaviour
     public void TogglePause()
     {
         if (_isPaused)
+        {
             ResumeGame();
+            transform.parent.GetComponent<Player>().ToggleControls(true);
+        }
         else
+        {
             PauseGame();
+            transform.parent.GetComponent<Player>().ToggleControls(false);
+        }
     }
 
     public void PauseGame()

@@ -173,15 +173,9 @@ public class BlisterheartRelic : Valuable
                 && Vector3.Distance(player.transform.position, transform.position) < 2f
             )
             {
-                // Apply damage to the player's health controller
-                HealthController healthController = player.GetComponent<HealthController>();
-                if (healthController != null)
-                {
-                    // healthController.TakeDamageServerRpc(damageAmount);
-                    Debug.Log(
-                        $"Player {conn.ClientId} burned by BlisterheartRelic! Damage: {damageAmount}"
-                    );
-                }
+                Debug.Log(
+                    $"Player {conn.ClientId} burned by BlisterheartRelic! Damage: {damageAmount}"
+                );
             }
         }
 
