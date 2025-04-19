@@ -122,8 +122,10 @@ public class DungeonGenerator : NetworkBehaviour
 
     [SerializeField]
     private int seed;
-    [SerializeField] 
+
+    [SerializeField]
     GameObject doorPrefab;
+
     void Start()
     {
         Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
@@ -197,7 +199,7 @@ public class DungeonGenerator : NetworkBehaviour
         }
 
         PlaceRooms();
-        
+
         RenderDungeon();
 
         if (valuableSpawner != null && IsServerInitialized)
@@ -474,22 +476,16 @@ public class DungeonGenerator : NetworkBehaviour
         switch (placement.direction)
         {
             case Direction.North:
-                targetLocalPos = new Vector2Int(
-                    placement.connectionPoint.x - placement.x,
-                    0 
-                );
+                targetLocalPos = new Vector2Int(placement.connectionPoint.x - placement.x, 0);
                 break;
             case Direction.South:
                 targetLocalPos = new Vector2Int(
                     placement.connectionPoint.x - placement.x,
-                    placement.size.length - 1 
+                    placement.size.length - 1
                 );
                 break;
             case Direction.East:
-                targetLocalPos = new Vector2Int(
-                    0,
-                    placement.connectionPoint.y - placement.z
-                );
+                targetLocalPos = new Vector2Int(0, placement.connectionPoint.y - placement.z);
                 break;
             case Direction.West:
                 targetLocalPos = new Vector2Int(
@@ -621,10 +617,7 @@ public class DungeonGenerator : NetworkBehaviour
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            x - newRoomX,
-                            0 
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(x - newRoomX, 0);
 
                         if (
                             variantData.allowedSouthDoors == null
@@ -681,10 +674,7 @@ public class DungeonGenerator : NetworkBehaviour
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            x - newRoomX,
-                            size.length - 1 
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(x - newRoomX, size.length - 1);
 
                         if (
                             variantData.allowedNorthDoors == null
@@ -741,10 +731,7 @@ public class DungeonGenerator : NetworkBehaviour
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            0,
-                            z - newRoomZ
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(0, z - newRoomZ);
 
                         if (
                             variantData.allowedWestDoors == null
@@ -801,10 +788,7 @@ public class DungeonGenerator : NetworkBehaviour
                     bool targetRoomValid = true;
                     if (hasVariantData && !variantData.allowDoorsAnywhere)
                     {
-                        Vector2Int targetLocalPos = new Vector2Int(
-                            size.width - 1,
-                            z - newRoomZ
-                        );
+                        Vector2Int targetLocalPos = new Vector2Int(size.width - 1, z - newRoomZ);
 
                         if (
                             variantData.allowedEastDoors == null
@@ -839,151 +823,153 @@ public class DungeonGenerator : NetworkBehaviour
         return placements;
     }
 
-   // Add a reference to the Door Prefab(s) for instantiation
-// or an array of door prefabs for variety
+    // Add a reference to the Door Prefab(s) for instantiation
+    // or an array of door prefabs for variety
 
-void RenderDungeon()
-{
-    Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
-
-    Room startingRoom = rooms[0];
-    float offsetX = -((startingRoom.xOrigin + (startingRoom.width / 2f)) * gridUnitSize);
-    float offsetZ = -((startingRoom.zOrigin + (startingRoom.length / 2f)) * gridUnitSize);
-
-    for (int i = 0; i < rooms.Count; i++)
+    void RenderDungeon()
     {
-        Room room = rooms[i];
-        bool isStartingRoom = (i == 0);
-        GameObject renderedRoom = null;
+        Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
 
-        Vector3 roomCenter = new Vector3(
-            (room.xOrigin + (room.width / 2f)) * gridUnitSize + offsetX,
-            0,
-            (room.zOrigin + (room.length / 2f)) * gridUnitSize + offsetZ
-        );
+        Room startingRoom = rooms[0];
+        float offsetX = -((startingRoom.xOrigin + (startingRoom.width / 2f)) * gridUnitSize);
+        float offsetZ = -((startingRoom.zOrigin + (startingRoom.length / 2f)) * gridUnitSize);
 
-        // Create the room prefab (starting room or normal room)
-        if (isStartingRoom && startingRoomPrefab != null)
+        for (int i = 0; i < rooms.Count; i++)
         {
-            renderedRoom = Instantiate(
-                startingRoomPrefab,
-                roomCenter,
-                Quaternion.identity,
-                transform
+            Room room = rooms[i];
+            bool isStartingRoom = (i == 0);
+            GameObject renderedRoom = null;
+
+            Vector3 roomCenter = new Vector3(
+                (room.xOrigin + (room.width / 2f)) * gridUnitSize + offsetX,
+                0,
+                (room.zOrigin + (room.length / 2f)) * gridUnitSize + offsetZ
             );
-            renderedRoom.name = "StartingRoom";
-        }
-        else
-        {
-            RoomSize size = new RoomSize { width = room.width, length = room.length };
 
-            if (roomVariants.ContainsKey(size))
+            // Create the room prefab (starting room or normal room)
+            if (isStartingRoom && startingRoomPrefab != null)
             {
-                RoomVariantData variantData = roomVariants[size];
+                renderedRoom = Instantiate(
+                    startingRoomPrefab,
+                    roomCenter,
+                    Quaternion.identity,
+                    transform
+                );
+                renderedRoom.name = "StartingRoom";
+            }
+            else
+            {
+                RoomSize size = new RoomSize { width = room.width, length = room.length };
 
-                if (variantData.normalVariants != null && variantData.normalVariants.Count > 0)
+                if (roomVariants.ContainsKey(size))
                 {
-                    GameObject prefab = variantData.normalVariants[
-                        Random.Range(0, variantData.normalVariants.Count)
-                    ];
+                    RoomVariantData variantData = roomVariants[size];
 
-                    renderedRoom = Instantiate(
-                        prefab,
-                        roomCenter,
-                        Quaternion.identity,
-                        transform
-                    );
-                    renderedRoom.name = $"Room_{room.xOrigin}_{room.zOrigin}";
+                    if (variantData.normalVariants != null && variantData.normalVariants.Count > 0)
+                    {
+                        GameObject prefab = variantData.normalVariants[
+                            Random.Range(0, variantData.normalVariants.Count)
+                        ];
+
+                        renderedRoom = Instantiate(
+                            prefab,
+                            roomCenter,
+                            Quaternion.identity,
+                            transform
+                        );
+                        renderedRoom.name = $"Room_{room.xOrigin}_{room.zOrigin}";
+                    }
+                    else
+                    {
+                        Debug.LogWarning(
+                            $"No room variants found for size: Width={size.width}, Length={size.length}"
+                        );
+                    }
                 }
                 else
                 {
                     Debug.LogWarning(
-                        $"No room variants found for size: Width={size.width}, Length={size.length}"
+                        $"No room variants defined for size: Width={room.width}, Length={room.length}"
                     );
                 }
             }
-            else
-            {
-                Debug.LogWarning(
-                    $"No room variants defined for size: Width={room.width}, Length={room.length}"
-                );
-            }
-        }
 
-        // After the room prefab is instantiated, place doors based on connections
-        if (renderedRoom != null)
-        {
-            RoomController controller = renderedRoom.GetComponent<RoomController>();
-            if (controller != null)
+            // After the room prefab is instantiated, place doors based on connections
+            if (renderedRoom != null)
             {
-                controller.SetupDoorsFromConnections(room.connectionPoints);
+                RoomController controller = renderedRoom.GetComponent<RoomController>();
+                if (controller != null)
+                {
+                    controller.SetupDoorsFromConnections(room.connectionPoints);
 
-                // Spawn doors at the connection points
-                SpawnDoors(room,renderedRoom);
-            }
-            else
-            {
-                Debug.LogWarning(
-                    $"Room at ({room.xOrigin}, {room.zOrigin}) has no RoomController component"
-                );
+                    // Spawn doors at the connection points
+                    if (IsServerInitialized)
+                        SpawnDoors(room, renderedRoom);
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        $"Room at ({room.xOrigin}, {room.zOrigin}) has no RoomController component"
+                    );
+                }
             }
         }
     }
-}
 
-// This method handles door spawning for the room based on its connection points
+    // This method handles door spawning for the room based on its connection points
 
 
-private HashSet<Vector3> occupiedDoorPositions = new HashSet<Vector3>();
+    private HashSet<Vector3> occupiedDoorPositions = new HashSet<Vector3>();
 
-void SpawnDoors(Room room, GameObject roomObject)
-{
-    if (room.connectionPoints == null || room.connectionPoints.Count == 0)
-        return;
-
-    foreach (ConnectionPoint cp in room.connectionPoints)
+    void SpawnDoors(Room room, GameObject roomObject)
     {
-        string dirName = cp.direction.ToString(); // "North", "South", etc.
-        Transform doorAnchor = roomObject.transform.Find($"Doors/{dirName}");
+        if (room.connectionPoints == null || room.connectionPoints.Count == 0)
+            return;
 
-        if (doorAnchor == null)
+        foreach (ConnectionPoint cp in room.connectionPoints)
         {
-            Debug.LogWarning($"Missing door anchor '{dirName}' in room: {roomObject.name}");
-            continue;
-        }
+            string dirName = cp.direction.ToString(); // "North", "South", etc.
+            Transform doorAnchor = roomObject.transform.Find($"Doors/{dirName}");
 
-        // Check if any doors exist within a radius of 5 units
-        if (IsDoorInRadius(doorAnchor.position, 5f))
-        {
-            Debug.Log($"Skipping door instantiation, nearby door already exists within 5 units.");
-            continue;
-        }
+            if (doorAnchor == null)
+            {
+                Debug.LogWarning($"Missing door anchor '{dirName}' in room: {roomObject.name}");
+                continue;
+            }
 
-        // Mark the door position as occupied
-        occupiedDoorPositions.Add(doorAnchor.position);
-        Vector3 adjustedPosition = doorAnchor.position + new Vector3(0, 0.5f, 0);
-        // Spawn door at this anchor
-        GameObject door = Instantiate(doorPrefab, adjustedPosition, doorAnchor.rotation, doorAnchor);
-        NetworkObject networkObject = door.GetComponent<NetworkObject>();
-        InstanceFinder.ServerManager.Spawn(networkObject);
-        door.name = $"Door_{dirName}";
+            // Check if any doors exist within a radius of 5 units
+            if (IsDoorInRadius(doorAnchor.position, 5f))
+            {
+                Debug.Log(
+                    $"Skipping door instantiation, nearby door already exists within 5 units."
+                );
+                continue;
+            }
+
+            // Mark the door position as occupied
+            occupiedDoorPositions.Add(doorAnchor.position);
+            Vector3 adjustedPosition = doorAnchor.position + new Vector3(0, 0.5f, 0);
+            // Spawn door at this anchor
+            GameObject door = Instantiate(doorPrefab, adjustedPosition, doorAnchor.rotation);
+
+            NetworkObject networkObject = door.GetComponent<NetworkObject>();
+            InstanceFinder.ServerManager.Spawn(networkObject);
+            door.name = $"Door_{dirName}";
+        }
     }
-}
 
-            
-bool IsDoorInRadius(Vector3 position, float radius)
-{
-    foreach (Vector3 occupiedPosition in occupiedDoorPositions)
+    bool IsDoorInRadius(Vector3 position, float radius)
     {
-        // If any door is within the radius, return true
-        if (Vector3.Distance(position, occupiedPosition) < radius)
+        foreach (Vector3 occupiedPosition in occupiedDoorPositions)
         {
-            return true;
+            // If any door is within the radius, return true
+            if (Vector3.Distance(position, occupiedPosition) < radius)
+            {
+                return true;
+            }
         }
+        return false;
     }
-    return false;
-}
-
 
     private IEnumerator GenerateNavMeshDelayed()
     {

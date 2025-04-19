@@ -352,7 +352,7 @@ MonoBehaviour:
   maxEnemiesPerRoom: 3
   skipEnemiesInStartRoom: 1
   seed: 69
-  doorPrefab: {fileID: 435237448655144098, guid: b785ed952cba06c42a96194e47cc3b33, type: 3}
+  doorPrefab: {fileID: 1239181922602411194, guid: 1cd25ad6cebf9544296b7df2b79c6da0, type: 3}
 --- !u!114 &1180316805
 MonoBehaviour:
   m_ObjectHideFlags: 0
