@@ -1488,8 +1488,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 745254680863901373, guid: 6d96955ef39372b4e879f591986246e6, type: 3}
       propertyPath: systemPrefabs.Array.size
-      value: 9
+      value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 745254680863901373, guid: 6d96955ef39372b4e879f591986246e6, type: 3}
+      propertyPath: 'systemPrefabs.Array.data[7]'
+      value: 
+      objectReference: {fileID: 8495833507254179227, guid: 6a2ad7a39f3f21544a49054c6a3cd3b8, type: 3}
     - target: {fileID: 745254680863901373, guid: 6d96955ef39372b4e879f591986246e6, type: 3}
       propertyPath: 'systemPrefabs.Array.data[8]'
       value: 

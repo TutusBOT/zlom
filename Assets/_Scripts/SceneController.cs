@@ -1,10 +1,11 @@
 using System.Collections;
+using System.Linq;
 using FishNet;
 using FishNet.Managing.Scened;
+using FishNet.Object;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class SceneController : MonoBehaviour
+public class SceneController : NetworkBehaviour
 {
     public static SceneController Instance { get; private set; }
 
@@ -22,7 +23,6 @@ public class SceneController : MonoBehaviour
     [SerializeField]
     private GameObject loadingScreen;
 
-    private string _currentlyLoadingScene;
     private bool _isLoading = false;
 
     void Awake()
@@ -30,7 +30,6 @@ public class SceneController : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
 
             // Initialize fade canvas if needed
             if (fadeCanvasGroup != null)
@@ -45,16 +44,32 @@ public class SceneController : MonoBehaviour
         }
     }
 
-    public void LoadScene(string sceneName, System.Action onComplete = null)
+    [ObserversRpc(RunLocally = true)]
+    public void LoadScene(string sceneName)
     {
         if (!InstanceFinder.IsServerStarted || _isLoading)
             return;
 
+        NetworkObject[] playersToMove = FindObjectsByType<Player>(FindObjectsSortMode.None)
+            .Select(p => p.GetComponent<NetworkObject>())
+            .Where(no => no != null)
+            .ToArray();
+
+        DisablePlayersControlRpc();
+
         SceneLoadData sld = new SceneLoadData(sceneName);
+        sld.ReplaceScenes = ReplaceOption.All;
+        sld.MovedNetworkObjects = playersToMove;
+
         InstanceFinder.SceneManager.LoadGlobalScenes(sld);
+        if (IsServerInitialized)
+        {
+            StartCoroutine(WaitForDungeonGeneration());
+        }
     }
 
-    public void UnloadScene(string sceneName, System.Action onComplete = null)
+    [ObserversRpc(RunLocally = true)]
+    public void UnloadScene(string sceneName)
     {
         if (!InstanceFinder.IsServerStarted || _isLoading)
             return;
@@ -63,110 +78,75 @@ public class SceneController : MonoBehaviour
         InstanceFinder.SceneManager.UnloadGlobalScenes(sud);
     }
 
-    // private IEnumerator LoadSceneRoutine(string sceneName, System.Action onComplete = null)
-    // {
-    //     _isLoading = true;
+    private IEnumerator WaitForDungeonGeneration()
+    {
+        // Place players in a safe position (high enough not to fall through)
+        ResetAllPlayerPositionsServerRpc();
 
-    //     // Fade out current scene
-    //     yield return StartCoroutine(FadeRoutine(1));
+        // Wait for dungeon to generate
+        yield return new WaitForSeconds(2f);
 
-    //     // Show loading screen if configured
-    //     if (showLoadingScreen && loadingScreen != null)
-    //         loadingScreen.SetActive(true);
+        // Now it's safe to enable player movement
+        EnablePlayersControlRpc();
 
-    //     // Load the scene asynchronously
-    //     AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
-    //     asyncLoad.allowSceneActivation = false;
+        _isLoading = false;
+    }
 
-    //     // Wait until it's almost done
-    //     while (asyncLoad.progress < 0.9f)
-    //     {
-    //         yield return null;
-    //     }
+    [ObserversRpc]
+    private void DisablePlayersControlRpc()
+    {
+        PlayerController[] playerControllers = FindObjectsByType<PlayerController>(
+            FindObjectsSortMode.None
+        );
+        foreach (var controller in playerControllers)
+        {
+            controller.canMove = false;
 
-    //     // Activate the scene
-    //     asyncLoad.allowSceneActivation = true;
+            // Disable gravity on character controllers
+            CharacterController cc = controller.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                // Store position so they don't fall
+                cc.enabled = false;
+            }
+        }
+    }
 
-    //     // Wait for scene to fully load
-    //     while (!asyncLoad.isDone)
-    //     {
-    //         yield return null;
-    //     }
+    [ObserversRpc]
+    private void EnablePlayersControlRpc()
+    {
+        PlayerController[] playerControllers = FindObjectsByType<PlayerController>(
+            FindObjectsSortMode.None
+        );
+        foreach (var controller in playerControllers)
+        {
+            // Re-enable character controllers first
+            CharacterController cc = controller.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = true;
+            }
 
-    //     // Hide loading screen
-    //     if (showLoadingScreen && loadingScreen != null)
-    //         loadingScreen.SetActive(false);
+            // Then allow movement
+            controller.canMove = true;
+        }
+    }
 
-    //     // Fade in new scene
-    //     yield return StartCoroutine(FadeRoutine(0));
+    [ServerRpc(RunLocally = true)]
+    private void ResetAllPlayerPositionsServerRpc()
+    {
+        // Find all players and reset their positions
+        Player[] allPlayers = FindObjectsByType<Player>(FindObjectsSortMode.None);
 
-    //     _isLoading = false;
-
-    //     // Execute callback if provided
-    //     onComplete?.Invoke();
-    // }
-
-    // // Overload for loading by index
-    // private IEnumerator LoadSceneRoutine(int sceneIndex, System.Action onComplete = null)
-    // {
-    //     _isLoading = true;
-
-    //     // Same logic as above but with sceneIndex
-    //     yield return StartCoroutine(FadeRoutine(1));
-
-    //     if (showLoadingScreen && loadingScreen != null)
-    //         loadingScreen.SetActive(true);
-
-    //     AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneIndex);
-    //     asyncLoad.allowSceneActivation = false;
-
-    //     while (asyncLoad.progress < 0.9f)
-    //     {
-    //         yield return null;
-    //     }
-
-    //     asyncLoad.allowSceneActivation = true;
-
-    //     while (!asyncLoad.isDone)
-    //     {
-    //         yield return null;
-    //     }
-
-    //     if (showLoadingScreen && loadingScreen != null)
-    //         loadingScreen.SetActive(false);
-
-    //     yield return StartCoroutine(FadeRoutine(0));
-
-    //     _isLoading = false;
-    //     onComplete?.Invoke();
-    // }
-
-    // private IEnumerator FadeRoutine(float targetAlpha)
-    // {
-    //     if (fadeCanvasGroup == null)
-    //         yield break;
-
-    //     // If we're fading in (going transparent), we should eventually allow raycasts through
-    //     bool shouldBlockRaycasts = (targetAlpha > 0);
-
-    //     // If we're fading out to transparent, block raycasts during transition
-    //     if (targetAlpha == 0)
-    //         fadeCanvasGroup.blocksRaycasts = true;
-
-    //     float startAlpha = fadeCanvasGroup.alpha;
-    //     float elapsedTime = 0;
-
-    //     while (elapsedTime < fadeTime)
-    //     {
-    //         fadeCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeTime);
-    //         elapsedTime += Time.deltaTime;
-    //         yield return null;
-    //     }
-
-    //     // Ensure we reach the exact target value
-    //     fadeCanvasGroup.alpha = targetAlpha;
-
-    //     // Set final raycast blocking state
-    //     fadeCanvasGroup.blocksRaycasts = shouldBlockRaycasts;
-    // }
+        foreach (Player player in allPlayers)
+        {
+            CharacterController cc = player.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = false;
+                player.transform.position = new Vector3(0f, 2f, 0f);
+                // Leave controller disabled - will be re-enabled after dungeon generation
+            }
+        }
+    }
 }
