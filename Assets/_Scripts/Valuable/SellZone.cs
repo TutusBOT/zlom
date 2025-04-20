@@ -11,13 +11,14 @@ public class SellZone : MonoBehaviour
 
     [Header("Visual")]
     public Color zoneColor = new Color(0, 1, 0, 0.2f);
-    public GameObject sellPromptUI; // Reference to a UI element that shows "Press E to sell"
+
+    // TODO: Delete sellPromptUI in the future
+    public GameObject sellPromptUI;
 
     public bool debug;
 
     private List<Valuable> valuablesInZone = new List<Valuable>();
     private bool playerInRange = false;
-    private Transform playerTransform;
 
     private void Start()
     {
@@ -27,9 +28,6 @@ public class SellZone : MonoBehaviour
             rend.material.color = zoneColor;
         }
 
-        playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
-
-        // Hide the prompt initially
         if (sellPromptUI != null)
             sellPromptUI.SetActive(false);
     }
@@ -56,7 +54,6 @@ public class SellZone : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
-            playerTransform = other.transform;
 
             // Show prompt if we have items to sell
             if (sellPromptUI != null && valuablesInZone.Count > 0)
@@ -113,7 +110,7 @@ public class SellZone : MonoBehaviour
 
         if (totalValue > 0)
         {
-            PlayerMoneyManager.Instance.AddMoney(totalValue);
+            PlayerMoneyManager.Instance.AddMoneyServerRpc(totalValue);
         }
     }
 

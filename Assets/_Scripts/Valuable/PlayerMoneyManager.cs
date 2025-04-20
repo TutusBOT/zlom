@@ -1,84 +1,117 @@
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
-using TMPro; // For TextMeshPro UI
 
-public class PlayerMoneyManager : MonoBehaviour
+public class PlayerMoneyManager : NetworkBehaviour
 {
     public static PlayerMoneyManager Instance { get; private set; }
-    
-    [Header("Settings")]
-    [SerializeField] private int currentMoney = 0;
-    
-    [Header("UI References")]
-    [SerializeField] private TextMeshProUGUI moneyText;
-    
-    // Event for other systems to subscribe to
+
+    [Header("Money Settings")]
+    private readonly SyncVar<int> _currentMoney = new SyncVar<int>();
+
+    [Header("Quota Settings")]
+    private readonly SyncVar<int> _currentQuota = new SyncVar<int>();
+
+    [SerializeField]
+    private int initialQuota = 1000;
+
+    [SerializeField]
+    private int quotaIncreaseAmount = 500;
+
     public delegate void MoneyChangedHandler(int newAmount);
     public event MoneyChangedHandler OnMoneyChanged;
-    
+
+    public delegate void QuotaChangedHandler(int current, int target);
+    public event QuotaChangedHandler OnQuotaChanged;
+
+    public delegate void QuotaCompletedHandler();
+    public event QuotaCompletedHandler OnQuotaCompleted;
+
     private void Awake()
     {
-        // Singleton pattern
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        Instance = this;
     }
-    
-    private void Start()
+
+    public override void OnStartNetwork()
     {
-        // Initialize UI
-        UpdateMoneyDisplay();
+        base.OnStartNetwork();
+
+        _currentMoney.OnChange += OnMoneyValueChanged;
+        _currentQuota.OnChange += OnQuotaValueChanged;
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        _currentQuota.Value = initialQuota;
+    }
+
+    public override void OnStopNetwork()
+    {
+        base.OnStopNetwork();
+
+        _currentMoney.OnChange -= OnMoneyValueChanged;
+        _currentQuota.OnChange -= OnQuotaValueChanged;
     }
 
     void Update()
-{
-    if (Input.GetKeyDown(KeyCode.M))
     {
-        AddMoney(100);
-        Debug.Log("Added test money!");
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            AddMoneyServerRpc(100);
+            Debug.Log("Added test money!");
+        }
     }
-}
-    
-    public int GetCurrentMoney()
+
+    private void OnMoneyValueChanged(int oldValue, int newValue, bool asServer)
     {
-        return currentMoney;
+        OnMoneyChanged?.Invoke(newValue);
+
+        if (newValue >= _currentQuota.Value && IsServerInitialized)
+        {
+            CompleteQuota();
+        }
     }
-    
-    public void AddMoney(int amount)
+
+    private void OnQuotaValueChanged(int oldValue, int newValue, bool asServer)
+    {
+        OnQuotaChanged?.Invoke(_currentMoney.Value, newValue);
+    }
+
+    public int GetCurrentMoney() => _currentMoney.Value;
+
+    public int GetCurrentQuota() => _currentQuota.Value;
+
+    [ServerRpc(RequireOwnership = false)]
+    public void AddMoneyServerRpc(int amount)
     {
         if (amount > 0)
         {
-            currentMoney += amount;
-            OnMoneyChanged?.Invoke(currentMoney);
-            UpdateMoneyDisplay();
-            
-            // Optional: Money gain particle/sound effect
-            Debug.Log($"Added ${amount}. Current money: ${currentMoney}");
+            _currentMoney.Value += amount;
+            Debug.Log($"Added ${amount}. Current money: ${_currentMoney.Value}");
         }
     }
-    
-    public bool SpendMoney(int amount)
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SpendMoneyServerRpc(int amount)
     {
-        if (amount > 0 && currentMoney >= amount)
+        if (amount > 0 && _currentMoney.Value >= amount)
         {
-            currentMoney -= amount;
-            OnMoneyChanged?.Invoke(currentMoney);
-            UpdateMoneyDisplay();
-            return true;
+            _currentMoney.Value -= amount;
         }
-        return false;
     }
-    
-    private void UpdateMoneyDisplay()
+
+    private void CompleteQuota()
     {
-        if (moneyText != null)
-        {
-            moneyText.text = $"${currentMoney}";
-        }
+        QuotaCompletedClientRpc();
+
+        _currentQuota.Value += quotaIncreaseAmount;
+    }
+
+    [ObserversRpc]
+    private void QuotaCompletedClientRpc()
+    {
+        OnQuotaCompleted?.Invoke();
     }
 }

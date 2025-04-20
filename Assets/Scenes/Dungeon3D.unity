@@ -371,7 +371,7 @@ MonoBehaviour:
   valuablePrefabs:
   - prefab: {fileID: 3551952761251280130, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
     size: 0
-    spawnWeight: 100
+    spawnWeight: 1
   - prefab: {fileID: 3551952761251280130, guid: a58b777b939d64a49b4ad58cf84cd59a, type: 3}
     size: 0
     spawnWeight: 1
