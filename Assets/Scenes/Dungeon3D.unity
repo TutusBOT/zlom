@@ -341,6 +341,9 @@ MonoBehaviour:
       variantData:
         normalVariants:
         - {fileID: 7510496102614955654, guid: 0e0155e05507fb64b94c0bf5e1ef64a5, type: 3}
+        - {fileID: 7985516317795483297, guid: 29811583ae268ad4c8735e53bfb24cf9, type: 3}
+        - {fileID: 3483105086249746092, guid: 9462ac425251da641a61d0723787e134, type: 3}
+        - {fileID: 8730771594713419465, guid: 093c4a2d2b93bb043bf2a4803b46aa96, type: 3}
         allowDoorsAnywhere: 1
         allowedNorthDoors: []
         allowedSouthDoors: []

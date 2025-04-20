@@ -45,6 +45,7 @@ public class PlayerController : NetworkBehaviour
                 transform.position.z
             );
             playerCamera.transform.SetParent(transform);
+            playerCamera.nearClipPlane = 0.05f;
 
             Debug.Log($"Created new camera for player {gameObject.name}");
         }
