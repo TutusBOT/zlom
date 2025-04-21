@@ -5,6 +5,7 @@ public class NetworkedObjectPickup : NetworkBehaviour
 {
     public Camera playerCamera;
     public float pickupRange = 5f;
+    public float maxDistance = 6f;
     public LayerMask interactableLayer;
     public LineRenderer lineRenderer;
     public float moveForce = 10f;
@@ -65,7 +66,12 @@ public class NetworkedObjectPickup : NetworkBehaviour
             lineRenderer.SetPosition(0, playerHand.position);
             lineRenderer.SetPosition(1, currentItem.transform.TransformPoint(springJoint.anchor));
 
-            if (Input.GetMouseButtonUp(0))
+            float dist = Vector3.Distance(
+                playerHand.position,
+                currentItem.transform.TransformPoint(springJoint.anchor)
+            );
+
+            if (dist > maxDistance || Input.GetMouseButtonUp(0))
             {
                 RequestDropServerRpc();
             }
@@ -74,6 +80,14 @@ public class NetworkedObjectPickup : NetworkBehaviour
         {
             lineRenderer.SetPosition(0, transform.position);
             lineRenderer.SetPosition(1, transform.position);
+        }
+    }
+
+    private void OnJointBreak(float breakForce)
+    {
+        if (isHoldingItem && IsServerInitialized)
+        {
+            RequestDropServerRpc();
         }
     }
 
