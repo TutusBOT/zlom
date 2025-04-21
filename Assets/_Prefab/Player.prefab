@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2616860343818222958}
   - component: {fileID: 7707114347477242969}
   - component: {fileID: 1551341732592336864}
-  - component: {fileID: 4313134647026765314}
+  - component: {fileID: 3843491939945933371}
   - component: {fileID: 4286912790948540255}
   - component: {fileID: 3921108572199274389}
   - component: {fileID: 1176229741873664378}
@@ -143,7 +143,7 @@ MonoBehaviour:
   damageSound: {fileID: 8300000, guid: d7c8c412d5b670d4aa890059b1523abc, type: 3}
   healSound: {fileID: 0}
   deathSound: {fileID: 0}
---- !u!114 &4313134647026765314
+--- !u!114 &3843491939945933371
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -152,25 +152,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 457794671632602189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 275c578117ff5ee45b9b005594a8266d, type: 3}
+  m_Script: {fileID: 11500000, guid: aafd374bb9c3cc4498776356d3114b6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 2
+  _componentIndexCache: 255
   _addedNetworkObject: {fileID: 9221043243608676975}
-  _networkObjectCache: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
+  playerCamera: {fileID: 0}
   pickupRange: 5
   interactableLayer:
     serializedVersion: 2
     m_Bits: 512
   lineRenderer: {fileID: 4286912790948540255}
-  holdPoint: {fileID: 7852026213241498017}
-  followSpeed: 12
-  rotationSpeed: 5
-  massInfluence: 0.8
-  minSpeedFactor: 0.01
-  maxLiftableMass: 10
-  absoluteMaxMass: 50
-  heavyDragFactor: 0.05
+  moveForce: 10
+  maxSpringForce: 20
+  playerHand: {fileID: 7852026213241498017}
 --- !u!120 &4286912790948540255
 LineRenderer:
   serializedVersion: 2
@@ -503,7 +499,7 @@ MonoBehaviour:
   NetworkBehaviours:
   - {fileID: 7707114347477242969}
   - {fileID: 0}
-  - {fileID: 4313134647026765314}
+  - {fileID: 0}
   - {fileID: -639547339833864361}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
@@ -888,6 +884,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7852026213241498017}
+  - component: {fileID: 3219603924749009618}
   m_Layer: 0
   m_Name: ObjectHolder
   m_TagString: Untagged
@@ -910,6 +907,49 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2184497652886554369}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3219603924749009618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3210608859934062762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 9221043243608676975}
+  _networkObjectCache: {fileID: 0}
+  _componentConfiguration: 0
+  _synchronizeParent: 0
+  _packing:
+    Position: 1
+    Rotation: 1
+    Scale: 0
+  _interpolation: 2
+  _extrapolation: 2
+  _enableTeleport: 0
+  _teleportThreshold: 1
+  _clientAuthoritative: 1
+  _sendToOwner: 1
+  _interval: 1
+  _synchronizePosition: 1
+  _positionSnapping:
+    X: 0
+    Y: 0
+    Z: 0
+  _synchronizeRotation: 1
+  _rotationSnapping:
+    X: 0
+    Y: 0
+    Z: 0
+  _synchronizeScale: 0
+  _scaleSnapping:
+    X: 0
+    Y: 0
+    Z: 0
 --- !u!1 &3470923490459121571
 GameObject:
   m_ObjectHideFlags: 0
