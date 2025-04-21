@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using FishNet.Component.Transforming;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
@@ -27,6 +28,8 @@ public class Valuable : NetworkBehaviour
 
     public static event Action<GameObject> OnItemBroke;
     protected readonly SyncVar<bool> _isBeingHeld = new(false);
+    private readonly SyncVar<bool> _isInvulnerable = new(false);
+    private float invulnerabilityDuration = 2f;
 
     [Header("Value Display")]
     [SerializeField]
@@ -79,6 +82,9 @@ public class Valuable : NetworkBehaviour
     {
         base.OnStartServer();
         _currentCashValue.Value = initialCashValue;
+
+        _isInvulnerable.Value = true;
+        StartCoroutine(InvulnerabilityTimer());
     }
 
     protected virtual void Update()
@@ -114,6 +120,9 @@ public class Valuable : NetworkBehaviour
     protected virtual void OnCollisionEnter(Collision collision)
     {
         if (!IsServerInitialized)
+            return;
+
+        if (_isInvulnerable.Value)
             return;
 
         float impactForce = collision.relativeVelocity.magnitude;
@@ -264,5 +273,11 @@ public class Valuable : NetworkBehaviour
             activeValueDisplay = null;
             valueText = null;
         }
+    }
+
+    private IEnumerator InvulnerabilityTimer()
+    {
+        yield return new WaitForSeconds(invulnerabilityDuration);
+        _isInvulnerable.Value = false;
     }
 }
