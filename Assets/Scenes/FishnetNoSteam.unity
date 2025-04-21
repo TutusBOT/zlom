@@ -3622,6 +3622,7 @@ MonoBehaviour:
   - {fileID: 4567546734140320367, guid: 0c904818678aa9e4981818e6c21a034d, type: 3}
   - {fileID: 5420541285710718128, guid: 0e0af78c8bd1e504f8901bd9b89e005e, type: 3}
   - {fileID: 6337713958848720258, guid: 99e01119844016241943d7cf426cba47, type: 3}
+  - {fileID: 8495833507254179227, guid: 6a2ad7a39f3f21544a49054c6a3cd3b8, type: 3}
   networkSystemPrefabs:
   - {fileID: 8925339826831650291, guid: 21e255318da60b640b568ad0dae6592f, type: 3}
   - {fileID: 1737599865022995632, guid: 0341a2bf0fd41454db2f5dbbdd850516, type: 3}
@@ -4963,74 +4964,6 @@ MonoBehaviour:
   m_SelectedFaces: 
   m_SelectedEdges: []
   m_SelectedVertices: 
---- !u!1 &662298646
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 662298649}
-  - component: {fileID: 662298648}
-  - component: {fileID: 662298647}
-  m_Layer: 0
-  m_Name: EventSystem
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &662298647
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 662298646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
---- !u!114 &662298648
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 662298646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76c392e42b5098c458856cdf6ecaaaa1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_FirstSelected: {fileID: 0}
-  m_sendNavigationEvents: 1
-  m_DragThreshold: 10
---- !u!4 &662298649
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 662298646}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &664793881
 GameObject:
   m_ObjectHideFlags: 0
@@ -14664,12 +14597,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57706b19e064bff49857a2985353ad6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 1855831892}
-  _networkObjectCache: {fileID: 0}
   dungeonSceneName: Dungeon3D
   activationKey: 278
-  requireServerAuthority: 1
 --- !u!4 &1855831894
 Transform:
   m_ObjectHideFlags: 0
@@ -17084,6 +17013,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2791475444080005620, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 853
+      objectReference: {fileID: 0}
+    - target: {fileID: 2791475444080005620, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 403
+      objectReference: {fileID: 0}
     - target: {fileID: 4108437998720690970, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: m_UiScaleMode
       value: 1
@@ -17099,6 +17036,10 @@ PrefabInstance:
     - target: {fileID: 6294612499620849907, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: <SceneId>k__BackingField
       value: 1677090815
+      objectReference: {fileID: 0}
+    - target: {fileID: 8241933779009179661, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 125
       objectReference: {fileID: 0}
     - target: {fileID: 8287786824793846375, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: m_Pivot.x
@@ -17348,7 +17289,6 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 705507995}
-  - {fileID: 662298649}
   - {fileID: 223974230}
   - {fileID: 782628376}
   - {fileID: 360100213}

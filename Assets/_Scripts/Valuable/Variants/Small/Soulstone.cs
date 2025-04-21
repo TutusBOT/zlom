@@ -1,3 +1,5 @@
+using FishNet;
+using FishNet.Object;
 using UnityEngine;
 
 public class Soulstone : Valuable
@@ -48,8 +50,10 @@ public class Soulstone : Valuable
 
         size = ValuableSize.Small;
 
+        Debug.Log($"Soulstone spawned: {gameObject.name}");
         if (isFirstStone && !hasSpawnedPartner && soulstonePrefab != null)
         {
+            Debug.Log("Spawning partner stone...");
             SpawnPartner();
         }
 
@@ -73,20 +77,29 @@ public class Soulstone : Valuable
 
         // Find a position slightly offset from this stone
         Vector3 offset = Random.insideUnitSphere * 0.3f;
-        offset.y = 0.1f; // Keep it slightly above ground
+        offset.y = 0.1f;
         Vector3 spawnPos = transform.position + offset;
+        Debug.Log($"Spawning partner at {spawnPos}");
 
         GameObject partnerObj = Instantiate(soulstonePrefab, spawnPos, Quaternion.identity);
         Soulstone partner = partnerObj.GetComponent<Soulstone>();
 
         if (partner != null)
         {
+            Debug.Log($"Partner spawned: {partner}");
             partner.isFirstStone = false;
 
             partner.hasSpawnedPartner = true;
 
             partner.pairedStone = this;
             pairedStone = partner;
+        }
+
+        NetworkObject networkObject = partnerObj.GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            Debug.Log($"Spawning partner network object {networkObject}");
+            InstanceFinder.ServerManager.Spawn(networkObject);
         }
     }
 
@@ -96,6 +109,7 @@ public class Soulstone : Valuable
         {
             if (isFirstStone)
             {
+                Debug.Log("Soulstone has no partner!");
                 Explode();
             }
             return;
@@ -105,6 +119,7 @@ public class Soulstone : Valuable
 
         if (distance > maxSeparationDistance)
         {
+            Debug.Log("Soulstone too far apart!");
             Explode();
         }
     }

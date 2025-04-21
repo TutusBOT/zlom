@@ -25,6 +25,18 @@ PrefabInstance:
       value: Soulstone
       objectReference: {fileID: 0}
     - target: {fileID: 9167090921501295748, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9167090921501295748, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9167090921501295748, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 9167090921501295748, guid: 993a1cf3234a27d4989eb1800119b1db, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -104,7 +116,7 @@ MonoBehaviour:
   maxSeparationDistance: 3
   warningDistance: 2
   explosionSoundId: stone_explosion
-  soulstonePrefab: {fileID: 3551952761251280130, guid: d3c556e8304a2f346bd2da3c5874f1ac, type: 3}
+  soulstonePrefab: {fileID: 5174430337177258003}
   normalColor: {r: 0.8, g: 0.2, b: 0.2, a: 0.5}
   warningColor: {r: 1, g: 0.1, b: 0.1, a: 1}
   explosionEffectPrefab: {fileID: 0}

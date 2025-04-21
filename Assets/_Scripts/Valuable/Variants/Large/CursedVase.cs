@@ -8,6 +8,8 @@ public class CursedVase : Valuable
 
     [SerializeField]
     private GameObject curseEffectPrefab;
+    private float curseRadius = 15f;
+    private float stressAmount = 10f;
 
     public override void OnStartServer()
     {
@@ -34,7 +36,31 @@ public class CursedVase : Valuable
             Instantiate(curseEffectPrefab, transform.position + Vector3.up, Quaternion.identity);
         }
 
-        Debug.Log("THE CURSE HAS BEEN RELEASED! Player stress would increase here.");
-        // TODO: Implement curse effect on player - probably increase stress or spawn enemies
+        ApplyStressToNearbyPlayers();
+    }
+
+    private void ApplyStressToNearbyPlayers()
+    {
+        var nearbyPlayers = PlayerManager.Instance.GetPlayersInRange(
+            transform.position,
+            curseRadius
+        );
+
+        foreach (Player player in nearbyPlayers)
+        {
+            StressController stressController = player.GetComponent<StressController>();
+
+            if (stressController != null)
+            {
+                stressController.AddStress(stressAmount);
+                Debug.Log($"Applied {stressAmount} stress to player");
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"Player {player.name} does not have a StressController component!"
+                );
+            }
+        }
     }
 }

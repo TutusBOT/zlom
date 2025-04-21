@@ -47,6 +47,10 @@ public class PlayerController : NetworkBehaviour
             playerCamera.transform.SetParent(transform);
             playerCamera.nearClipPlane = 0.05f;
 
+            GameObject crtEffectObj = new GameObject("CRT_Effect");
+            CRTOverlayEffect crtEffect = crtEffectObj.AddComponent<CRTOverlayEffect>();
+            crtEffect.Initialize(playerCamera);
+
             Debug.Log($"Created new camera for player {gameObject.name}");
         }
         else
