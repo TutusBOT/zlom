@@ -101,13 +101,14 @@ public class NetworkedObjectPickup : NetworkBehaviour
         springJoint.anchor = obj.transform.InverseTransformPoint(objectAttachPoint);
         springJoint.connectedAnchor = playerHand.position;
 
-        float massFactor = Mathf.Clamp(1 / currentRigidbody.mass, 0.1f, 1f);
-        springJoint.spring = maxSpringForce * massFactor;
-        springJoint.damper = 10f;
+        float spring = Mathf.Clamp(maxSpringForce * Mathf.Sqrt(currentRigidbody.mass), 10f, 40f);
+        float damper = Mathf.Clamp(10f * Mathf.Sqrt(currentRigidbody.mass), 2f, 20f);
+        springJoint.spring = spring;
+        springJoint.damper = damper;
         springJoint.maxDistance = itemDistance;
 
-        currentRigidbody.linearDamping = 5f;
-        currentRigidbody.angularDamping = 5f;
+        currentRigidbody.linearDamping = Mathf.Clamp(2f * currentRigidbody.mass, 5f, 20f);
+        currentRigidbody.angularDamping = Mathf.Clamp(2f * currentRigidbody.mass, 2.5f, 20f);
 
         RpcPickup(
             netObj,
@@ -164,7 +165,9 @@ public class NetworkedObjectPickup : NetworkBehaviour
         if (currentRigidbody != null && isHoldingItem)
         {
             Vector3 forceDirection = handPos - currentRigidbody.position;
-            float maxForce = 50f;
+
+            float maxForce = Mathf.Clamp(20f / currentRigidbody.mass, 0.05f, 5f);
+
             Vector3 clampedForce = Vector3.ClampMagnitude(forceDirection * moveForce, maxForce);
             currentRigidbody.AddForce(clampedForce, ForceMode.Acceleration);
         }
