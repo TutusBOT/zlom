@@ -1,3 +1,5 @@
+using FishNet;
+using FishNet.Managing;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -8,6 +10,9 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField]
     private ConnectionManager connectionManager;
+
+    [SerializeField]
+    private bool useSteam = true;
 
     [Header("UI Elements")]
     [SerializeField]
@@ -24,6 +29,13 @@ public class MainMenu : MonoBehaviour
         if (hostButton)
             hostButton.onClick.AddListener(() =>
             {
+                if (!useSteam)
+                {
+                    NetworkManager networkManager = InstanceFinder.NetworkManager;
+                    networkManager.ServerManager.StartConnection();
+                    SceneManager.LoadScene("Lobby");
+                    return;
+                }
                 connectionManager.StartHost();
                 SceneManager.LoadScene("Lobby");
             });
@@ -31,6 +43,14 @@ public class MainMenu : MonoBehaviour
         if (joinButton)
             joinButton.onClick.AddListener(() =>
             {
+                if (!useSteam)
+                {
+                    NetworkManager networkManager = InstanceFinder.NetworkManager;
+                    networkManager.ClientManager.StartConnection();
+                    SceneManager.LoadScene("Lobby");
+                    return;
+                }
+
                 if (ulong.TryParse(steamIDInput.text, out ulong id))
                 {
                     connectionManager.JoinGame(new CSteamID(id));

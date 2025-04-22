@@ -51,6 +51,7 @@ public struct ConnectionPoint
 
 public class DungeonGenerator : NetworkBehaviour
 {
+    public static event Action DungeonGenerated;
     public const int DEFAULT_GRID_SIZE_X = 50;
     public const int DEFAULT_GRID_SIZE_Z = 50;
     public const int DEFAULT_ROOM_COUNT = 8;
@@ -214,6 +215,7 @@ public class DungeonGenerator : NetworkBehaviour
         }
 
         Random.InitState((int)DateTime.Now.Ticks);
+        DungeonGenerated?.Invoke();
     }
 
     void PlaceRooms()
@@ -994,9 +996,8 @@ public class DungeonGenerator : NetworkBehaviour
 
     private IEnumerator SpawnEnemiesInRooms()
     {
+        yield return new WaitForSeconds(0.6f);
 
-        yield return new WaitForSeconds(0.6f); 
-        
         int startIndex = skipEnemiesInStartRoom ? 1 : 0;
 
         for (int i = startIndex; i < transform.childCount; i++)
