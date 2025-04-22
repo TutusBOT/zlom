@@ -52,24 +52,33 @@ public class BootstrapNetworkManager : NetworkBehaviour
         // OnSpawned?.Invoke(nob);
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+        InstanceFinder.SceneManager.OnLoadEnd += OnSceneLoaded;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+        InstanceFinder.SceneManager.OnLoadEnd -= OnSceneLoaded;
     }
 
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    void OnSceneLoaded(SceneLoadEndEventArgs args)
     {
-        UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
-        if (scene.name == "Dungeon3D")
+        if (!IsServerInitialized)
+            return;
+
+        foreach (var scene in args.LoadedScenes)
         {
-            DungeonGenerator dg = FindFirstObjectByType<DungeonGenerator>();
-            if (dg != null)
-                DungeonGenerator.DungeonGenerated += OnDungeonGenerated;
+            if (scene.name == "Dungeon3D")
+            {
+                UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
+                DungeonGenerator dg = FindFirstObjectByType<DungeonGenerator>();
+                if (dg != null)
+                {
+                    DungeonGenerator.DungeonGenerated += OnDungeonGenerated;
+                }
+                break;
+            }
         }
     }
 
