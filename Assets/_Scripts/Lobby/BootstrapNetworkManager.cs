@@ -17,17 +17,11 @@ public class BootstrapNetworkManager : NetworkBehaviour
 
     public static void ChangeNetworkScene(string sceneName, string[] scenesToClose)
     {
-        instance.CloseScenes(scenesToClose);
+        instance.CloseScenesObserver(scenesToClose);
 
         SceneLoadData sld = new SceneLoadData(sceneName);
         NetworkConnection[] conns = instance.ServerManager.Clients.Values.ToArray();
         instance.SceneManager.LoadConnectionScenes(conns, sld);
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    void CloseScenes(string[] scenesToClose)
-    {
-        CloseScenesObserver(scenesToClose);
     }
 
     [ObserversRpc]
@@ -90,5 +84,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
         {
             instance.SpawnPlayer(conn, spawnPosition, Quaternion.identity);
         }
+
+        DungeonGenerator.DungeonGenerated -= OnDungeonGenerated;
     }
 }

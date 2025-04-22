@@ -22,11 +22,20 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField]
     private Button startGameButton;
 
+    [SerializeField]
+    private TextMeshProUGUI lobbyPlayerListText;
+
+    [SerializeField]
+    private Button leaveLobbyButton;
+
+    private Callback<LobbyChatUpdate_t> lobbyChatUpdate;
+
     private void Awake() => instance = this;
 
     private void Start()
     {
         OpenMainMenu();
+        lobbyChatUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyChatUpdate);
     }
 
     public void CreateLobby()
@@ -51,8 +60,10 @@ public class MainMenuManager : MonoBehaviour
         instance.lobbyTitle.text = lobbyName;
         instance.startGameButton.gameObject.SetActive(isHost);
         instance.startGameButton.onClick.AddListener(instance.StartGame);
+        instance.leaveLobbyButton.onClick.AddListener(instance.LeaveLobby);
         instance.lobbyIDText.text = BootstrapManager.CurrentLobbyID.ToString();
         instance.OpenLobby();
+        instance.UpdateLobbyPlayerList();
     }
 
     void CloseAllScreens()
@@ -77,5 +88,32 @@ public class MainMenuManager : MonoBehaviour
     {
         string[] scenesToClose = new string[] { "Menu2" };
         BootstrapNetworkManager.ChangeNetworkScene("Dungeon3D", scenesToClose);
+    }
+
+    private void OnLobbyChatUpdate(LobbyChatUpdate_t callback)
+    {
+        UpdateLobbyPlayerList();
+    }
+
+    public void UpdateLobbyPlayerList()
+    {
+        if (!SteamManager.Initialized || BootstrapManager.CurrentLobbyID == 0)
+        {
+            lobbyPlayerListText.text = "No players in lobby.";
+            return;
+        }
+
+        CSteamID lobbyID = new CSteamID(BootstrapManager.CurrentLobbyID);
+        int memberCount = SteamMatchmaking.GetNumLobbyMembers(lobbyID);
+
+        string playerList = "";
+        for (int i = 0; i < memberCount; i++)
+        {
+            CSteamID memberSteamID = SteamMatchmaking.GetLobbyMemberByIndex(lobbyID, i);
+            string name = SteamFriends.GetFriendPersonaName(memberSteamID);
+            playerList += name + "\n";
+        }
+
+        lobbyPlayerListText.text = playerList;
     }
 }
