@@ -27,6 +27,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
     [ObserversRpc]
     void CloseScenesObserver(string[] scenesToClose)
     {
+        Debug.Log("Closing scenes: " + string.Join(", ", scenesToClose));
         foreach (var sceneName in scenesToClose)
         {
             UnityEngine.SceneManagement.SceneManager.UnloadSceneAsync(sceneName);
@@ -71,6 +72,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
                 {
                     DungeonGenerator.DungeonGenerated += OnDungeonGenerated;
                 }
+                instance.SetActiveSceneObserver(scene.name);
                 break;
             }
         }
@@ -86,5 +88,13 @@ public class BootstrapNetworkManager : NetworkBehaviour
         }
 
         DungeonGenerator.DungeonGenerated -= OnDungeonGenerated;
+    }
+
+    [ObserversRpc]
+    void SetActiveSceneObserver(string sceneName)
+    {
+        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
+        if (scene.IsValid())
+            UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
     }
 }
