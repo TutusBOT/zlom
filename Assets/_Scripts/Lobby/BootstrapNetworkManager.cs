@@ -17,6 +17,10 @@ public class BootstrapNetworkManager : NetworkBehaviour
 
     public static void ChangeNetworkScene(string sceneName, string[] scenesToClose)
     {
+        foreach (NetworkConnection conn in instance.NetworkObject.Observers)
+        {
+            Debug.Log($"Observer: {conn.ClientId}");
+        }
         instance.CloseScenesObserver(scenesToClose);
 
         SceneLoadData sld = new SceneLoadData(sceneName);
@@ -66,13 +70,13 @@ public class BootstrapNetworkManager : NetworkBehaviour
         {
             if (scene.name == "Dungeon3D")
             {
+                instance.SetActiveSceneObserver(scene.name);
                 UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
                 DungeonGenerator dg = FindFirstObjectByType<DungeonGenerator>();
                 if (dg != null)
                 {
                     DungeonGenerator.DungeonGenerated += OnDungeonGenerated;
                 }
-                instance.SetActiveSceneObserver(scene.name);
                 break;
             }
         }
@@ -93,6 +97,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
     [ObserversRpc]
     void SetActiveSceneObserver(string sceneName)
     {
+        Debug.Log("Setting active scene: " + sceneName);
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
         if (scene.IsValid())
             UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);

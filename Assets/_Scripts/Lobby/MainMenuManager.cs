@@ -28,7 +28,12 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField]
     private Button leaveLobbyButton;
 
+    [SerializeField]
+    private Button copyLobbyIDButton;
+
+#pragma warning disable IDE0052 // Remove unread private member - needs to be kept for Steam callback
     private Callback<LobbyChatUpdate_t> lobbyChatUpdate;
+#pragma warning restore IDE0052
 
     private void Awake() => instance = this;
 
@@ -58,9 +63,12 @@ public class MainMenuManager : MonoBehaviour
     public static void LobbyEntered(string lobbyName, bool isHost)
     {
         instance.lobbyTitle.text = lobbyName;
+
         instance.startGameButton.gameObject.SetActive(isHost);
         instance.startGameButton.onClick.AddListener(instance.StartGame);
         instance.leaveLobbyButton.onClick.AddListener(instance.LeaveLobby);
+        instance.leaveLobbyButton.onClick.AddListener(instance.LeaveLobby);
+
         instance.lobbyIDText.text = BootstrapManager.CurrentLobbyID.ToString();
         instance.OpenLobby();
         instance.UpdateLobbyPlayerList();
@@ -115,5 +123,16 @@ public class MainMenuManager : MonoBehaviour
         }
 
         lobbyPlayerListText.text = playerList;
+    }
+
+    public void CopyLobbyIDToClipboard()
+    {
+        if (BootstrapManager.CurrentLobbyID != 0)
+        {
+            string lobbyID = BootstrapManager.CurrentLobbyID.ToString();
+            GUIUtility.systemCopyBuffer = lobbyID;
+
+            Debug.Log("Lobby ID copied to clipboard: " + lobbyID);
+        }
     }
 }
