@@ -97,9 +97,36 @@ public class BootstrapNetworkManager : NetworkBehaviour
     [ObserversRpc]
     void SetActiveSceneObserver(string sceneName)
     {
-        Debug.Log("Setting active scene: " + sceneName);
+        Debug.Log("Request to set active scene: " + sceneName);
+
+        // Check if scene is already loaded
         var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
         if (scene.IsValid())
+        {
+            Debug.Log("Scene already loaded, setting as active: " + sceneName);
             UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
+        }
+        else
+        {
+            Debug.Log("Scene not loaded yet, setting up scene loaded callback: " + sceneName);
+            // Set up a callback to wait for the scene to load
+            StartCoroutine(WaitForSceneLoad(sceneName));
+        }
+    }
+
+    private System.Collections.IEnumerator WaitForSceneLoad(string sceneName)
+    {
+        // Wait until the scene is loaded
+        while (!UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName).IsValid())
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        Debug.Log("Scene now loaded, setting as active: " + sceneName);
+        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(sceneName);
+        if (scene.IsValid())
+        {
+            UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
+        }
     }
 }
