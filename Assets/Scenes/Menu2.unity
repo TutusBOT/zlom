@@ -2691,7 +2691,7 @@ MonoBehaviour:
   startGameButton: {fileID: 2044453686}
   lobbyPlayerListText: {fileID: 1640510009}
   leaveLobbyButton: {fileID: 999846301}
-  copyLobbyIDButton: {fileID: 0}
+  copyLobbyIDButton: {fileID: 1830655077}
 --- !u!1 &1640510008
 GameObject:
   m_ObjectHideFlags: 0
