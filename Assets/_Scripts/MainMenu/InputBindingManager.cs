@@ -6,7 +6,6 @@ public class InputBindingManager : MonoBehaviour
 {
     public static InputBindingManager Instance { get; private set; }
 
-    private Dictionary<string, KeyCode> _keyBindings = new Dictionary<string, KeyCode>();
     private Dictionary<string, KeyCode> _defaultBindings = new Dictionary<string, KeyCode>();
 
     public event Action<string, KeyCode> OnBindingChanged;
@@ -17,8 +16,6 @@ public class InputBindingManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            InitializeDefaultBindings();
-            LoadBindings();
         }
         else
         {
@@ -26,123 +23,96 @@ public class InputBindingManager : MonoBehaviour
         }
     }
 
-    private void InitializeDefaultBindings()
+    private void Start()
     {
-        _defaultBindings[InputActions.MoveForward] = KeyCode.W;
-        _defaultBindings[InputActions.MoveBackward] = KeyCode.S;
-        _defaultBindings[InputActions.MoveLeft] = KeyCode.A;
-        _defaultBindings[InputActions.MoveRight] = KeyCode.D;
-        _defaultBindings[InputActions.Jump] = KeyCode.Space;
-        _defaultBindings[InputActions.Crouch] = KeyCode.LeftControl;
-        _defaultBindings[InputActions.Sprint] = KeyCode.LeftShift;
-        _defaultBindings[InputActions.VoiceChat] = KeyCode.V;
-        _defaultBindings[InputActions.TextChat] = KeyCode.Slash;
-        _defaultBindings[InputActions.Cancel] = KeyCode.Escape;
-        _defaultBindings[InputActions.Flashlight] = KeyCode.F;
-        _defaultBindings[InputActions.RechargeFlashlight] = KeyCode.R;
-        _defaultBindings[InputActions.Flash] = KeyCode.Q;
-        _defaultBindings[InputActions.Interact] = KeyCode.E;
-        _defaultBindings[InputActions.Confirm] = KeyCode.Return;
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.OnSettingsChanged.AddListener(OnSettingsChanged);
 
+            SyncWithSettingsManager();
+        }
+        else
+        {
+            Debug.LogError(
+                "SettingsManager instance not found! Input binding won't work properly."
+            );
+        }
+    }
+
+    private void SyncWithSettingsManager()
+    {
         foreach (var binding in _defaultBindings)
         {
-            _keyBindings[binding.Key] = binding.Value;
+            // If the key doesn't exist in SettingsManager, add it
+            if (SettingsManager.Instance.GetKeyBinding(binding.Key) == KeyCode.None)
+            {
+                SettingsManager.Instance.SetKeyBinding(binding.Key, binding.Value);
+            }
+        }
+    }
+
+    private void OnSettingsChanged()
+    {
+        Dictionary<string, KeyCode> bindings = SettingsManager.Instance.GetAllKeyBindings();
+        foreach (var binding in bindings)
+        {
+            OnBindingChanged?.Invoke(binding.Key, binding.Value);
         }
     }
 
     public bool IsActionPressed(string actionName)
     {
-        if (_keyBindings.TryGetValue(actionName, out KeyCode key))
-        {
-            return Input.GetKey(key);
-        }
-        return false;
+        KeyCode key = SettingsManager.Instance.GetKeyBinding(actionName);
+        return Input.GetKey(key);
     }
 
     public bool IsActionTriggered(string actionName)
     {
-        if (_keyBindings.TryGetValue(actionName, out KeyCode key))
-        {
-            return Input.GetKeyDown(key);
-        }
-        return false;
+        KeyCode key = SettingsManager.Instance.GetKeyBinding(actionName);
+        return Input.GetKeyDown(key);
     }
 
     public bool IsActionReleased(string actionName)
     {
-        if (_keyBindings.TryGetValue(actionName, out KeyCode key))
-        {
-            return Input.GetKeyUp(key);
-        }
-        return false;
+        KeyCode key = SettingsManager.Instance.GetKeyBinding(actionName);
+        return Input.GetKeyUp(key);
     }
 
     public bool SetBinding(string actionName, KeyCode key)
     {
-        foreach (var binding in _keyBindings)
+        bool success = SettingsManager.Instance.SetKeyBinding(actionName, key);
+        if (success)
         {
-            if (binding.Value == key && binding.Key != actionName)
-            {
-                Debug.LogWarning($"Key {key} is already bound to {binding.Key}");
-                return false;
-            }
+            OnBindingChanged?.Invoke(actionName, key);
+            SettingsManager.Instance.SaveSettings();
         }
-
-        _keyBindings[actionName] = key;
-        OnBindingChanged?.Invoke(actionName, key);
-        SaveBindings();
-        return true;
+        return success;
     }
 
     public KeyCode GetBinding(string actionName)
     {
-        if (_keyBindings.TryGetValue(actionName, out KeyCode key))
-        {
-            return key;
-        }
-        return KeyCode.None;
+        return SettingsManager.Instance.GetKeyBinding(actionName);
+    }
+
+    public Dictionary<string, KeyCode> GetAllBindings()
+    {
+        return SettingsManager.Instance.GetAllKeyBindings();
     }
 
     public void ResetToDefaults()
     {
-        foreach (var binding in _defaultBindings)
-        {
-            _keyBindings[binding.Key] = binding.Value;
-            OnBindingChanged?.Invoke(binding.Key, binding.Value);
-        }
-        SaveBindings();
+        SettingsManager.Instance.ResetToDefaults();
     }
 
-    private void SaveBindings()
-    {
-        foreach (var binding in _keyBindings)
-        {
-            PlayerPrefs.SetInt($"KeyBinding_{binding.Key}", (int)binding.Value);
-        }
-        PlayerPrefs.Save();
-    }
-
-    private void LoadBindings()
-    {
-        foreach (string actionName in _defaultBindings.Keys)
-        {
-            if (PlayerPrefs.HasKey($"KeyBinding_{actionName}"))
-            {
-                _keyBindings[actionName] = (KeyCode)PlayerPrefs.GetInt($"KeyBinding_{actionName}");
-            }
-        }
-    }
-
-    // Allows adding new actions during runtime (useful for mods)
     public void RegisterAction(string actionName, KeyCode defaultKey)
     {
         if (!_defaultBindings.ContainsKey(actionName))
         {
             _defaultBindings[actionName] = defaultKey;
 
-            if (!_keyBindings.ContainsKey(actionName))
+            if (SettingsManager.Instance.GetKeyBinding(actionName) == KeyCode.None)
             {
-                _keyBindings[actionName] = defaultKey;
+                SettingsManager.Instance.SetKeyBinding(actionName, defaultKey);
             }
         }
     }

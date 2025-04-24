@@ -332,7 +332,7 @@ MonoBehaviour:
   gridSizeZ: 50
   roomCount: 8
   startingRoomPrefab: {fileID: 7510496102614955654, guid: 63c8106f07eb7154a9883e2163e8f745, type: 3}
-  debug: 1
+  debug: 0
   roomVariantsWrapper:
     roomVariantsList:
     - size:

@@ -129,7 +129,7 @@ public class DungeonGenerator : NetworkBehaviour
 
     void Start()
     {
-        Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
+        if (debug) Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
         foreach (var entry in roomVariantsWrapper.roomVariantsList)
         {
             RoomSize size = entry.size;
@@ -445,9 +445,10 @@ public class DungeonGenerator : NetworkBehaviour
                     }
                 }
 
-                Debug.Log(
-                    $"Room placement complete. Placed {placedRooms} rooms out of {roomCount} after {attempts} attempts."
-                );
+                if (debug)
+                    Debug.Log(
+                        $"Room placement complete. Placed {placedRooms} rooms out of {roomCount} after {attempts} attempts."
+                    );
             }
             else
             {
@@ -942,9 +943,10 @@ public class DungeonGenerator : NetworkBehaviour
             // Check if any doors exist within a radius of 5 units
             if (IsDoorInRadius(doorAnchor.position, 5f))
             {
-                Debug.Log(
-                    $"Skipping door instantiation, nearby door already exists within 5 units."
-                );
+                if (debug)
+                    Debug.Log(
+                        $"Skipping door instantiation, nearby door already exists within 5 units."
+                    );
                 continue;
             }
 
