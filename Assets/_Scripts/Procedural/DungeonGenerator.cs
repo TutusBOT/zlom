@@ -6,6 +6,7 @@ using FishNet.Object;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public enum CellType
@@ -175,6 +176,8 @@ public class DungeonGenerator : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+        Scene dungeonScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName("Dungeon3D");
+        UnityEngine.SceneManagement.SceneManager.SetActiveScene(dungeonScene);
 
         if (!IsServerInitialized)
             return;
