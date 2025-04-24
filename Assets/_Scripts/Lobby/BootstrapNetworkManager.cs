@@ -152,11 +152,27 @@ public class BootstrapNetworkManager : NetworkBehaviour
 
     private void OnDungeonGenerated()
     {
-        Vector3 spawnPosition = new Vector3(0, 1, 0);
+        Vector3[] spawnPositions = new Vector3[]
+        {
+            new Vector3(0, 1, 0),
+            new Vector3(2, 1, 0),
+            new Vector3(0, 1, 2),
+            new Vector3(-2, 1, 0),
+            new Vector3(0, 1, -2),
+            new Vector3(2, 1, 2),
+            new Vector3(-2, 1, -2),
+            new Vector3(2, 1, -2),
+            new Vector3(-2, 1, 2),
+        };
 
+        int spawnIndex = 0;
         foreach (var conn in InstanceFinder.ServerManager.Clients.Values)
         {
+            // Use modulo to cycle through spawn positions if more players than positions
+            Vector3 spawnPosition = spawnPositions[spawnIndex % spawnPositions.Length];
             instance.SpawnPlayer(conn, spawnPosition, Quaternion.identity);
+
+            spawnIndex++;
         }
 
         DungeonGenerator.DungeonGenerated -= OnDungeonGenerated;
