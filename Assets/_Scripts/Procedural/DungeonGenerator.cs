@@ -130,7 +130,9 @@ public class DungeonGenerator : NetworkBehaviour
 
     void Start()
     {
-        if (debug) Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
+        if (debug)
+            Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
+
         foreach (var entry in roomVariantsWrapper.roomVariantsList)
         {
             RoomSize size = entry.size;

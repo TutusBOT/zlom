@@ -94,7 +94,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void StartGame()
     {
-        string[] scenesToClose = new string[] { "Menu2" };
+        string[] scenesToClose = new string[] { "Menu" };
         BootstrapNetworkManager.ChangeNetworkScene("Dungeon3D", scenesToClose);
     }
 
