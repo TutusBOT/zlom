@@ -6,6 +6,7 @@ using FishNet.Object;
 using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
 public enum CellType
@@ -51,6 +52,7 @@ public struct ConnectionPoint
 
 public class DungeonGenerator : NetworkBehaviour
 {
+    public static event Action DungeonGenerated;
     public const int DEFAULT_GRID_SIZE_X = 50;
     public const int DEFAULT_GRID_SIZE_Z = 50;
     public const int DEFAULT_ROOM_COUNT = 8;
@@ -128,7 +130,9 @@ public class DungeonGenerator : NetworkBehaviour
 
     void Start()
     {
-        Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
+        if (debug)
+            Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
+
         foreach (var entry in roomVariantsWrapper.roomVariantsList)
         {
             RoomSize size = entry.size;
@@ -174,6 +178,8 @@ public class DungeonGenerator : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+        Scene dungeonScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName("Dungeon3D");
+        UnityEngine.SceneManagement.SceneManager.SetActiveScene(dungeonScene);
 
         if (!IsServerInitialized)
             return;
@@ -214,6 +220,7 @@ public class DungeonGenerator : NetworkBehaviour
         }
 
         Random.InitState((int)DateTime.Now.Ticks);
+        DungeonGenerated?.Invoke();
     }
 
     void PlaceRooms()
@@ -443,9 +450,10 @@ public class DungeonGenerator : NetworkBehaviour
                     }
                 }
 
-                Debug.Log(
-                    $"Room placement complete. Placed {placedRooms} rooms out of {roomCount} after {attempts} attempts."
-                );
+                if (debug)
+                    Debug.Log(
+                        $"Room placement complete. Placed {placedRooms} rooms out of {roomCount} after {attempts} attempts."
+                    );
             }
             else
             {
@@ -940,9 +948,10 @@ public class DungeonGenerator : NetworkBehaviour
             // Check if any doors exist within a radius of 5 units
             if (IsDoorInRadius(doorAnchor.position, 5f))
             {
-                Debug.Log(
-                    $"Skipping door instantiation, nearby door already exists within 5 units."
-                );
+                if (debug)
+                    Debug.Log(
+                        $"Skipping door instantiation, nearby door already exists within 5 units."
+                    );
                 continue;
             }
 
@@ -994,9 +1003,8 @@ public class DungeonGenerator : NetworkBehaviour
 
     private IEnumerator SpawnEnemiesInRooms()
     {
+        yield return new WaitForSeconds(0.6f);
 
-        yield return new WaitForSeconds(0.6f); 
-        
         int startIndex = skipEnemiesInStartRoom ? 1 : 0;
 
         for (int i = startIndex; i < transform.childCount; i++)
