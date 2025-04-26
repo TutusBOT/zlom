@@ -332,7 +332,7 @@ MonoBehaviour:
   gridSizeZ: 50
   roomCount: 8
   startingRoomPrefab: {fileID: 7510496102614955654, guid: 63c8106f07eb7154a9883e2163e8f745, type: 3}
-  debug: 1
+  debug: 0
   roomVariantsWrapper:
     roomVariantsList:
     - size:
@@ -453,6 +453,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2791475444080005620, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 405
+      objectReference: {fileID: 0}
+    - target: {fileID: 3014379324121287804, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 465.9001
+      objectReference: {fileID: 0}
+    - target: {fileID: 4998657920035889592, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 464.9
+      objectReference: {fileID: 0}
     - target: {fileID: 6294612499620849907, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: <SceneId>k__BackingField
       value: 4275699421
