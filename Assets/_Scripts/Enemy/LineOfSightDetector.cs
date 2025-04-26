@@ -21,22 +21,16 @@ public class LineOfSightDetector : MonoBehaviour
             Vector3 directionToTarget = (collider.transform.position - transform.position).normalized;
             float angle = Vector3.Angle(transform.forward, directionToTarget);
 
-            if (angle <= detectionAngle / 2)
+            if (angle <= detectionAngle / 2 &&
+                Physics.Raycast(transform.position + Vector3.up * 1.5f, directionToTarget, out RaycastHit hit, detectionRadius) &&
+                hit.collider.gameObject == collider.gameObject &&
+                angle < closestAngle)
             {
-                // Opcjonalnie: sprawdzenie raycastem czy nic nie zasłania gracza
-                if (Physics.Raycast(transform.position + Vector3.up * 1.5f, directionToTarget, out RaycastHit hit, detectionRadius))
-                {
-                    if (hit.collider.gameObject == collider.gameObject)
-                    {
-                        if (angle < closestAngle)
-                        {
-                            closestTarget = collider.gameObject;
-                            closestAngle = angle;
-                        }
-                    }
-                }
+                closestTarget = collider.gameObject;
+                closestAngle = angle;
             }
         }
+
 
         DetectedTarget = closestTarget;
         return DetectedTarget;

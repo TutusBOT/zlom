@@ -26,45 +26,41 @@ public class EnemyAttack : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsServerInitialized)
-            return;
+        if (!IsServerInitialized)return;
 
         attackTimer += Time.deltaTime;
 
         if (targetPlayer == null)
         {
             FindTarget();
+            return;
+        }
+
+        if (CanSeeTarget(targetPlayer))
+        {
+            timeSinceLastSeen = 0f;
         }
         else
         {
-            if (CanSeeTarget(targetPlayer))
+            timeSinceLastSeen += Time.deltaTime;
+            if (timeSinceLastSeen >= forgetTargetTime)
             {
-                timeSinceLastSeen = 0f;
-            }
-            else
-            {
-                timeSinceLastSeen += Time.deltaTime;
-                if (timeSinceLastSeen >= forgetTargetTime)
-                {
-                    targetPlayer = null;
-                    return;
-                }
-            }
-
-            float distance = Vector3.Distance(transform.position, targetPlayer.transform.position);
-
-            if (distance <= attackRange)
-            {
-                if (agent.hasPath)
-                    agent.ResetPath();
-
-                TryAttack();
-            }
-            else
-            {
-                agent.SetDestination(targetPlayer.transform.position);
+                targetPlayer = null;
+                return;
             }
         }
+
+        float distance = Vector3.Distance(transform.position, targetPlayer.transform.position);
+
+        if (distance <= attackRange)
+        {
+            if (agent.hasPath) agent.ResetPath();
+            TryAttack();
+            return;
+        }
+
+        agent.SetDestination(targetPlayer.transform.position);
+
     }
 
     private void FindTarget()

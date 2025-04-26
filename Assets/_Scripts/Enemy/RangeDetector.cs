@@ -6,7 +6,6 @@ public class RangeDetector : MonoBehaviour
     [SerializeField] private float detectionAngle = 90f;
     [SerializeField] private LayerMask detectionMask;
     [SerializeField] private bool showDebugVisuals = true;
-//bagon
     public GameObject DetectedTarget { get; set; }
 
     public GameObject UpdateDetector()
