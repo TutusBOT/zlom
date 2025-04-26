@@ -81,7 +81,6 @@ public class PlayerController : NetworkBehaviour
             Debug.Log($"Disabled control for non-owned player {gameObject.name}");
         }
     }
-//bagno
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -167,29 +166,24 @@ public class PlayerController : NetworkBehaviour
         HandleStamina();
     }
 
-    private void HandleStamina()
+private void HandleStamina()
 {
     bool sprintKeyHeld = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
 
     if (isSprinting)
     {
         currentStamina -= staminaDrainRate * Time.deltaTime;
-        if (currentStamina < 0f)
-            currentStamina = 0f;
+        currentStamina = Mathf.Max(currentStamina, 0f);
+        return;
     }
-    else
+
+    if (!sprintKeyHeld && currentStamina < maxStamina)
     {
-        if (!sprintKeyHeld) // Only regenerate if NOT holding sprint key
-        {
-            if (currentStamina < maxStamina)
-            {
-                currentStamina += staminaRegenRate * Time.deltaTime;
-                if (currentStamina > maxStamina)
-                    currentStamina = maxStamina;
-            }
-        }
+        currentStamina += staminaRegenRate * Time.deltaTime;
+        currentStamina = Mathf.Min(currentStamina, maxStamina);
     }
 }
+
 
 
     private void HandleCrouch()

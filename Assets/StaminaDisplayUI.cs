@@ -5,7 +5,7 @@ using UnityEngine;
 public class StaminaDisplayUI : NetworkBehaviour
 {
     [SerializeField]
-    private TextMeshProUGUI staminaText; // Reference to the UI Text object
+    private TextMeshProUGUI staminaText;
 
     private PlayerController playerController;
 
@@ -13,7 +13,6 @@ public class StaminaDisplayUI : NetworkBehaviour
     {
         base.OnStartClient();
 
-        // Get the PlayerController for the local player
         var players = PlayerManager.Instance.GetAllPlayers();
         foreach (var player in players)
         {
@@ -24,26 +23,22 @@ public class StaminaDisplayUI : NetworkBehaviour
             }
         }
 
-        // Update stamina display initially
         UpdateStaminaDisplay(playerController.CurrentStamina, playerController.MaxStamina);
     }
 
     void Update()
     {
-        // Only update for the local player
         if (playerController != null)
         {
-            // Update the stamina text
             UpdateStaminaDisplay(playerController.CurrentStamina, playerController.MaxStamina);
         }
     }
 
-    // Update the UI text displaying current and max stamina
     private void UpdateStaminaDisplay(float currentStamina, float maxStamina)
     {
         if (staminaText != null)
         {
-            staminaText.text = $"{Mathf.CeilToInt(currentStamina)}/{Mathf.CeilToInt(maxStamina)}"; // Shows the current/max stamina
+            staminaText.text = $"{Mathf.CeilToInt(currentStamina)}/{Mathf.CeilToInt(maxStamina)}";
         }
     }
 }
