@@ -20,6 +20,7 @@ public class PlayerController : NetworkBehaviour
     private bool isSprinting = false;
     public float CurrentStamina => currentStamina;
     public float MaxStamina => maxStamina;
+    public event System.Action<float, float> OnStaminaChanged;
 
     [Header("Crouch")]
     public float crouchHeight = 1.0f;
@@ -81,6 +82,7 @@ public class PlayerController : NetworkBehaviour
             Debug.Log($"Disabled control for non-owned player {gameObject.name}");
         }
     }
+
     void Start()
     {
         characterController = GetComponent<CharacterController>();
@@ -98,7 +100,10 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleMovement()
     {
-        isSprinting = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint) && currentStamina > 0f && !isCrouching;
+        isSprinting =
+            InputBindingManager.Instance.IsActionPressed(InputActions.Sprint)
+            && currentStamina > 0f
+            && !isCrouching;
 
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
@@ -166,25 +171,27 @@ public class PlayerController : NetworkBehaviour
         HandleStamina();
     }
 
-private void HandleStamina()
-{
-    bool sprintKeyHeld = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
-
-    if (isSprinting)
+    private void HandleStamina()
     {
-        currentStamina -= staminaDrainRate * Time.deltaTime;
-        currentStamina = Mathf.Max(currentStamina, 0f);
-        return;
+        bool sprintKeyHeld = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
+
+        if (isSprinting)
+        {
+            currentStamina -= staminaDrainRate * Time.deltaTime;
+            currentStamina = Mathf.Max(currentStamina, 0f);
+
+            OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+            return;
+        }
+
+        if (!sprintKeyHeld && currentStamina < maxStamina)
+        {
+            currentStamina += staminaRegenRate * Time.deltaTime;
+            currentStamina = Mathf.Min(currentStamina, maxStamina);
+
+            OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+        }
     }
-
-    if (!sprintKeyHeld && currentStamina < maxStamina)
-    {
-        currentStamina += staminaRegenRate * Time.deltaTime;
-        currentStamina = Mathf.Min(currentStamina, maxStamina);
-    }
-}
-
-
 
     private void HandleCrouch()
     {

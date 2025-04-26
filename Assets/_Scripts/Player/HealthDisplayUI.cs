@@ -13,22 +13,19 @@ public class HealthDisplayUI : NetworkBehaviour
     {
         base.OnStartClient();
 
-        var players = PlayerManager.Instance.GetAllPlayers();
+        BootstrapNetworkManager.OnLocalPlayerSpawned += OnLocalPlayerSpawned;
+    }
 
-        foreach (var player in players)
-        {
-            if (player.IsOwner)
-            {
-                playerHealth = player.GetComponent<PlayerHealth>();
-                playerHealth.OnHealthChanged += UpdateHealthDisplay;
-                UpdateHealthDisplay(playerHealth.CurrentHealth, playerHealth.MaxHealth);
-                break;
-            }
-        }
+    private void OnLocalPlayerSpawned(NetworkObject player)
+    {
+        playerHealth = player.GetComponent<PlayerHealth>();
+        playerHealth.OnHealthChanged += UpdateHealthDisplay;
+        UpdateHealthDisplay(playerHealth.CurrentHealth, playerHealth.MaxHealth);
     }
 
     void OnDestroy()
     {
+        BootstrapNetworkManager.OnLocalPlayerSpawned -= OnLocalPlayerSpawned;
         if (playerHealth != null)
             playerHealth.OnHealthChanged -= UpdateHealthDisplay;
     }
