@@ -2,39 +2,52 @@ using UnityEngine;
 
 public class LineOfSightDetector : MonoBehaviour
 {
-    [SerializeField] private LayerMask playerLayerMask;
-    [SerializeField] private float detectionRange = 10.0f;
-    [SerializeField] private float detectionHeight = 3f;
-
+    [SerializeField] private float detectionRadius = 20f;
+    [SerializeField] private float detectionAngle = 90f;
+    [SerializeField] private LayerMask detectionMask;
     [SerializeField] private bool showDebugVisuals = true;
 
-    public GameObject PerformDetection(GameObject potentialTarget)
-    {
-        RaycastHit hit;
-        Vector3 direction = potentialTarget.transform.position - (transform.position + Vector3.up * detectionHeight); // Uwzględniamy wysokość detektora
+    public GameObject DetectedTarget { get; private set; }
 
-        // Zmieniamy promień, aby uwzględniał tylko kierunek i zasięg detekcji
-        if (Physics.Raycast(transform.position + Vector3.up * detectionHeight, direction.normalized, out hit, detectionRange, playerLayerMask))
+    public GameObject PerformDetection()
+    {
+        Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRadius, detectionMask);
+
+        GameObject closestTarget = null;
+        float closestAngle = detectionAngle;
+
+        foreach (Collider collider in colliders)
         {
-            // Sprawdzamy, czy trafiony obiekt to nasz potencjalny cel
-            if (hit.collider.gameObject == potentialTarget)
+            Vector3 directionToTarget = (collider.transform.position - transform.position).normalized;
+            float angle = Vector3.Angle(transform.forward, directionToTarget);
+
+            if (angle <= detectionAngle / 2 &&
+                Physics.Raycast(transform.position + Vector3.up * 1.5f, directionToTarget, out RaycastHit hit, detectionRadius) &&
+                hit.collider.gameObject == collider.gameObject &&
+                angle < closestAngle)
             {
-                if (showDebugVisuals && this.enabled)
-                {
-                    Debug.DrawLine(transform.position + Vector3.up * detectionHeight, potentialTarget.transform.position, Color.green);
-                }
-                return hit.collider.gameObject;
+                closestTarget = collider.gameObject;
+                closestAngle = angle;
             }
         }
-        return null;
+
+
+        DetectedTarget = closestTarget;
+        return DetectedTarget;
     }
 
     private void OnDrawGizmos()
     {
-        if (showDebugVisuals)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawSphere(transform.position + Vector3.up * detectionHeight, 0.3f);
-        }
+        if (!showDebugVisuals || !enabled) return;
+
+        Gizmos.color = DetectedTarget ? Color.green : Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
+
+        Gizmos.color = new Color(1, 0, 0, 0.3f);
+        Vector3 leftBoundary = Quaternion.Euler(0, -detectionAngle / 2, 0) * transform.forward * detectionRadius;
+        Vector3 rightBoundary = Quaternion.Euler(0, detectionAngle / 2, 0) * transform.forward * detectionRadius;
+
+        Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
+        Gizmos.DrawLine(transform.position, transform.position + rightBoundary);
     }
 }

@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: 6693165520555275754}
   - component: {fileID: 190611701644058554}
   - component: {fileID: 7424213222454427390}
+  - component: {fileID: 2986441160212970774}
   m_Layer: 6
   m_Name: Enemy
   m_TagString: Untagged
@@ -221,6 +222,7 @@ MonoBehaviour:
     m_Bits: 384
   detectionRange: 10
   detectionHeight: 3
+  fieldOfViewAngle: 60
   showDebugVisuals: 1
 --- !u!114 &483786976839248071
 MonoBehaviour:
@@ -314,7 +316,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
@@ -430,6 +432,26 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
+--- !u!114 &2986441160212970774
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f511b60f39f8af94b99fdea201487d2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6693165520555275754}
+  _networkObjectCache: {fileID: 0}
+  attackRange: 2
+  attackCooldown: 1.5
+  damage: 20
+  lineOfSightDetector: {fileID: 3688009037046720638}
+  rangeDetector: {fileID: 8593591314835196474}
 --- !u!1 &1994694671543990721
 GameObject:
   m_ObjectHideFlags: 0

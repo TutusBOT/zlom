@@ -600,7 +600,7 @@ MonoBehaviour:
     spawnChance: 100
     maxCount: 10
     currentCount: 0
-  maxEnemies: 10
+  maxEnemies: 1
   spawnInterval: 5
   minDistanceFromPlayer: 30
   maxDistanceFromPlayer: 100
