@@ -16,6 +16,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
     private Dictionary<int, bool> _clientSceneLoadStatus = new Dictionary<int, bool>();
 
     private string _currentLoadingScene = string.Empty;
+    public static event System.Action<NetworkObject> OnLocalPlayerSpawned;
 
     private void Awake() => instance = this;
 
@@ -56,7 +57,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
         NetworkObject nob = nm.GetPooledInstantiated(_playerPrefab, position, rotation, true);
         nm.ServerManager.Spawn(nob, conn);
 
-        // OnSpawned?.Invoke(nob);
+        NotifyClientOfSpawnRpc(conn, nob);
     }
 
     private void OnEnable()
@@ -156,6 +157,13 @@ public class BootstrapNetworkManager : NetworkBehaviour
         }
 
         DungeonGenerator.DungeonGenerated -= OnDungeonGenerated;
+    }
+
+    [TargetRpc]
+    private void NotifyClientOfSpawnRpc(NetworkConnection conn, NetworkObject player)
+    {
+        OnLocalPlayerSpawned?.Invoke(player);
+        Debug.Log($"Local player spawned: {player.name}");
     }
 
     [ObserversRpc]
