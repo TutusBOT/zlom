@@ -3,14 +3,13 @@ using Unity.Behavior;
 
 public class EnemyAI : MonoBehaviour
 {
-    public GameObject player;  // Gracz, za którym podąża przeciwnik
-    private BehaviorGraphAgent behaviorGraph; // Komponent BehaviorGraph przypisany do obiektu
+    public GameObject player;
+    private BehaviorGraphAgent behaviorGraph;
     
 
 
     void Update()
     {
-        // Szukamy gracza w scenie
         player = GameObject.FindWithTag("Player");
         behaviorGraph = GetComponent<BehaviorGraphAgent>();
 

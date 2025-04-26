@@ -1,39 +1,40 @@
 using UnityEngine;
 using UnityEngine.AI;
-using System.Collections;
+using FishNet.Object;
 
-public class WanderingAI : MonoBehaviour {
+public class WanderingAI : NetworkBehaviour
+{
+    public float wanderRadius = 10f;
+    public float wanderTimer = 5f;
 
-    public float wanderRadius;
-    public float wanderTimer;
-
-    private Transform target;
     private NavMeshAgent agent;
     private float timer;
 
-    // Use this for initialization
-    void OnEnable () {
-        agent = GetComponent<NavMeshAgent> ();
+    private void OnEnable()
+    {
+        agent = GetComponent<NavMeshAgent>();
         timer = wanderTimer;
     }
-  
-    // Update is called once per frame
-    void Update () {
+
+    private void Update()
+    {
+        if (!IsServerInitialized) return;
         timer += Time.deltaTime;
 
-        if (timer >= wanderTimer) {
+        if (timer >= wanderTimer)
+        {
             Vector3 newPos = GetRandomPointOnNavMesh();
 
             NavMeshPath path = new NavMeshPath();
-            if (agent.CalculatePath(newPos, path) && path.status == NavMeshPathStatus.PathComplete) {
+            if (agent.CalculatePath(newPos, path) && path.status == NavMeshPathStatus.PathComplete)
+            {
                 agent.SetDestination(newPos);
                 timer = 0;
             }
         }
     }
 
-
-    public static Vector3 GetRandomPointOnNavMesh()
+    private Vector3 GetRandomPointOnNavMesh()
     {
         NavMeshTriangulation navMeshData = NavMesh.CalculateTriangulation();
 
@@ -46,6 +47,6 @@ public class WanderingAI : MonoBehaviour {
             return hit.position;
         }
 
-        return GetRandomPointOnNavMesh();
+        return transform.position;
     }
 }

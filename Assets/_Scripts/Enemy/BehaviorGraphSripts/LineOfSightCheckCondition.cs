@@ -9,8 +9,13 @@ public partial class LineOfSightCheckCondition : Condition
     [SerializeReference] public BlackboardVariable<GameObject> Target;
     [SerializeReference] public BlackboardVariable<LineOfSightDetector> Detector;
 
-    public override bool IsTrue(){
-        bool result = Detector.Value.PerformDetection(Target.Value) != null;
-        return result;
+    public override bool IsTrue()
+    {
+        if (Detector.Value == null || Target.Value == null)
+            return false;
+
+        GameObject detected = Detector.Value.PerformDetection();
+
+        return detected == Target.Value;
     }
 }
