@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 294656319187813847}
   - component: {fileID: 4214760729355928606}
   - component: {fileID: 7561023080675721101}
+  - component: {fileID: -1374997941685989230}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -115,12 +116,19 @@ MonoBehaviour:
   _componentIndexCache: 0
   _addedNetworkObject: {fileID: 9221043243608676975}
   _networkObjectCache: {fileID: 9221043243608676975}
-  walkingSpeed: 7.5
-  sprintSpeed: 11.5
-  jumpSpeed: 8
+  walkingSpeed: 5
+  sprintSpeed: 8
+  crouchSpeed: 3
+  jumpSpeed: 6
   gravity: 20
   lookSpeed: 2
   lookXLimit: 90
+  maxStamina: 5
+  staminaDrainRate: 2
+  staminaRegenRate: 0.5
+  crouchHeight: 1
+  normalHeight: 2
+  crouchCameraYOffset: 0.2
   canMove: 1
   cameraYOffset: 0.4
 --- !u!114 &1551341732592336864
@@ -160,6 +168,7 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 0}
   playerCamera: {fileID: 0}
   pickupRange: 5
+  maxDistance: 6
   interactableLayer:
     serializedVersion: 2
     m_Bits: 512
@@ -746,6 +755,18 @@ MonoBehaviour:
   pushForce: 1.5
   massLimit: 150
   pushCooldown: 0.2
+--- !u!114 &-1374997941685989230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e9a4298153f0654c9331efe82123b9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2369446905339070106
 GameObject:
   m_ObjectHideFlags: 0

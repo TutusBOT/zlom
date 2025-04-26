@@ -4,12 +4,28 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour
 {
     [Header("Base setup")]
-    public float walkingSpeed = 7.5f;
-    public float sprintSpeed = 11.5f;
-    public float jumpSpeed = 8.0f;
+    public float walkingSpeed = 5.0f;
+    public float sprintSpeed = 8.0f;
+    public float crouchSpeed = 3.0f;
+    public float jumpSpeed = 3.0f;
     public float gravity = 20.0f;
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
+
+    [Header("Stamina")]
+    public float maxStamina = 5.0f;
+    public float staminaDrainRate = 2.0f;
+    public float staminaRegenRate = 0.5f;
+    private float currentStamina;
+    private bool isSprinting = false;
+    public float CurrentStamina => currentStamina;
+    public float MaxStamina => maxStamina;
+
+    [Header("Crouch")]
+    public float crouchHeight = 1.0f;
+    public float normalHeight = 2.0f;
+    public float crouchCameraYOffset = 0.2f;
+    private bool isCrouching = false;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -65,19 +81,25 @@ public class PlayerController : NetworkBehaviour
             Debug.Log($"Disabled control for non-owned player {gameObject.name}");
         }
     }
-
     void Start()
     {
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        currentStamina = maxStamina;
     }
 
     void Update()
     {
-        bool isSprinting = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
+        HandleMovement();
+        HandleCrouch();
+        HandleCamera();
+    }
 
-        // We are grounded, so recalculate move direction based on axis
+    private void HandleMovement()
+    {
+        isSprinting = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint) && currentStamina > 0f && !isCrouching;
+
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 
@@ -86,13 +108,29 @@ public class PlayerController : NetworkBehaviour
 
         Vector2 inputVector = new Vector2(inputX, inputY);
         if (inputVector.magnitude > 1f)
-        {
             inputVector.Normalize();
-        }
 
-        // Apply normalized values
-        float curSpeedX = canMove ? (isSprinting ? sprintSpeed : walkingSpeed) * inputVector.x : 0;
-        float curSpeedY = canMove ? (isSprinting ? sprintSpeed : walkingSpeed) * inputVector.y : 0;
+        float curSpeedX = 0;
+        float curSpeedY = 0;
+
+        if (canMove)
+        {
+            if (isCrouching)
+            {
+                curSpeedX = crouchSpeed * inputVector.x;
+                curSpeedY = crouchSpeed * inputVector.y;
+            }
+            else if (isSprinting)
+            {
+                curSpeedX = sprintSpeed * inputVector.x;
+                curSpeedY = sprintSpeed * inputVector.y;
+            }
+            else
+            {
+                curSpeedX = walkingSpeed * inputVector.x;
+                curSpeedY = walkingSpeed * inputVector.y;
+            }
+        }
 
         float movementDirectionY = moveDirection.y;
         moveDirection = (forward * curSpeedX) + (right * curSpeedY);
@@ -101,6 +139,7 @@ public class PlayerController : NetworkBehaviour
             InputBindingManager.Instance.IsActionPressed(InputActions.Jump)
             && canMove
             && characterController.isGrounded
+            && !isCrouching
         )
         {
             moveDirection.y = jumpSpeed;
@@ -121,18 +160,56 @@ public class PlayerController : NetworkBehaviour
         {
             float horizontalSpeed = new Vector2(moveDirection.x, moveDirection.z).magnitude;
 
-            if (horizontalSpeed > 0.1f)
-            {
-                // Stronger downward force when moving to prevent ceiling gliding
-                moveDirection.y = -2.0f;
-            }
-            else
-            {
-                // Normal downward force when not moving horizontally
-                moveDirection.y = -0.1f;
-            }
+            moveDirection.y = (horizontalSpeed > 0.1f) ? -2.0f : -0.1f;
         }
 
+        HandleStamina();
+    }
+
+private void HandleStamina()
+{
+    bool sprintKeyHeld = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
+
+    if (isSprinting)
+    {
+        currentStamina -= staminaDrainRate * Time.deltaTime;
+        currentStamina = Mathf.Max(currentStamina, 0f);
+        return;
+    }
+
+    if (!sprintKeyHeld && currentStamina < maxStamina)
+    {
+        currentStamina += staminaRegenRate * Time.deltaTime;
+        currentStamina = Mathf.Min(currentStamina, maxStamina);
+    }
+}
+
+
+
+    private void HandleCrouch()
+    {
+        if (InputBindingManager.Instance.IsActionPressed(InputActions.Crouch))
+        {
+            if (!isCrouching)
+            {
+                isCrouching = true;
+                characterController.height = crouchHeight;
+                playerCamera.transform.localPosition = new Vector3(0, crouchCameraYOffset, 0);
+            }
+        }
+        else
+        {
+            if (isCrouching)
+            {
+                isCrouching = false;
+                characterController.height = normalHeight;
+                playerCamera.transform.localPosition = new Vector3(0, cameraYOffset, 0);
+            }
+        }
+    }
+
+    private void HandleCamera()
+    {
         if (canMove && playerCamera != null)
         {
             rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
