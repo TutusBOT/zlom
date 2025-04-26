@@ -21,7 +21,6 @@ public class ChatInputManager : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log($"Chat active: {_isChatActive}");
         if (InputBindingManager.Instance.IsActionTriggered(InputActions.TextChat) && !_isChatActive)
         {
             OpenChat();

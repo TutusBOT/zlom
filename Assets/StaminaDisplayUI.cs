@@ -13,25 +13,27 @@ public class StaminaDisplayUI : NetworkBehaviour
     {
         base.OnStartClient();
 
-        var players = PlayerManager.Instance.GetAllPlayers();
-        foreach (var player in players)
+        BootstrapNetworkManager.OnLocalPlayerSpawned += OnLocalPlayerSpawned;
+    }
+
+    private void OnLocalPlayerSpawned(NetworkObject player)
+    {
+        playerController = player.GetComponent<PlayerController>();
+        if (playerController == null)
         {
-            if (player.IsOwner)
-            {
-                playerController = player.GetComponent<PlayerController>();
-                break;
-            }
+            Debug.LogError("PlayerController not found on local player object.");
+            return;
         }
 
+        playerController.OnStaminaChanged += UpdateStaminaDisplay;
         UpdateStaminaDisplay(playerController.CurrentStamina, playerController.MaxStamina);
     }
 
-    void Update()
+    void OnDestroy()
     {
+        BootstrapNetworkManager.OnLocalPlayerSpawned -= OnLocalPlayerSpawned;
         if (playerController != null)
-        {
-            UpdateStaminaDisplay(playerController.CurrentStamina, playerController.MaxStamina);
-        }
+            playerController.OnStaminaChanged -= UpdateStaminaDisplay;
     }
 
     private void UpdateStaminaDisplay(float currentStamina, float maxStamina)
