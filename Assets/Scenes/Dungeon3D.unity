@@ -353,8 +353,7 @@ MonoBehaviour:
   spawnEnemiesInRooms: 1
   minEnemiesPerRoom: 0
   maxEnemiesPerRoom: 3
-  skipEnemiesInStartRoom: 1
-  seed: 69
+  seed: 0
   doorPrefab: {fileID: 1239181922602411194, guid: 1cd25ad6cebf9544296b7df2b79c6da0, type: 3}
 --- !u!114 &1180316805
 MonoBehaviour:
@@ -592,13 +591,15 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1630119741}
   _networkObjectCache: {fileID: 0}
   enemyPrefabs:
-  - enemyPrefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
+  - prefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
     spawnChance: 100
     maxCount: 10
+    tier: 3
     currentCount: 0
-  - enemyPrefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
+  - prefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
     spawnChance: 100
     maxCount: 10
+    tier: 1
     currentCount: 0
   maxEnemies: 1
   spawnInterval: 5

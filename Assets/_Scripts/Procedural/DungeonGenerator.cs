@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using FishNet;
 using FishNet.Object;
 using Unity.AI.Navigation;
@@ -120,9 +121,6 @@ public class DungeonGenerator : NetworkBehaviour
     private int maxEnemiesPerRoom = 3;
 
     [SerializeField]
-    private bool skipEnemiesInStartRoom = true;
-
-    [SerializeField]
     private int seed;
 
     [SerializeField]
@@ -216,7 +214,7 @@ public class DungeonGenerator : NetworkBehaviour
         if (spawnEnemiesInRooms && enemySpawner != null)
         {
             StartCoroutine(GenerateNavMeshDelayed());
-            SpawnEnemiesInRooms();
+            StartCoroutine(SpawnEnemiesInRooms());
         }
 
         Random.InitState((int)DateTime.Now.Ticks);
@@ -1003,15 +1001,22 @@ public class DungeonGenerator : NetworkBehaviour
 
     private IEnumerator SpawnEnemiesInRooms()
     {
-        yield return new WaitForSeconds(0.6f);
+        yield return new WaitForSeconds(3f);
 
-        int startIndex = skipEnemiesInStartRoom ? 1 : 0;
+        List<Transform> roomsList = new List<Transform>();
 
-        for (int i = startIndex; i < transform.childCount; i++)
+        for (int i = 1; i < transform.childCount; i++)
         {
             Transform roomTransform = transform.GetChild(i);
-            enemySpawner.SpawnEnemiesInRoom(roomTransform, minEnemiesPerRoom, maxEnemiesPerRoom);
+            roomsList.Add(roomTransform);
         }
+
+        int roomCount = roomsList.Count;
+        List<Transform> lastThreeRooms = roomsList.GetRange(roomCount - 3, 3);
+
+        Transform[] roomsToSpawn = lastThreeRooms.ToArray();
+
+        enemySpawner.SpawnEnemies(roomsToSpawn, 3);
     }
 
     void OnDrawGizmos()
