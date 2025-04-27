@@ -27,6 +27,7 @@ public class PlayerChatDisplay : NetworkBehaviour
     private Transform _chatAnchor;
 
     private readonly SyncVar<string> _currentMessage = new SyncVar<string>("");
+    private TextToSpeech _textToSpeech = new();
 
     [Serializable]
     private class ChatMessage
@@ -76,6 +77,10 @@ public class PlayerChatDisplay : NetworkBehaviour
         if (!string.IsNullOrEmpty(newValue))
         {
             AddMessageToQueue(newValue);
+            if (!IsOwner) // Only play TTS for messages from other players
+            {
+                _textToSpeech.StartSpeech(newValue);
+            }
         }
     }
 
