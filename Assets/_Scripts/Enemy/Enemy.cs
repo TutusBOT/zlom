@@ -1,9 +1,8 @@
-using UnityEngine;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using UnityEngine;
 
-[RequireComponent(typeof(NetworkObject))]
-public class EnemyBase : NetworkBehaviour
+public class Enemy : NetworkBehaviour
 {
     [Header("Enemy Settings")]
     [SerializeField]
@@ -18,7 +17,6 @@ public class EnemyBase : NetworkBehaviour
     {
         base.OnStartServer();
         _currentHealth.Value = maxHealth;
-        
     }
 
     public virtual void TakeDamage(float amount)
@@ -48,5 +46,5 @@ public class EnemyBase : NetworkBehaviour
         }
     }
 
-    protected virtual void ServerUpdate(){}
+    protected virtual void ServerUpdate() { }
 }
