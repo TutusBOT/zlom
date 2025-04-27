@@ -13,6 +13,7 @@ public class ChatInputManager : MonoBehaviour
 
     private Player _player;
     private bool _isChatActive = false;
+    private TextToSpeech _textToSpeech = new();
 
     private void Start()
     {
@@ -94,6 +95,7 @@ public class ChatInputManager : MonoBehaviour
     private void SendMessage()
     {
         string message = chatInputField.text.Trim();
+        _textToSpeech.StartSpeech(message);
         Debug.Log($"Sending chat message: {message}");
 
         if (!string.IsNullOrEmpty(message))
