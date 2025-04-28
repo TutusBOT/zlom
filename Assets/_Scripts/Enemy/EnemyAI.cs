@@ -1,12 +1,10 @@
-using UnityEngine;
 using Unity.Behavior;
+using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
     public GameObject player;
     private BehaviorGraphAgent behaviorGraph;
-    
-
 
     void Update()
     {
