@@ -25,6 +25,8 @@ public class NetworkedObjectPickup : NetworkBehaviour
         base.OnStartClient();
 
         playerCamera = GetComponentInChildren<Camera>();
+
+        Valuable.OnItemBroke += OnItemDestroyed;
     }
 
     void Update()
@@ -124,6 +126,12 @@ public class NetworkedObjectPickup : NetworkBehaviour
         currentRigidbody.linearDamping = Mathf.Clamp(2f * currentRigidbody.mass, 5f, 20f);
         currentRigidbody.angularDamping = Mathf.Clamp(2f * currentRigidbody.mass, 2.5f, 20f);
 
+        Valuable valuable = obj.GetComponent<Valuable>();
+        if (valuable != null)
+        {
+            valuable.OnPickedUp();
+        }
+
         RpcPickup(
             netObj,
             objectAttachPoint,
@@ -214,6 +222,12 @@ public class NetworkedObjectPickup : NetworkBehaviour
             currentRigidbody.angularDamping = 0.05f;
         }
 
+        Valuable valuable = currentItem.GetComponent<Valuable>();
+        if (valuable != null)
+        {
+            valuable.GetType().GetMethod("OnDropped").Invoke(valuable, null);
+        }
+
         isHoldingItem = false;
         currentRigidbody = null;
         currentItem = null;
@@ -238,5 +252,34 @@ public class NetworkedObjectPickup : NetworkBehaviour
         isHoldingItem = false;
         currentRigidbody = null;
         currentItem = null;
+    }
+
+    private void OnItemDestroyed(GameObject destroyedObject)
+    {
+        if (isHoldingItem && currentItem == destroyedObject)
+        {
+            // Clean up references
+            if (springJoint != null)
+            {
+                Destroy(springJoint);
+                springJoint = null;
+            }
+
+            isHoldingItem = false;
+            currentRigidbody = null;
+            currentItem = null;
+
+            // Reset line renderer
+            if (lineRenderer != null)
+            {
+                lineRenderer.SetPosition(0, transform.position);
+                lineRenderer.SetPosition(1, transform.position);
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        Valuable.OnItemBroke -= OnItemDestroyed;
     }
 }

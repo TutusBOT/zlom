@@ -89,30 +89,30 @@ public class Valuable : NetworkBehaviour
 
     protected virtual void Update()
     {
-        if (_isBeingHeld.Value)
-        {
-            tooltipTimer += Time.deltaTime;
+        if (!_isBeingHeld.Value)
+            return;
 
-            if (tooltipTimer >= tooltipDisplayTime)
+        tooltipTimer += Time.deltaTime;
+
+        if (tooltipTimer >= tooltipDisplayTime)
+        {
+            HideTooltip();
+            return;
+        }
+
+        if (activeValueDisplay != null)
+        {
+            activeValueDisplay.transform.position =
+                transform.position + Vector3.up * (1.0f * SizeScale);
+
+            if (Camera.main != null)
             {
-                HideTooltip();
-                return;
+                activeValueDisplay.transform.forward = Camera.main.transform.forward;
             }
 
-            if (activeValueDisplay != null)
+            if (valueText != null)
             {
-                activeValueDisplay.transform.position =
-                    transform.position + Vector3.up * (1.0f * SizeScale);
-
-                if (Camera.main != null)
-                {
-                    activeValueDisplay.transform.forward = Camera.main.transform.forward;
-                }
-
-                if (valueText != null)
-                {
-                    valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
-                }
+                valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
             }
         }
     }
@@ -214,11 +214,6 @@ public class Valuable : NetworkBehaviour
 
         tooltipTimer = 0f;
 
-        // Force sync transform when picked up
-        NetworkTransform netTransform = GetComponent<NetworkTransform>();
-        if (netTransform != null)
-            netTransform.ForceSend();
-
         if (IsOwner || IsClientInitialized)
         {
             ShowValueTooltip();
@@ -233,6 +228,7 @@ public class Valuable : NetworkBehaviour
 
     private void ShowValueTooltip()
     {
+        Debug.Log($"Showing tooltip for {gameObject.name} {activeValueDisplay}");
         if (valueDisplayPrefab != null && activeValueDisplay == null)
         {
             activeValueDisplay = Instantiate(valueDisplayPrefab);
