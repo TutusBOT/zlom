@@ -1,6 +1,6 @@
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.AI;
-using FishNet.Object;
 
 public class WanderingAI : NetworkBehaviour
 {
@@ -18,7 +18,8 @@ public class WanderingAI : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsServerInitialized) return;
+        if (!IsServerInitialized)
+            return;
         timer += Time.deltaTime;
 
         if (timer >= wanderTimer)

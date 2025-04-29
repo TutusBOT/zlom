@@ -1,4 +1,3 @@
-using FishNet.Managing.Scened;
 using UnityEngine;
 
 public class FinishLevelButton : MonoBehaviour
@@ -7,14 +6,14 @@ public class FinishLevelButton : MonoBehaviour
 
     private void Start()
     {
-        if (PlayerMoneyManager.Instance != null)
+        if (EconomyManager.Instance != null)
         {
-            PlayerMoneyManager.Instance.OnQuotaCompleted += OnQuotaCompleted;
+            EconomyManager.Instance.OnQuotaCompleted += OnQuotaCompleted;
         }
         else
         {
             Debug.LogWarning(
-                "PlayerMoneyManager.Instance is null. Button won't update based on quota."
+                "EconomyManager.Instance is null. Button won't update based on quota."
             );
         }
     }
@@ -22,9 +21,9 @@ public class FinishLevelButton : MonoBehaviour
     private void OnDestroy()
     {
         // Unsubscribe from events
-        if (PlayerMoneyManager.Instance != null)
+        if (EconomyManager.Instance != null)
         {
-            PlayerMoneyManager.Instance.OnQuotaCompleted -= OnQuotaCompleted;
+            EconomyManager.Instance.OnQuotaCompleted -= OnQuotaCompleted;
         }
     }
 

@@ -110,7 +110,7 @@ public class SellZone : MonoBehaviour
 
         if (totalValue > 0)
         {
-            PlayerMoneyManager.Instance.AddMoneyServerRpc(totalValue);
+            EconomyManager.Instance.AddMoneyServerRpc(totalValue);
         }
     }
 

@@ -1,17 +1,25 @@
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.AI;
-using FishNet.Object;
 
 public class EnemyAttack : NetworkBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float attackRange = 2f;
-    [SerializeField] private float attackCooldown = 1.5f;
-    [SerializeField] private float damage = 20f;
+    [SerializeField]
+    private float attackRange = 2f;
+
+    [SerializeField]
+    private float attackCooldown = 1.5f;
+
+    [SerializeField]
+    private float damage = 20f;
 
     [Header("Detectors")]
-    [SerializeField] private LineOfSightDetector lineOfSightDetector;
-    [SerializeField] private RangeDetector rangeDetector;
+    [SerializeField]
+    private LineOfSightDetector lineOfSightDetector;
+
+    [SerializeField]
+    private RangeDetector rangeDetector;
 
     private NavMeshAgent agent;
     private float attackTimer;
@@ -26,7 +34,8 @@ public class EnemyAttack : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsServerInitialized)return;
+        if (!IsServerInitialized)
+            return;
 
         attackTimer += Time.deltaTime;
 
@@ -54,13 +63,13 @@ public class EnemyAttack : NetworkBehaviour
 
         if (distance <= attackRange)
         {
-            if (agent.hasPath) agent.ResetPath();
+            if (agent.hasPath)
+                agent.ResetPath();
             TryAttack();
             return;
         }
 
         agent.SetDestination(targetPlayer.transform.position);
-
     }
 
     private void FindTarget()

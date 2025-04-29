@@ -4,9 +4,7 @@ using UnityEngine;
 
 public class VoiceChatManager : NetworkBehaviour
 {
-    // Voice chat settings
     [Header("Voice Settings")]
-
     [SerializeField]
     private float maxVoiceDistance = 15f;
 

@@ -2,9 +2,9 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 
-public class PlayerMoneyManager : NetworkBehaviour
+public class EconomyManager : NetworkBehaviour
 {
-    public static PlayerMoneyManager Instance { get; private set; }
+    public static EconomyManager Instance { get; private set; }
 
     [Header("Money Settings")]
     private readonly SyncVar<int> _currentMoney = new SyncVar<int>();
