@@ -2,15 +2,26 @@ using UnityEngine;
 
 public class RangeDetector : MonoBehaviour
 {
-    [SerializeField] private float detectionRadius = 20f;
-    [SerializeField] private float detectionAngle = 90f;
-    [SerializeField] private LayerMask detectionMask;
-    [SerializeField] private bool showDebugVisuals = true;
+    [SerializeField]
+    private float detectionRadius = 20f;
+
+    [SerializeField]
+    private float detectionAngle = 90f;
+
+    [SerializeField]
+    private LayerMask detectionMask;
+
+    [SerializeField]
+    private bool showDebugVisuals = true;
     public GameObject DetectedTarget { get; set; }
 
     public GameObject UpdateDetector()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRadius, detectionMask);
+        Collider[] colliders = Physics.OverlapSphere(
+            transform.position,
+            detectionRadius,
+            detectionMask
+        );
 
         GameObject closestTarget = null;
         float closestAngle = detectionAngle;
@@ -37,14 +48,17 @@ public class RangeDetector : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (!showDebugVisuals || this.enabled == false) return;
+        if (!showDebugVisuals || this.enabled == false)
+            return;
 
         Gizmos.color = DetectedTarget ? Color.green : Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
 
         Gizmos.color = new Color(1, 0, 0, 0.3f);
-        Vector3 leftBoundary = Quaternion.Euler(0, -detectionAngle / 2, 0) * transform.forward * detectionRadius;
-        Vector3 rightBoundary = Quaternion.Euler(0, detectionAngle / 2, 0) * transform.forward * detectionRadius;
+        Vector3 leftBoundary =
+            Quaternion.Euler(0, -detectionAngle / 2, 0) * transform.forward * detectionRadius;
+        Vector3 rightBoundary =
+            Quaternion.Euler(0, detectionAngle / 2, 0) * transform.forward * detectionRadius;
 
         Gizmos.DrawLine(transform.position, transform.position + leftBoundary);
         Gizmos.DrawLine(transform.position, transform.position + rightBoundary);

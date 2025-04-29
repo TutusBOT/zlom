@@ -23,30 +23,30 @@ public class MoneyDisplay : MonoBehaviour
 
     private void Start()
     {
-        if (PlayerMoneyManager.Instance == null)
+        if (EconomyManager.Instance == null)
         {
-            Debug.LogWarning("MoneyDisplay: No PlayerMoneyManager instance found!");
+            Debug.LogWarning("MoneyDisplay: No EconomyManager instance found!");
             return;
         }
 
-        UpdateMoneyDisplay(PlayerMoneyManager.Instance.GetCurrentMoney());
+        UpdateMoneyDisplay(EconomyManager.Instance.GetCurrentMoney());
         UpdateQuotaDisplay(
-            PlayerMoneyManager.Instance.GetCurrentMoney(),
-            PlayerMoneyManager.Instance.GetCurrentQuota()
+            EconomyManager.Instance.GetCurrentMoney(),
+            EconomyManager.Instance.GetCurrentQuota()
         );
 
-        PlayerMoneyManager.Instance.OnMoneyChanged += UpdateMoneyDisplay;
-        PlayerMoneyManager.Instance.OnQuotaChanged += UpdateQuotaDisplay;
-        PlayerMoneyManager.Instance.OnQuotaCompleted += ShowQuotaCompletedNotification;
+        EconomyManager.Instance.OnMoneyChanged += UpdateMoneyDisplay;
+        EconomyManager.Instance.OnQuotaChanged += UpdateQuotaDisplay;
+        EconomyManager.Instance.OnQuotaCompleted += ShowQuotaCompletedNotification;
     }
 
     private void OnDestroy()
     {
-        if (PlayerMoneyManager.Instance != null)
+        if (EconomyManager.Instance != null)
         {
-            PlayerMoneyManager.Instance.OnMoneyChanged -= UpdateMoneyDisplay;
-            PlayerMoneyManager.Instance.OnQuotaChanged -= UpdateQuotaDisplay;
-            PlayerMoneyManager.Instance.OnQuotaCompleted -= ShowQuotaCompletedNotification;
+            EconomyManager.Instance.OnMoneyChanged -= UpdateMoneyDisplay;
+            EconomyManager.Instance.OnQuotaChanged -= UpdateQuotaDisplay;
+            EconomyManager.Instance.OnQuotaCompleted -= ShowQuotaCompletedNotification;
         }
     }
 
