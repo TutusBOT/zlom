@@ -193,9 +193,12 @@ public class EnemySpawnController : NetworkBehaviour
 
             EnemySpawnConfig enemy = SelectRandomEnemy(remainingPower);
             remainingPower -= enemy.tier;
-            Debug.Log("-------------------------------------------------------");
-            Debug.Log($"Enemy tier: {enemy.tier}");
-            Debug.Log($"Remaining power: {remainingPower}");
+            if (debugMode)
+            {
+                Debug.Log("-------------------------------------------------------");
+                Debug.Log($"Enemy tier: {enemy.tier}");
+                Debug.Log($"Remaining power: {remainingPower}");
+            }
 
             SpawnEnemy(enemy.prefab, spawnPosition);
         }

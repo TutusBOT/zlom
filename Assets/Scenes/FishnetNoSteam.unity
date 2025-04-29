@@ -3688,6 +3688,7 @@ MonoBehaviour:
   networkSystemPrefabs:
   - {fileID: 8925339826831650291, guid: 21e255318da60b640b568ad0dae6592f, type: 3}
   - {fileID: 1737599865022995632, guid: 0341a2bf0fd41454db2f5dbbdd850516, type: 3}
+  - {fileID: 4799835556637964325, guid: 067b5eace23ef2542b579915638ee6b7, type: 3}
 --- !u!4 &549266608
 Transform:
   m_ObjectHideFlags: 0
