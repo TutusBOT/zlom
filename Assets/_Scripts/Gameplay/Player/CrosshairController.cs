@@ -22,20 +22,32 @@ public class CrosshairController : MonoBehaviour
     private Vector3 defaultScale;
     private Vector3 targetScale;
 
-    private void Start()
+    private void Awake()
     {
-        _playerCamera = GetComponentInChildren<Camera>();
-        if (_playerCamera == null)
+        enabled = false;
+        if (CameraManager.Instance?.PlayerCamera != null)
         {
-            Debug.LogError("No camera found. Please assign a camera to the CrosshairController.");
-            return;
+            OnCameraInitialized(CameraManager.Instance.PlayerCamera);
         }
+        else
+        {
+            CameraManager.Instance.OnPlayerCameraRegistered += OnCameraInitialized;
+        }
+    }
+
+    private void OnCameraInitialized(Camera camera)
+    {
+        _playerCamera = camera;
 
         CreateCrosshairCanvas();
         CreateCrosshairImage();
 
         defaultScale = crosshairImage.transform.localScale;
         targetScale = defaultScale;
+
+        enabled = true;
+
+        CameraManager.Instance.OnPlayerCameraRegistered -= OnCameraInitialized;
     }
 
     private void CreateCrosshairCanvas()
@@ -107,5 +119,11 @@ public class CrosshairController : MonoBehaviour
                 Time.deltaTime * scaleSpeed
             );
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (CameraManager.Instance != null)
+            CameraManager.Instance.OnPlayerCameraRegistered -= OnCameraInitialized;
     }
 }

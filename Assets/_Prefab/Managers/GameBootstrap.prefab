@@ -52,9 +52,10 @@ MonoBehaviour:
   - {fileID: 8171001556097400531, guid: fe9642f201cc4bd4c8f20c5c8c84ae8b, type: 3}
   - {fileID: 4567546734140320367, guid: 0c904818678aa9e4981818e6c21a034d, type: 3}
   - {fileID: 5420541285710718128, guid: 0e0af78c8bd1e504f8901bd9b89e005e, type: 3}
-  - {fileID: 8348682974187962595, guid: 74a8ed0704a5fe742a06eee8d48dd61f, type: 3}
   - {fileID: 6337713958848720258, guid: 99e01119844016241943d7cf426cba47, type: 3}
   - {fileID: 7092854682982753630, guid: abd634d01b93da94eaccc9ad3014b2bb, type: 3}
+  - {fileID: 8084073767875837982, guid: 4fcc0d14bd9a362468561c4ffd6ba4e2, type: 3}
+  - {fileID: 8495833507254179227, guid: 6a2ad7a39f3f21544a49054c6a3cd3b8, type: 3}
   networkSystemPrefabs:
   - {fileID: 8925339826831650291, guid: 21e255318da60b640b568ad0dae6592f, type: 3}
   - {fileID: 1737599865022995632, guid: 0341a2bf0fd41454db2f5dbbdd850516, type: 3}
