@@ -40,7 +40,7 @@ public class InteractionManager : MonoBehaviour
                 return;
             }
         }
-        
+
         Ray ray = _playerCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         IInteractable hitInteractable = null;

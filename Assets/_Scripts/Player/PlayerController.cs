@@ -96,6 +96,8 @@ public class PlayerController : NetworkBehaviour
         HandleMovement();
         HandleCrouch();
         HandleCamera();
+
+        TempHandleLightSwitch();
     }
 
     private void HandleMovement()
@@ -239,6 +241,29 @@ public class PlayerController : NetworkBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+    }
+
+    private void TempHandleLightSwitch()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (
+                Physics.Raycast(
+                    playerCamera.transform.position,
+                    playerCamera.transform.forward,
+                    out RaycastHit hit,
+                    3f
+                )
+            )
+            {
+                LightSwitch lightSwitch = hit.collider.GetComponent<LightSwitch>();
+                if (lightSwitch != null)
+                {
+                    lightSwitch.Interact();
+                    return;
+                }
+            }
         }
     }
 }

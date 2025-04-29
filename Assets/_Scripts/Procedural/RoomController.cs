@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RoomController : MonoBehaviour
+public class RoomController : MonoBehaviour, ILightingStateReceiver
 {
     public GameObject[] northWalls;
     public GameObject[] southWalls;
@@ -13,6 +13,34 @@ public class RoomController : MonoBehaviour
     public GameObject[] eastDoors;
     public GameObject[] westDoors;
 
+    public enum RoomLightingType
+    {
+        Unimplemented, // No lighting system
+        Disabled, // Has lights, permanently disabled
+        Enabled, // Has lights that can be powered
+    }
+
+    [Header("Lighting")]
+    [SerializeField]
+    public RoomLightingType lightingType = RoomLightingType.Unimplemented;
+
+    [SerializeField]
+    private GameObject lightSwitchPrefab;
+
+    [SerializeField]
+    private Transform lightSwitchMountPoint;
+    private LightSwitch _roomLightSwitch;
+
+    // Lighting state
+    private bool _isPowered = false;
+    private bool _hasWorkingLights = false;
+
+    // Properties for external access
+    public bool HasLightingImplementation => lightingType != RoomLightingType.Unimplemented;
+    public bool CanBePowered => lightingType == RoomLightingType.Enabled;
+    public bool IsPowered => _isPowered && CanBePowered;
+    public bool IsLit => IsPowered && _hasWorkingLights;
+
     public void SetupDoorsFromConnections(List<ConnectionPoint> connectionPoints)
     {
         Debug.Log($"Room at {transform.position}: Setting up {connectionPoints.Count} doors");
@@ -23,7 +51,7 @@ public class RoomController : MonoBehaviour
         foreach (ConnectionPoint cp in connectionPoints)
         {
             Debug.Log(
-                $"  Enabling door at local ({cp.localPosition.x}, {cp.localPosition.y}) facing {cp.direction}"
+                $"Enabling door at local ({cp.localPosition.x}, {cp.localPosition.y}) facing {cp.direction}"
             );
             bool success = EnableDoorAtPosition(cp.localPosition, cp.direction);
             if (!success)
@@ -123,5 +151,66 @@ public class RoomController : MonoBehaviour
 
         Debug.LogError($"No door found for position {localPos} and direction {direction}");
         return false;
+    }
+
+    public void OnLightingStateChanged(bool isPowered, bool hasWorkingLights)
+    {
+        // Disabled rooms can never be powered
+        if (lightingType == RoomLightingType.Disabled)
+            isPowered = false;
+
+        bool wasLit = _isPowered && _hasWorkingLights;
+
+        _isPowered = isPowered;
+        _hasWorkingLights = hasWorkingLights;
+
+        bool isLit = _isPowered && _hasWorkingLights;
+
+        if (wasLit != isLit && HasLightingImplementation)
+        {
+            if (isLit)
+            {
+                Debug.Log($"Room at {transform.position} is now lit");
+            }
+            else
+            {
+                Debug.Log($"Room at {transform.position} is now dark");
+            }
+        }
+    }
+
+    public void SetupLightSwitch()
+    {
+        if (!HasLightingImplementation)
+            return;
+
+        if (lightSwitchMountPoint == null)
+        {
+            Debug.LogError(
+                $"Room at {transform.position} does not have a light switch mount point."
+            );
+            return;
+        }
+
+        GameObject switchObj = Instantiate(
+            lightSwitchPrefab,
+            lightSwitchMountPoint.position,
+            lightSwitchMountPoint.rotation,
+            transform
+        );
+        _roomLightSwitch = switchObj.GetComponent<LightSwitch>();
+
+        if (_roomLightSwitch != null)
+        {
+            _roomLightSwitch.SetTargetRoom(this);
+        }
+    }
+
+    public void ReportLightDestroyed(RoomLightSource light)
+    {
+        if (RoomLightingManager.Instance != null)
+        {
+            RoomLightingManager.Instance.DestroyLightServerRpc(light.transform.position);
+        }
     }
 }
