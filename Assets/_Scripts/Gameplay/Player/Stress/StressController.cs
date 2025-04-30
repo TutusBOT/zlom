@@ -112,6 +112,9 @@ public class StressController : NetworkBehaviour
     private GameObject shakyEyesPrefab; // Visual indicator for other players
     #endregion
 
+    public float MaxStress => maxStress;
+    public float CurrentStress => _localStressValue;
+
     #region Networked State
 
     // Current stress level - synced to all clients but with local smoothing
@@ -156,6 +159,8 @@ public class StressController : NetworkBehaviour
     private bool _isHeartbeatPlaying = false;
     private float _lastHeartbeatStressLevel = 0f;
 
+    public event System.Action<float, float> OnStressValueChanged;
+
     #endregion
 
     #region Initialization and Updates
@@ -199,7 +204,7 @@ public class StressController : NetworkBehaviour
         base.OnStartNetwork();
 
         // Register callbacks for SyncVars
-        _syncedStressValue.OnChange += OnStressValueChanged;
+        _syncedStressValue.OnChange += OnSyncedStressChanged;
         _currentAffliction.OnChange += OnAfflictionChanged;
         _visibleMeltdown.OnChange += OnMeltdownVisibilityChanged;
     }
@@ -255,6 +260,8 @@ public class StressController : NetworkBehaviour
 
         // Apply locally first for immediate feedback
         _localStressValue = Mathf.Clamp(_localStressValue + amount, 0, maxStress);
+
+        OnStressValueChanged?.Invoke(_localStressValue, maxStress);
 
         // Then sync to server occasionally (only on significant changes)
         if (Mathf.Abs(_localStressValue - _syncedStressValue.Value) >= 5f)
@@ -332,6 +339,8 @@ public class StressController : NetworkBehaviour
             _syncedStressValue.Value,
             Time.deltaTime * _stressSmoothingRate
         );
+
+        OnStressValueChanged?.Invoke(_localStressValue, maxStress);
 
         // Calculate stress factor (0-1)
         float stressFactor = _localStressValue / maxStress;
@@ -503,15 +512,15 @@ public class StressController : NetworkBehaviour
         }
     }
 
-    private void OnStressValueChanged(float oldValue, float newValue, bool asServer)
+    private void OnSyncedStressChanged(float oldValue, float newValue, bool asServer)
     {
-        // This is called on all clients when the synced stress value changes
         if (!asServer && IsOwner)
         {
             // Don't overwrite local value completely to avoid jerky visuals
-            // Instead, move local value closer to synced value
             float diff = newValue - _localStressValue;
             _localStressValue += diff * 0.5f;
+
+            OnStressValueChanged?.Invoke(_localStressValue, maxStress);
         }
     }
 
