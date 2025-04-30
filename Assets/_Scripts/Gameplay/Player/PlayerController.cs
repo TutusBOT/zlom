@@ -108,10 +108,11 @@ public class PlayerController : NetworkBehaviour, IUpgradeable
 
     private void HandleMovement()
     {
-        isSprinting =
-            InputBindingManager.Instance.IsActionPressed(InputActions.Sprint)
-            && currentStamina > 0f
-            && !isCrouching;
+        bool isSprintButtonPressed = InputBindingManager.Instance.IsActionPressed(
+            InputActions.Sprint
+        );
+
+        isSprinting = isSprintButtonPressed && currentStamina > 0f && !isCrouching;
 
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
@@ -176,12 +177,12 @@ public class PlayerController : NetworkBehaviour, IUpgradeable
             moveDirection.y = (horizontalSpeed > 0.1f) ? -2.0f : -0.1f;
         }
 
-        HandleStamina();
+        HandleStamina(isSprintButtonPressed);
     }
 
-    private void HandleStamina()
+    private void HandleStamina(bool isSprintButtonPressed)
     {
-        if (isSprinting)
+        if (isSprintButtonPressed)
         {
             currentStamina -= staminaDrainRate * Time.deltaTime;
             currentStamina = Mathf.Max(currentStamina, 0f);
