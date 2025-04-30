@@ -1,7 +1,7 @@
 using FishNet.Object;
 using UnityEngine;
 
-public class NetworkedObjectPickup : NetworkBehaviour
+public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
 {
     public Camera playerCamera;
     public float pickupRange = 5f;
@@ -281,5 +281,23 @@ public class NetworkedObjectPickup : NetworkBehaviour
     private void OnDestroy()
     {
         Valuable.OnItemBroke -= OnItemDestroyed;
+    }
+
+    public bool CanHandleUpgrade(UpgradeType type)
+    {
+        return type == UpgradeType.Range || type == UpgradeType.Strength;
+    }
+
+    public void ApplyUpgrade(UpgradeType type, int level, float value)
+    {
+        if (type == UpgradeType.Range)
+        {
+            pickupRange += value;
+        }
+
+        if (type == UpgradeType.Strength)
+        {
+            moveForce += value;
+        }
     }
 }

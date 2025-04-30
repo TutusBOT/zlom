@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 4735235392766103181}
   - component: {fileID: 4261230266848846684}
   - component: {fileID: 8522427719167573054}
+  - component: {fileID: 6266782422974899355}
   - component: {fileID: 7561023080675721101}
   - component: {fileID: -639547339833864361}
   - component: {fileID: 9221043243608676975}
@@ -444,6 +445,59 @@ MonoBehaviour:
   afflictions: []
   afflictionCooldown: 5
   shakyEyesPrefab: {fileID: 0}
+--- !u!114 &6266782422974899355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 457794671632602189}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd6e330bbac3ed44abfb1bf77f3eb7b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  availableUpgrades:
+  - type: 1
+    name: Stamina
+    description: Stamina i guess
+    icon: {fileID: 0}
+    maxLevel: 0
+    canStackInfinitely: 1
+    baseValue: 1
+    valuePerLevel: 1
+  - type: 0
+    name: Speed
+    description: Speed description
+    icon: {fileID: 0}
+    maxLevel: 0
+    canStackInfinitely: 1
+    baseValue: 0.1
+    valuePerLevel: 0.1
+  - type: 2
+    name: Health
+    description: Health desc
+    icon: {fileID: 0}
+    maxLevel: 0
+    canStackInfinitely: 1
+    baseValue: 20
+    valuePerLevel: 20
+  - type: 4
+    name: Range
+    description: Range desc
+    icon: {fileID: 0}
+    maxLevel: 4
+    canStackInfinitely: 0
+    baseValue: 1
+    valuePerLevel: 1
+  - type: 3
+    name: Strength
+    description: Strength desc
+    icon: {fileID: 0}
+    maxLevel: 10
+    canStackInfinitely: 0
+    baseValue: 0.5
+    valuePerLevel: 0.5
 --- !u!114 &7561023080675721101
 MonoBehaviour:
   m_ObjectHideFlags: 0
