@@ -50,9 +50,6 @@ MonoBehaviour:
   _networkObjectCache: {fileID: -4739393529224919637}
   initialQuota: 1000
   quotaIncreaseAmount: 500
-  moneyText: {fileID: 0}
-  quotaText: {fileID: 0}
-  quotaCompletedNotification: {fileID: 0}
 --- !u!114 &-4739393529224919637
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -89,13 +86,13 @@ MonoBehaviour:
   _enableStateForwarding: 1
   _networkTransform: {fileID: 0}
   _ownerInterpolation: 1
-  _ownerSmoothedProperties: 255
+  _ownerSmoothedProperties: 4294967295
   _adaptiveInterpolation: 3
-  _spectatorSmoothedProperties: 255
+  _spectatorSmoothedProperties: 4294967295
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 21
+  <PrefabId>k__BackingField: 22
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 11256006201141526306
   <SceneId>k__BackingField: 0

@@ -128,16 +128,15 @@ public class DungeonGenerator : NetworkBehaviour
 
     void Start()
     {
-        if (debug)
-            Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
+        if (!debug)
+            return;
+
+        Debug.Log("=== ROOM VARIANT CONFIGURATIONS ===");
 
         foreach (var entry in roomVariantsWrapper.roomVariantsList)
         {
             RoomSize size = entry.size;
             RoomVariantData data = entry.variantData;
-
-            if (!debug)
-                continue;
 
             if (data.allowedNorthDoors != null)
             {
@@ -205,6 +204,8 @@ public class DungeonGenerator : NetworkBehaviour
         PlaceRooms();
 
         RenderDungeon();
+
+        SetupRoomLighting();
 
         if (valuableSpawner != null && IsServerInitialized)
         {
@@ -829,9 +830,6 @@ public class DungeonGenerator : NetworkBehaviour
         return placements;
     }
 
-    // Add a reference to the Door Prefab(s) for instantiation
-    // or an array of door prefabs for variety
-
     void RenderDungeon()
     {
         Dictionary<RoomSize, RoomVariantData> roomVariants = roomVariantsWrapper.ToDictionary();
@@ -1001,6 +999,9 @@ public class DungeonGenerator : NetworkBehaviour
 
     private IEnumerator SpawnEnemiesInRooms()
     {
+        if (!IsServerInitialized)
+            yield break;
+
         yield return new WaitForSeconds(3f);
 
         List<Transform> roomsList = new List<Transform>();
@@ -1017,6 +1018,30 @@ public class DungeonGenerator : NetworkBehaviour
         Transform[] roomsToSpawn = lastThreeRooms.ToArray();
 
         enemySpawner.SpawnEnemies(roomsToSpawn, 3);
+    }
+
+    private void SetupRoomLighting()
+    {
+        int litRooms = 0;
+
+        for (int i = 2; i < transform.childCount; i++)
+        {
+            RoomController room = transform.GetChild(i).GetComponent<RoomController>();
+            if (room == null || room.lightingType == RoomController.RoomLightingType.Unimplemented)
+                continue;
+
+            if (
+                (Random.value < 0.35f && litRooms < 3)
+                || (litRooms == 0 && i == transform.childCount - 1)
+            )
+            {
+                room.lightingType = RoomController.RoomLightingType.Enabled;
+                room.SetupLightSwitch();
+                continue;
+            }
+
+            room.lightingType = RoomController.RoomLightingType.Disabled;
+        }
     }
 
     void OnDrawGizmos()

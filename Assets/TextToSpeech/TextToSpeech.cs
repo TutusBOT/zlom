@@ -1,12 +1,8 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
-using UI = UnityEngine.UI;
 
-sealed class TextToSpeech : MonoBehaviour
+sealed class TextToSpeech
 {
-    [SerializeField]
-    UI.Text _text = null;
-
     public void StartSpeech(string text) => ttsrust_say(text);
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_WEBGL)
