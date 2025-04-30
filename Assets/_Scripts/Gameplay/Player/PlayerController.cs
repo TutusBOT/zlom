@@ -1,7 +1,7 @@
 using FishNet.Object;
 using UnityEngine;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : NetworkBehaviour, IUpgradeable
 {
     [Header("Base setup")]
     public float walkingSpeed = 5.0f;
@@ -38,6 +38,9 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private float cameraYOffset = 0.4f;
     private Camera playerCamera;
+
+    private float baseSprintSpeed;
+    private float baseMaxStamina;
 
     public override void OnStartClient()
     {
@@ -89,6 +92,9 @@ public class PlayerController : NetworkBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         currentStamina = maxStamina;
+
+        baseSprintSpeed = sprintSpeed;
+        baseMaxStamina = maxStamina;
     }
 
     void Update()
@@ -175,8 +181,6 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleStamina()
     {
-        bool sprintKeyHeld = InputBindingManager.Instance.IsActionPressed(InputActions.Sprint);
-
         if (isSprinting)
         {
             currentStamina -= staminaDrainRate * Time.deltaTime;
@@ -186,7 +190,7 @@ public class PlayerController : NetworkBehaviour
             return;
         }
 
-        if (!sprintKeyHeld && currentStamina < maxStamina)
+        if (currentStamina < maxStamina)
         {
             currentStamina += staminaRegenRate * Time.deltaTime;
             currentStamina = Mathf.Min(currentStamina, maxStamina);
@@ -197,23 +201,23 @@ public class PlayerController : NetworkBehaviour
 
     private void HandleCrouch()
     {
-        if (InputBindingManager.Instance.IsActionPressed(InputActions.Crouch))
+        if (
+            InputBindingManager.Instance.IsActionPressed(InputActions.Crouch)
+            && canMove
+            && !isCrouching
+        )
         {
-            if (!isCrouching)
-            {
-                isCrouching = true;
-                characterController.height = crouchHeight;
-                playerCamera.transform.localPosition = new Vector3(0, crouchCameraYOffset, 0);
-            }
+            isCrouching = true;
+            characterController.height = crouchHeight;
+            playerCamera.transform.localPosition = new Vector3(0, crouchCameraYOffset, 0);
+            return;
         }
-        else
+
+        if (isCrouching)
         {
-            if (isCrouching)
-            {
-                isCrouching = false;
-                characterController.height = normalHeight;
-                playerCamera.transform.localPosition = new Vector3(0, cameraYOffset, 0);
-            }
+            isCrouching = false;
+            characterController.height = normalHeight;
+            playerCamera.transform.localPosition = new Vector3(0, cameraYOffset, 0);
         }
     }
 
@@ -241,6 +245,33 @@ public class PlayerController : NetworkBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+    }
+
+    public bool CanHandleUpgrade(UpgradeType type)
+    {
+        return type == UpgradeType.Speed || type == UpgradeType.Stamina;
+    }
+
+    public void ApplyUpgrade(UpgradeType type, int level, float value)
+    {
+        switch (type)
+        {
+            case UpgradeType.Speed:
+                sprintSpeed = baseSprintSpeed * (1f + value);
+                Debug.Log($"Speed upgraded to: {sprintSpeed}");
+                break;
+
+            case UpgradeType.Stamina:
+                float oldMaxStamina = maxStamina;
+                maxStamina = baseMaxStamina + value;
+
+                float staminaRatio = currentStamina / oldMaxStamina;
+                currentStamina = maxStamina * staminaRatio;
+
+                OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+                Debug.Log($"Stamina upgraded to: {maxStamina}");
+                break;
         }
     }
 

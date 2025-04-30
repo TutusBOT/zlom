@@ -3,7 +3,7 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 
-public class PlayerHealth : NetworkBehaviour
+public class PlayerHealth : NetworkBehaviour, IUpgradeable
 {
     [Header("Health Settings")]
     [SerializeField]
@@ -26,6 +26,11 @@ public class PlayerHealth : NetworkBehaviour
     private readonly SyncVar<bool> _syncedIsDead = new SyncVar<bool>();
 
     private bool _isInvulnerable = false;
+    private float _baseMaxHealth;
+
+    public float CurrentHealth => _syncedCurrentHealth.Value;
+    public float MaxHealth => maxHealth;
+    public bool IsDead => _syncedIsDead.Value;
 
     public event Action<float, float> OnHealthChanged;
     public event Action OnDeath;
@@ -35,6 +40,8 @@ public class PlayerHealth : NetworkBehaviour
     {
         _syncedCurrentHealth.OnChange += OnHealthValueChanged;
         _syncedIsDead.OnChange += OnDeadStateChanged;
+
+        _baseMaxHealth = maxHealth;
     }
 
     public override void OnStartServer()
@@ -199,11 +206,6 @@ public class PlayerHealth : NetworkBehaviour
         // Death animation, particle effects, etc.
     }
 
-    // Public accessors
-    public float CurrentHealth => _syncedCurrentHealth.Value;
-    public float MaxHealth => maxHealth;
-    public bool IsDead => _syncedIsDead.Value;
-
     public void SetInvulnerable(bool invulnerable)
     {
         if (!IsOwner && !IsServerInitialized)
@@ -215,5 +217,19 @@ public class PlayerHealth : NetworkBehaviour
     public float GetHealthPercentage()
     {
         return _syncedCurrentHealth.Value / maxHealth;
+    }
+
+    public bool CanHandleUpgrade(UpgradeType type)
+    {
+        return type == UpgradeType.Health;
+    }
+
+    public void ApplyUpgrade(UpgradeType type, int level, float value)
+    {
+        if (type == UpgradeType.Health)
+        {
+            maxHealth = _baseMaxHealth + value;
+            _syncedCurrentHealth.Value = Mathf.Min(_syncedCurrentHealth.Value + value, maxHealth);
+        }
     }
 }

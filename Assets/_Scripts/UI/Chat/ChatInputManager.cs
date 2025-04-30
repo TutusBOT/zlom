@@ -95,14 +95,76 @@ public class ChatInputManager : MonoBehaviour
     private void SendMessage()
     {
         string message = chatInputField.text.Trim();
-        _textToSpeech.StartSpeech(message);
-        Debug.Log($"Sending chat message: {message}");
 
-        if (!string.IsNullOrEmpty(message))
+        if (string.IsNullOrEmpty(message))
         {
-            _player.GetPlayerChatDisplay().SendChatMessageServerRpc(message);
+            CloseChat();
+            return;
         }
 
+        if (message.StartsWith("!"))
+        {
+            ProcessCommand(message);
+            CloseChat();
+            return;
+        }
+
+        _textToSpeech.StartSpeech(message);
+        _player.GetPlayerChatDisplay().SendChatMessageServerRpc(message);
+
         CloseChat();
+    }
+
+    private bool ProcessCommand(string command)
+    {
+        command = command.ToLower();
+
+        if (command == "!upgrade stamina")
+        {
+            UpgradePlayerStat(UpgradeType.Stamina);
+            return true;
+        }
+
+        if (command == "!upgrade speed")
+        {
+            UpgradePlayerStat(UpgradeType.Speed);
+            return true;
+        }
+
+        if (command == "!upgrade health")
+        {
+            UpgradePlayerStat(UpgradeType.Health);
+            return true;
+        }
+
+        if (command == "!upgrade strength")
+        {
+            UpgradePlayerStat(UpgradeType.Strength);
+            return true;
+        }
+
+        if (command == "!upgrade range")
+        {
+            UpgradePlayerStat(UpgradeType.Range);
+            return true;
+        }
+
+        Debug.Log($"Unknown command: {command}");
+        return false;
+    }
+
+    private void UpgradePlayerStat(UpgradeType upgradeType)
+    {
+        if (_player == null)
+            return;
+
+        PlayerUpgrades playerUpgrades = _player.GetComponent<PlayerUpgrades>();
+        if (playerUpgrades == null)
+        {
+            Debug.LogWarning("PlayerUpgrades component not found on player");
+            return;
+        }
+
+        playerUpgrades.ApplyUpgrade(upgradeType);
     }
 }
