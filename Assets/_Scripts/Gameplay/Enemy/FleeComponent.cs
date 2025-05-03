@@ -51,8 +51,6 @@ public class FleeComponent : MonoBehaviour
     private bool _hasValidPath;
     private float _nextPathUpdateTime;
     private int _attemptsMade;
-
-    // Cache for performance
     private NavMeshPath _path;
     private List<Room> _nearbyRooms = new List<Room>();
     private Dictionary<Collider, bool> _roomLightCache = new Dictionary<Collider, bool>();
@@ -154,62 +152,18 @@ public class FleeComponent : MonoBehaviour
     {
         fleePoint = Vector3.zero;
 
-        // Get rooms from DungeonGenerator
         _nearbyRooms = DungeonGenerator.Instance.Rooms;
-        Debug.Log($"Found {_nearbyRooms.Count} rooms for fleeing.");
 
         if (_nearbyRooms.Count == 0)
             return false;
 
-        // Determine which room the agent is currently in
-        Room currentRoom = null;
-        foreach (Room room in _nearbyRooms)
-        {
-            // Calculate room bounds in world space
-            Bounds roomBounds = GetRoomBounds(room);
+        Room currentRoom = FindCurrentRoom();
 
-            if (roomBounds.Contains(transform.position))
-            {
-                currentRoom = room;
-                break;
-            }
-        }
-
-        // Sort rooms - prioritizing different rooms over current room and unlit over lit
-        _nearbyRooms.Sort(
-            (a, b) =>
-            {
-                // First priority: Different room over current room
-                bool aIsCurrent = (a == currentRoom);
-                bool bIsCurrent = (b == currentRoom);
-
-                if (!aIsCurrent && bIsCurrent)
-                    return -1; // A is better (not current room)
-                if (aIsCurrent && !bIsCurrent)
-                    return 1; // B is better (not current room)
-
-                // Second priority: Unlit over lit
-                bool isRoomALit = IsRoomLit(a);
-                bool isRoomBLit = IsRoomLit(b);
-
-                if (!isRoomALit && isRoomBLit)
-                    return -1; // A is better (unlit)
-                if (isRoomALit && !isRoomBLit)
-                    return 1; // B is better (unlit)
-
-                // Third priority: Distance from danger
-                Bounds boundsA = GetRoomBounds(a);
-                Bounds boundsB = GetRoomBounds(b);
-                float distA = Vector3.Distance(boundsA.center, _fleeFromTarget.position);
-                float distB = Vector3.Distance(boundsB.center, _fleeFromTarget.position);
-                return distB.CompareTo(distA); // Further is better
-            }
-        );
+        SortRoomsByPriority(currentRoom);
 
         // Try unlit rooms (non-current first)
         foreach (Room room in _nearbyRooms)
         {
-            // Skip current room in first pass
             if (room == currentRoom)
                 continue;
 
@@ -298,12 +252,55 @@ public class FleeComponent : MonoBehaviour
         return false;
     }
 
-    // Helper to get room bounds in world space based on DungeonGenerator's Room struct
+    private Room FindCurrentRoom()
+    {
+        foreach (Room room in _nearbyRooms)
+        {
+            Bounds roomBounds = GetRoomBounds(room);
+            if (roomBounds.Contains(transform.position))
+                return room;
+        }
+        return null;
+    }
+
+    private void SortRoomsByPriority(Room currentRoom)
+    {
+        _nearbyRooms.Sort(
+            (a, b) =>
+            {
+                // Different room check
+                bool aIsCurrent = a == currentRoom;
+                bool bIsCurrent = b == currentRoom;
+
+                if (!aIsCurrent && bIsCurrent)
+                    return -1;
+                if (aIsCurrent && !bIsCurrent)
+                    return 1;
+
+                // Lighting check
+                bool isRoomALit = IsRoomLit(a);
+                bool isRoomBLit = IsRoomLit(b);
+
+                if (!isRoomALit && isRoomBLit)
+                    return -1;
+                if (isRoomALit && !isRoomBLit)
+                    return 1;
+
+                // Distance check
+                Bounds boundsA = GetRoomBounds(a);
+                Bounds boundsB = GetRoomBounds(b);
+                float distA = Vector3.Distance(boundsA.center, _fleeFromTarget.position);
+                float distB = Vector3.Distance(boundsB.center, _fleeFromTarget.position);
+
+                return distB.CompareTo(distA); // Further is better
+            }
+        );
+    }
+
     private Bounds GetRoomBounds(Room room)
     {
         float gridUnitSize = DungeonGenerator.Instance.gridUnitSize;
 
-        // Calculate actual world positions
         float offsetX = -(
             (
                 DungeonGenerator.Instance.Rooms[0].xOrigin
@@ -323,19 +320,13 @@ public class FleeComponent : MonoBehaviour
             (room.zOrigin + (room.length / 2f)) * gridUnitSize + offsetZ
         );
 
-        Vector3 size = new Vector3(
-            room.width * gridUnitSize,
-            4f, // Room height - adjust if needed
-            room.length * gridUnitSize
-        );
+        Vector3 size = new Vector3(room.width * gridUnitSize, 4f, room.length * gridUnitSize);
 
         return new Bounds(center, size);
     }
 
-    // Modified IsRoomLit to work with Room struct
     private bool IsRoomLit(Room room)
     {
-        // First check if this room contains the light source
         Bounds roomBounds = GetRoomBounds(room);
         if (_fleeFromTarget != null && roomBounds.Contains(_fleeFromTarget.position))
             return true;
@@ -348,7 +339,6 @@ public class FleeComponent : MonoBehaviour
 
             if (controller != null)
             {
-                // Try to match the room by position
                 Bounds transformBounds = new Bounds(child.position, Vector3.one * 0.1f);
                 if (roomBounds.Intersects(transformBounds))
                 {

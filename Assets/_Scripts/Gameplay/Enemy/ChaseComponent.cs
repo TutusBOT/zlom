@@ -47,7 +47,6 @@ public class ChaseComponent : MonoBehaviour
         _isActive = true;
         _pathUpdateTimer = 0f; // Force immediate update
 
-        // Set animation
         if (animator != null)
             animator.SetBool(chaseAnimParam, true);
     }
@@ -57,16 +56,13 @@ public class ChaseComponent : MonoBehaviour
         _isActive = false;
         _target = null;
 
-        // Reset animation
         if (animator != null)
             animator.SetBool(chaseAnimParam, false);
 
-        // Stop the agent
         if (_agent != null)
             _agent.ResetPath();
     }
 
-    // Check if target is close enough for other actions (like attacking)
     public bool IsTargetReached()
     {
         if (_target == null || !_isActive)
@@ -75,14 +71,11 @@ public class ChaseComponent : MonoBehaviour
         return Vector3.Distance(transform.position, _target.position) <= minDistanceToTarget;
     }
 
-    // Check if we've lost the target completely
     public bool IsTargetLost()
     {
         return !_isActive || _target == null;
     }
 
-    // Update the last known position of the target
-    // Called by external systems when target is spotted
     public void UpdateLastKnownPosition(Vector3 position)
     {
         _lastKnownPosition = position;
@@ -93,11 +86,9 @@ public class ChaseComponent : MonoBehaviour
         if (!_isActive || _agent == null)
             return;
 
-        // Update animation speed
         if (animator != null)
             animator.SetFloat(speedParam, _agent.velocity.magnitude);
 
-        // Check for target proximity
         if (_target != null)
         {
             float distanceToTarget = Vector3.Distance(transform.position, _target.position);
@@ -125,7 +116,6 @@ public class ChaseComponent : MonoBehaviour
             // Head to last known position if target reference is lost
             if (Vector3.Distance(transform.position, _lastKnownPosition) < minDistanceToTarget)
             {
-                // We've reached last known position and target is gone
                 StopChasing();
             }
         }

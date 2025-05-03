@@ -27,15 +27,12 @@ public partial class AttackAction : Action
 
     protected override Status OnStart()
     {
-        // Reset state
         _attackInitiated = false;
 
-        // Get the AttackComponent from the agent
         if (Agent.Value != null)
         {
             _attackComponent = Agent.Value.GetComponent<AttackComponent>();
 
-            // Component not found
             if (_attackComponent == null)
                 return Status.Failure;
 
@@ -53,7 +50,6 @@ public partial class AttackAction : Action
 
     protected override Status OnUpdate()
     {
-        // Validate references
         if (Agent.Value == null || Target.Value == null || _attackComponent == null)
             return Status.Failure;
 
@@ -62,7 +58,6 @@ public partial class AttackAction : Action
 
         if (!_attackInitiated)
         {
-            // Try to initiate attack
             _attackInitiated = _attackComponent.TryAttack(Target.Value);
 
             if (!_attackInitiated)

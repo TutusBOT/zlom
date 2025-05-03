@@ -26,14 +26,12 @@ public partial class ChaseAction : Action
 
     protected override Status OnStart()
     {
-        // Validate required references
         if (Agent.Value == null || Target.Value == null)
         {
             Debug.LogWarning("ChaseAction: Missing Agent or Target reference");
             return Status.Failure;
         }
 
-        // Get or find chase component
         chaseComp = ChaseComponent.Value;
         if (chaseComp == null)
         {
@@ -49,7 +47,6 @@ public partial class ChaseAction : Action
             return Status.Failure;
         }
 
-        // Start chasing
         chaseComp.StartChasing(Target.Value.transform);
 
         return Status.Running;
@@ -57,25 +54,20 @@ public partial class ChaseAction : Action
 
     protected override Status OnUpdate()
     {
-        // Check if any references are invalid
         if (chaseComp == null || Target.Value == null)
             return Status.Failure;
 
-        // Check if target is lost
         if (chaseComp.IsTargetLost())
             return Status.Failure;
 
-        // Check if we've reached the target
         if (chaseComp.IsTargetReached())
             return Status.Success;
 
-        // Still chasing
         return Status.Running;
     }
 
     protected override void OnEnd()
     {
-        // Properly stop chasing when this node ends
         if (chaseComp != null)
             chaseComp.StopChasing();
     }

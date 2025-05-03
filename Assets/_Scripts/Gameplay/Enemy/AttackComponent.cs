@@ -51,16 +51,13 @@ public class AttackComponent : MonoBehaviour
 
         _currentTarget = target;
 
-        // Check if on cooldown
         if (_attackTimer > 0)
             return false;
 
-        // Check if target is in range
         float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
         if (distanceToTarget > attackRange)
             return false;
 
-        // Initiate attack
         StartAttack();
         return true;
     }
@@ -70,22 +67,18 @@ public class AttackComponent : MonoBehaviour
     /// </summary>
     private void StartAttack()
     {
-        // Play attack animation
         if (_animator != null)
             _animator.SetBool(attackAnimParam, true);
 
-        // Deal damage to player
         if (_currentTarget != null)
         {
             PlayerHealth playerHealth = _currentTarget.GetComponent<PlayerHealth>();
             if (playerHealth != null && !playerHealth.IsDead)
             {
-                // Deal damage
                 playerHealth.TakeDamage(damage, gameObject);
             }
         }
 
-        // Set cooldown
         _attackTimer = cooldownDuration;
         _hasAttacked = true;
     }

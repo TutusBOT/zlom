@@ -15,7 +15,6 @@ public partial class FleeAction : Action
 
     protected override Status OnStart()
     {
-        // Validate required references
         if (Agent.Value == null || Target.Value == null)
         {
             Debug.LogWarning("FleeAction: Missing Agent or Target reference");
@@ -48,21 +47,17 @@ public partial class FleeAction : Action
 
     protected override Status OnUpdate()
     {
-        // Check if any references are missing
         if (fleeComponent == null || Target.Value == null)
             return Status.Failure;
 
-        // Check if fleeing is complete
         if (fleeComponent.IsFleeingComplete())
             return Status.Success;
 
-        // Still fleeing
         return Status.Running;
     }
 
     protected override void OnEnd()
     {
-        // Clean up - stop fleeing when node execution ends
         if (fleeComponent != null)
         {
             fleeComponent.StopFleeing();

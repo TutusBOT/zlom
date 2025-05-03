@@ -22,12 +22,10 @@ public partial class IsInLightCondition : Condition
         if (Agent.Value == null)
             return false;
 
-        // Get light detector component
         LightDetector detector = Agent.Value.GetComponent<LightDetector>();
         if (detector == null)
             return false;
 
-        // Simple check - is the agent currently in light?
         if (detector.IsInLight)
             return true;
 
