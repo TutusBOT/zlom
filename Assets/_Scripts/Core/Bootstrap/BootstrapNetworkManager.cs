@@ -86,7 +86,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
                 {
                     UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
 
-                    DungeonGenerator dg = FindFirstObjectByType<DungeonGenerator>();
+                    DungeonGenerator dg = DungeonGenerator.Instance;
                     if (dg != null)
                     {
                         DungeonGenerator.DungeonGenerated += OnDungeonGenerated;
