@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class FleeComponent : MonoBehaviour
+public class FleeComponent : NetworkBehaviour
 {
     [Header("Flee Settings")]
     [SerializeField]
@@ -66,6 +67,9 @@ public class FleeComponent : MonoBehaviour
 
     private void Update()
     {
+        if (!IsServerInitialized)
+            return;
+
         if (!_isFleeing)
             return;
 

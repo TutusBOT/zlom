@@ -1,7 +1,8 @@
+using FishNet.Object;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class ChaseComponent : MonoBehaviour
+public class ChaseComponent : NetworkBehaviour
 {
     [Header("Chase Settings")]
     [SerializeField]
@@ -83,6 +84,9 @@ public class ChaseComponent : MonoBehaviour
 
     private void Update()
     {
+        if (!IsServerInitialized)
+            return;
+
         if (!_isActive || _agent == null)
             return;
 
