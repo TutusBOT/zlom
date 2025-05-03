@@ -53,6 +53,7 @@ public struct ConnectionPoint
 
 public class DungeonGenerator : NetworkBehaviour
 {
+    public static DungeonGenerator Instance { get; private set; }
     public static event Action DungeonGenerated;
     public const int DEFAULT_GRID_SIZE_X = 50;
     public const int DEFAULT_GRID_SIZE_Z = 50;
@@ -106,6 +107,7 @@ public class DungeonGenerator : NetworkBehaviour
 
     private CellType[,] grid;
     private List<Room> rooms = new List<Room>();
+    public List<Room> Rooms => rooms;
 
     [Header("Enemy Spawning")]
     [SerializeField]
@@ -125,6 +127,11 @@ public class DungeonGenerator : NetworkBehaviour
 
     [SerializeField]
     GameObject doorPrefab;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     void Start()
     {

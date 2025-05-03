@@ -2,7 +2,7 @@ using FishNet.Object;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class WanderingAI : NetworkBehaviour
+public class WanderComponent : NetworkBehaviour
 {
     public float wanderRadius = 10f;
     public float wanderTimer = 5f;

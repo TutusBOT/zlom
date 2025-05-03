@@ -341,8 +341,6 @@ MonoBehaviour:
       variantData:
         normalVariants:
         - {fileID: 7510496102614955654, guid: 0e0155e05507fb64b94c0bf5e1ef64a5, type: 3}
-        - {fileID: 7985516317795483297, guid: 29811583ae268ad4c8735e53bfb24cf9, type: 3}
-        - {fileID: 3483105086249746092, guid: 9462ac425251da641a61d0723787e134, type: 3}
         - {fileID: 8730771594713419465, guid: 093c4a2d2b93bb043bf2a4803b46aa96, type: 3}
         allowDoorsAnywhere: 1
         allowedNorthDoors: []
@@ -452,6 +450,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1132706546620574070, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2791475444080005620, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 405
@@ -463,6 +465,10 @@ PrefabInstance:
     - target: {fileID: 4998657920035889592, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 464.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 5417612244116161436, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6294612499620849907, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: <SceneId>k__BackingField
@@ -599,10 +605,8 @@ MonoBehaviour:
   - prefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
     spawnChance: 100
     maxCount: 10
-    tier: 1
+    tier: 3
     currentCount: 0
-  maxEnemies: 1
-  spawnInterval: 5
   minDistanceFromPlayer: 30
   maxDistanceFromPlayer: 100
   debugMode: 0
