@@ -1,7 +1,8 @@
+using FishNet.Object;
 using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
-public class AttackComponent : MonoBehaviour
+public class AttackComponent : NetworkBehaviour
 {
     [Header("Attack Settings")]
     [Tooltip("Damage amount to deal")]
@@ -46,6 +47,9 @@ public class AttackComponent : MonoBehaviour
     /// <returns>True if attack was initiated, false otherwise</returns>
     public bool TryAttack(GameObject target)
     {
+        if (!IsServerInitialized)
+            return false;
+
         if (target == null)
             return false;
 

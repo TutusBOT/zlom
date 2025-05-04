@@ -31,14 +31,16 @@ public class RangeDetector : MonoBehaviour
             Vector3 directionToTarget = collider.transform.position - transform.position;
             float angle = Vector3.Angle(transform.forward, directionToTarget);
 
-            if (angle <= detectionAngle / 2)
+            if (angle > detectionAngle / 2)
+                continue;
+
+            float distance = Vector3.Distance(transform.position, collider.transform.position);
+            bool isPlayerDead = collider.gameObject.GetComponent<Player>().IsDead();
+
+            if (distance < detectionRadius && angle < closestAngle && !isPlayerDead)
             {
-                float distance = Vector3.Distance(transform.position, collider.transform.position);
-                if (distance < detectionRadius && angle < closestAngle)
-                {
-                    closestTarget = collider.gameObject;
-                    closestAngle = angle;
-                }
+                closestTarget = collider.gameObject;
+                closestAngle = angle;
             }
         }
 

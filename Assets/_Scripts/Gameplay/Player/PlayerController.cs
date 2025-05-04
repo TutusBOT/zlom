@@ -236,17 +236,6 @@ public class PlayerController : NetworkBehaviour, IUpgradeable
     public void ToggleControls(bool enabled)
     {
         canMove = enabled;
-
-        if (enabled)
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 
     public bool CanHandleUpgrade(UpgradeType type)
