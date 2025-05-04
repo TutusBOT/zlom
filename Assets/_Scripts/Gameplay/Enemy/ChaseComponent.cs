@@ -90,8 +90,8 @@ public class ChaseComponent : NetworkBehaviour
         if (!_isActive || _agent == null)
             return;
 
-        if (animator != null)
-            animator.SetFloat(speedParam, _agent.velocity.magnitude);
+        // if (animator != null)
+        //     animator.SetFloat(speedParam, _agent.velocity.magnitude);
 
         if (_target != null)
         {

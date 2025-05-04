@@ -136,9 +136,6 @@ public class PlayerHealth : NetworkBehaviour, IUpgradeable
             return;
 
         _syncedIsDead.Value = true;
-
-        // Handle any server-side death logic
-        // ...
     }
 
     private void OnHealthValueChanged(float oldValue, float newValue, bool asServer)
@@ -154,11 +151,11 @@ public class PlayerHealth : NetworkBehaviour, IUpgradeable
 
             PlayDeathEffectObserversRpc();
 
-            // Handle any visual/gameplay changes for death
             if (IsOwner)
             {
-                // Player-specific death logic (disable input, etc.)
-                // ...
+                Player player = GetComponent<Player>();
+                player.ToggleControls(false, false, true);
+                HUD.Instance.ToggleStatsDisplay(false);
             }
         }
         else if (oldValue == true && newValue == false)
@@ -166,11 +163,10 @@ public class PlayerHealth : NetworkBehaviour, IUpgradeable
             // Player was just respawned
             OnRespawn?.Invoke();
 
-            // Handle any visual/gameplay changes for respawn
             if (IsOwner)
             {
-                // Player-specific respawn logic (re-enable input, etc.)
-                // ...
+                GetComponent<Player>().ToggleControls(true);
+                HUD.Instance.ToggleStatsDisplay(true);
             }
         }
     }
