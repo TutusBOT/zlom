@@ -20,6 +20,9 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
         Enabled, // Has lights that can be powered
     }
 
+    [SerializeField]
+    public GameObject[] waypoints;
+
     [Header("Lighting")]
     [SerializeField]
     public RoomLightingType lightingType = RoomLightingType.Unimplemented;
@@ -144,7 +147,6 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
             if (wall != null)
             {
                 wall.SetActive(false);
-                Debug.Log($"Disabled wall at {localPos} facing {direction}");
             }
             return true;
         }

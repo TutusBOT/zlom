@@ -56,6 +56,7 @@ MonoBehaviour:
   - {fileID: 7092854682982753630, guid: abd634d01b93da94eaccc9ad3014b2bb, type: 3}
   - {fileID: 8084073767875837982, guid: 4fcc0d14bd9a362468561c4ffd6ba4e2, type: 3}
   - {fileID: 8495833507254179227, guid: 6a2ad7a39f3f21544a49054c6a3cd3b8, type: 3}
+  - {fileID: 6373276048924799431, guid: 08129e5c90ca86649abea7a37383d164, type: 3}
   networkSystemPrefabs:
   - {fileID: 8925339826831650291, guid: 21e255318da60b640b568ad0dae6592f, type: 3}
   - {fileID: 1737599865022995632, guid: 0341a2bf0fd41454db2f5dbbdd850516, type: 3}

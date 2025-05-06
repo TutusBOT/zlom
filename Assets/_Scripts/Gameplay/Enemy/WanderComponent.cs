@@ -6,6 +6,7 @@ public class WanderComponent : NetworkBehaviour
 {
     public float wanderRadius = 10f;
     public float wanderTimer = 5f;
+    public bool isWandering = false;
 
     private NavMeshAgent agent;
     private float timer;
@@ -18,7 +19,7 @@ public class WanderComponent : NetworkBehaviour
 
     private void Update()
     {
-        if (!IsServerInitialized)
+        if (!IsServerInitialized || !isWandering)
             return;
         timer += Time.deltaTime;
 

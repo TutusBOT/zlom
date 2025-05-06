@@ -62,7 +62,7 @@ public class LineOfSightDetector : MonoBehaviour
         if (!showDebugVisuals || !enabled)
             return;
 
-        Gizmos.color = DetectedTarget ? Color.green : Color.yellow;
+        Gizmos.color = DetectedTarget ? Color.green : Color.blue;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
 
         Gizmos.color = new Color(1, 0, 0, 0.3f);

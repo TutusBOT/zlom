@@ -120,7 +120,7 @@ public class EnemySpawnController : NetworkBehaviour
         return availablePrefabs[0];
     }
 
-    public void SpawnEnemies(Transform[] roomsTransform)
+    public void SpawnEnemies(Transform[] roomsTransform, List<GameObject> waypoints)
     {
         if (roomsTransform == null || roomsTransform.Length == 0)
         {
@@ -151,7 +151,7 @@ public class EnemySpawnController : NetworkBehaviour
 
             GameObject enemyPrefab = SelectRandomEnemy().prefab;
 
-            SpawnEnemy(enemyPrefab, spawnPosition);
+            SpawnEnemy(enemyPrefab, spawnPosition, waypoints);
 
             if (debugMode)
             {
@@ -160,7 +160,11 @@ public class EnemySpawnController : NetworkBehaviour
         }
     }
 
-    public void SpawnEnemies(Transform[] roomsTransform, int powerBudget)
+    public void SpawnEnemies(
+        Transform[] roomsTransform,
+        List<GameObject> waypoints,
+        int powerBudget
+    )
     {
         if (roomsTransform == null || roomsTransform.Length == 0)
         {
@@ -193,6 +197,7 @@ public class EnemySpawnController : NetworkBehaviour
 
             EnemySpawnConfig enemy = SelectRandomEnemy(remainingPower);
             remainingPower -= enemy.tier;
+
             if (debugMode)
             {
                 Debug.Log("-------------------------------------------------------");
@@ -200,13 +205,18 @@ public class EnemySpawnController : NetworkBehaviour
                 Debug.Log($"Remaining power: {remainingPower}");
             }
 
-            SpawnEnemy(enemy.prefab, spawnPosition);
+            SpawnEnemy(enemy.prefab, spawnPosition, waypoints);
         }
     }
 
-    public void SpawnEnemy(GameObject enemyPrefab, Vector3 spawnPosition)
+    public void SpawnEnemy(
+        GameObject enemyPrefab,
+        Vector3 spawnPosition,
+        List<GameObject> waypoints
+    )
     {
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
+        enemy.GetComponent<Enemy>().waypoints = waypoints;
 
         var enemyNetObj = enemy.GetComponent<NetworkObject>();
 
