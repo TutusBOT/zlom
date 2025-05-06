@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using Unity.Behavior;
@@ -12,7 +13,14 @@ public class Enemy : NetworkBehaviour, IHear
     private readonly SyncVar<float> _currentHealth = new();
 
     [Header("Movement")]
-    public float moveSpeed = 3.5f;
+    [Tooltip("Regular patrol/walking speed")]
+    [SerializeField]
+    private float moveSpeed = 3f;
+
+    [Tooltip("Chase/running speed")]
+    [SerializeField]
+    private float runSpeed = 5f;
+    public List<GameObject> waypoints = new List<GameObject>();
 
     [Header("Sound Detection")]
     [SerializeField]
@@ -28,6 +36,16 @@ public class Enemy : NetworkBehaviour, IHear
     {
         base.OnStartServer();
         _currentHealth.Value = maxHealth;
+
+        behaviorGraph.SetVariableValue("Waypoints", waypoints);
+
+        ChaseComponent chaseComp = GetComponent<ChaseComponent>();
+        if (chaseComp != null)
+            chaseComp.Initialize(moveSpeed, runSpeed);
+
+        PatrolComponent patrolComp = GetComponent<PatrolComponent>();
+        if (patrolComp != null)
+            patrolComp.Initialize(moveSpeed);
     }
 
     public virtual void TakeDamage(float amount)

@@ -21,6 +21,8 @@ public partial class WaneringAction : Action
 
     protected override Status OnStart()
     {
+        WanderComponent wanderComp = WanderingBehavior.Value;
+        wanderComp.isWandering = true;
         return Status.Running;
     }
 
@@ -29,5 +31,9 @@ public partial class WaneringAction : Action
         return Status.Success;
     }
 
-    protected override void OnEnd() { }
+    protected override void OnEnd()
+    {
+        WanderComponent wanderComp = WanderingBehavior.Value;
+        wanderComp.isWandering = false;
+    }
 }

@@ -13,6 +13,8 @@ public class ChaseComponent : NetworkBehaviour
 
     [SerializeField]
     private float minDistanceToTarget = 1.5f;
+    private float walkSpeed = 3f;
+    private float chaseSpeed = 5f;
 
     [Header("Animation")]
     [SerializeField]
@@ -38,6 +40,12 @@ public class ChaseComponent : NetworkBehaviour
             animator = GetComponent<Animator>();
     }
 
+    public void Initialize(float walkSpeed, float chaseSpeed)
+    {
+        this.walkSpeed = walkSpeed;
+        this.chaseSpeed = chaseSpeed;
+    }
+
     public void StartChasing(Transform targetTransform)
     {
         if (targetTransform == null)
@@ -45,6 +53,7 @@ public class ChaseComponent : NetworkBehaviour
 
         _target = targetTransform;
         _lastKnownPosition = _target.position;
+        _agent.speed = chaseSpeed;
         _isActive = true;
         _pathUpdateTimer = 0f; // Force immediate update
 
@@ -56,6 +65,7 @@ public class ChaseComponent : NetworkBehaviour
     {
         _isActive = false;
         _target = null;
+        _agent.speed = walkSpeed;
 
         if (animator != null)
             animator.SetBool(chaseAnimParam, false);
