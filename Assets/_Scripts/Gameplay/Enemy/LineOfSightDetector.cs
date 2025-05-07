@@ -32,25 +32,27 @@ public class LineOfSightDetector : MonoBehaviour
             Vector3 directionToTarget = (
                 collider.transform.position - transform.position
             ).normalized;
+
             float angle = Vector3.Angle(transform.forward, directionToTarget);
 
-            if (
-                angle <= detectionAngle / 2
-                && Physics.Raycast(
-                    transform.position + Vector3.up * 1.5f,
-                    directionToTarget,
-                    out RaycastHit hit,
-                    detectionRadius
-                )
-                && hit.collider.gameObject == collider.gameObject
-                && angle < closestAngle
-            )
+            bool angleCheck = angle <= detectionAngle / 2;
+            bool raycastHit = Physics.Raycast(
+                transform.position,
+                directionToTarget,
+                out RaycastHit hit,
+                detectionRadius,
+                detectionMask
+            );
+
+            bool hitValidation = raycastHit && hit.collider.gameObject == collider.gameObject;
+            bool closestCheck = angle < closestAngle;
+
+            if (angleCheck && hitValidation && closestCheck)
             {
                 closestTarget = collider.gameObject;
                 closestAngle = angle;
             }
         }
-
         DetectedTarget = closestTarget;
         return DetectedTarget;
     }
@@ -60,7 +62,7 @@ public class LineOfSightDetector : MonoBehaviour
         if (!showDebugVisuals || !enabled)
             return;
 
-        Gizmos.color = DetectedTarget ? Color.green : Color.yellow;
+        Gizmos.color = DetectedTarget ? Color.green : Color.blue;
         Gizmos.DrawWireSphere(transform.position, detectionRadius);
 
         Gizmos.color = new Color(1, 0, 0, 0.3f);

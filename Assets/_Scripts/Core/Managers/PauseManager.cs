@@ -91,6 +91,8 @@ public class PauseManager : NetworkBehaviour
         _isPaused = true;
         transform.parent.GetComponent<Player>().ToggleControls(false);
 
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         // Show pause menu
         if (_pauseMenuPanel != null)
             _pauseMenuPanel.SetActive(true);
@@ -101,6 +103,8 @@ public class PauseManager : NetworkBehaviour
         _isPaused = false;
         transform.parent.GetComponent<Player>().ToggleControls(true);
 
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         // Hide pause menu
         if (_pauseMenuPanel != null)
             _pauseMenuPanel.SetActive(false);

@@ -100,6 +100,7 @@ MonoBehaviour:
   crosshairController: {fileID: 3921108572199274389}
   playerController: {fileID: 7707114347477242969}
   playerChatDisplay: {fileID: 1176229741873664378}
+  playerHealth: {fileID: 1551341732592336864}
 --- !u!114 &7707114347477242969
 MonoBehaviour:
   m_ObjectHideFlags: 0

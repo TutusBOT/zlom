@@ -1,4 +1,6 @@
 using System.Collections;
+using FishNet;
+using FishNet.Object;
 using TMPro;
 using UnityEngine;
 
@@ -115,9 +117,9 @@ public class ChatInputManager : MonoBehaviour
         CloseChat();
     }
 
-    private bool ProcessCommand(string command)
+    private bool ProcessCommand(string input)
     {
-        command = command.ToLower();
+        string command = input.ToLower();
 
         if (command == "!upgrade stamina")
         {
@@ -149,6 +151,13 @@ public class ChatInputManager : MonoBehaviour
             return true;
         }
 
+        if (command.StartsWith("!spawn "))
+        {
+            string itemName = input.Substring(7).Trim();
+            SpawnItem(itemName);
+            return true;
+        }
+
         Debug.Log($"Unknown command: {command}");
         return false;
     }
@@ -166,5 +175,40 @@ public class ChatInputManager : MonoBehaviour
         }
 
         playerUpgrades.ApplyUpgrade(upgradeType);
+    }
+
+    private void SpawnItem(string itemName)
+    {
+        if (_player == null)
+            return;
+
+        string prefabPath = "Assets/_Prefab/Item/Variants/";
+
+        // Default to Healthpack if itemName is empty
+        if (string.IsNullOrEmpty(itemName))
+            prefabPath += "Healthpack.prefab";
+        else
+            prefabPath += itemName + ".prefab";
+
+        GameObject prefab = null;
+
+#if UNITY_EDITOR
+        prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+#else
+        Debug.LogError("AssetDatabase is only available in editor mode!");
+        return;
+#endif
+        if (prefab == null)
+        {
+            Debug.LogError($"Failed to load prefab: {prefabPath}");
+            return;
+        }
+
+        Vector3 spawnPosition =
+            _player.transform.position + _player.transform.forward * 1.5f + Vector3.up * 0.5f;
+
+        GameObject item = Instantiate(prefab, spawnPosition, Quaternion.identity);
+        NetworkObject networkObject = item.GetComponent<NetworkObject>();
+        InstanceFinder.ServerManager.Spawn(networkObject);
     }
 }

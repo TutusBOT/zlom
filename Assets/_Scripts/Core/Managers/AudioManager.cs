@@ -38,7 +38,8 @@ public class AudioManager : MonoBehaviour
         Vector3 position,
         float volume = 1.0f,
         float pitch = 1.0f,
-        float spatialBlend = 1.0f
+        float spatialBlend = 1.0f,
+        bool notifyAI = true
     )
     {
         if (clip == null)
@@ -61,6 +62,9 @@ public class AudioManager : MonoBehaviour
         Destroy(tempAudio, clip.length + 0.1f);
 
         // Notify AI system about sound
+        if (!notifyAI)
+            return;
+
         float range = source.maxDistance;
         Sound sound = new Sound(position, range);
         Sounds.MakeSound(sound);

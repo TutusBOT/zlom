@@ -17171,6 +17171,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1132706546620574070, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2791475444080005620, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 853
@@ -17190,6 +17194,10 @@ PrefabInstance:
     - target: {fileID: 4108437998720690970, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: m_ReferenceResolution.y
       value: 1080
+      objectReference: {fileID: 0}
+    - target: {fileID: 5417612244116161436, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6294612499620849907, guid: 79ba301b834229644a58c0769a39cf27, type: 3}
       propertyPath: <SceneId>k__BackingField

@@ -24,6 +24,9 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private PlayerChatDisplay playerChatDisplay;
 
+    [SerializeField]
+    private PlayerHealth playerHealth;
+
     private void Awake()
     {
         if (stressController == null)
@@ -46,6 +49,9 @@ public class Player : NetworkBehaviour
 
         if (playerChatDisplay == null)
             Debug.LogError("PlayerChatDisplay is not assigned in the inspector.");
+
+        if (playerHealth == null)
+            Debug.LogError("PlayerHealth is not assigned in the inspector.");
     }
 
     public override void OnStartClient()
@@ -80,6 +86,10 @@ public class Player : NetworkBehaviour
 
     public PlayerChatDisplay GetPlayerChatDisplay() => playerChatDisplay;
 
+    public PlayerHealth GetPlayerHealth() => playerHealth;
+
+    public bool IsDead() => playerHealth.IsDead;
+
     public bool IsIsolated(float distance)
     {
         return !PlayerManager.Instance.IsAnyPlayerInRange(transform.position, distance, this);
@@ -87,8 +97,26 @@ public class Player : NetworkBehaviour
 
     public void ToggleControls(bool enable)
     {
+        if (playerHealth.IsDead && enable)
+            return;
+
         flashlightController.enabled = enable;
         playerController.ToggleControls(enable);
         voiceChatManager.enabled = enable;
+        crosshairController.enabled = enable;
+    }
+
+    public void ToggleControls(
+        bool enableFlashlight,
+        bool enablePlayerController,
+        bool enableVoiceChat
+    )
+    {
+        if (playerHealth.IsDead && enableFlashlight)
+            return;
+
+        flashlightController.enabled = enableFlashlight;
+        playerController.ToggleControls(enablePlayerController);
+        voiceChatManager.enabled = enableVoiceChat;
     }
 }

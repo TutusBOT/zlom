@@ -12,6 +12,7 @@ public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
     public float maxSpringForce = 20f;
     public Transform playerHand;
 
+    private Player player;
     private GameObject currentItem;
     private Rigidbody currentRigidbody;
     private SpringJoint springJoint;
@@ -25,8 +26,9 @@ public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
         base.OnStartClient();
 
         playerCamera = GetComponentInChildren<Camera>();
+        player = GetComponent<Player>();
 
-        Valuable.OnItemBroke += OnItemDestroyed;
+        IPickable.OnItemDestroyed += OnItemDestroyed;
     }
 
     void Update()
@@ -126,10 +128,10 @@ public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
         currentRigidbody.linearDamping = Mathf.Clamp(2f * currentRigidbody.mass, 5f, 20f);
         currentRigidbody.angularDamping = Mathf.Clamp(2f * currentRigidbody.mass, 2.5f, 20f);
 
-        Valuable valuable = obj.GetComponent<Valuable>();
-        if (valuable != null)
+        IPickable pickableItem = obj.GetComponent<IPickable>();
+        if (pickableItem != null)
         {
-            valuable.OnPickedUp();
+            pickableItem.OnPickedUp(player);
         }
 
         RpcPickup(
@@ -222,10 +224,10 @@ public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
             currentRigidbody.angularDamping = 0.05f;
         }
 
-        Valuable valuable = currentItem.GetComponent<Valuable>();
-        if (valuable != null)
+        IPickable pickableItem = currentItem.GetComponent<IPickable>();
+        if (pickableItem != null)
         {
-            valuable.GetType().GetMethod("OnDropped").Invoke(valuable, null);
+            pickableItem.OnDropped();
         }
 
         isHoldingItem = false;
@@ -280,7 +282,7 @@ public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
 
     private void OnDestroy()
     {
-        Valuable.OnItemBroke -= OnItemDestroyed;
+        IPickable.OnItemDestroyed -= OnItemDestroyed;
     }
 
     public bool CanHandleUpgrade(UpgradeType type)

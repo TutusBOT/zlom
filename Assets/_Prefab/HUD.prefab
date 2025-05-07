@@ -47,6 +47,7 @@ GameObject:
   - component: {fileID: 2791475444080005620}
   - component: {fileID: 1583021834485568187}
   - component: {fileID: 7512965483970729024}
+  - component: {fileID: 2473661989142970093}
   m_Layer: 5
   m_Name: HealthDisplay
   m_TagString: Untagged
@@ -61,12 +62,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 418390236880627459}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8287786824793846375}
+  m_Father: {fileID: 3286912516034832019}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -172,6 +173,22 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &2473661989142970093
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418390236880627459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a490a2c61cd22d48beece764db15c4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6294612499620849907}
+  _networkObjectCache: {fileID: 0}
+  healthText: {fileID: 7512965483970729024}
 --- !u!1 &669722578527832148
 GameObject:
   m_ObjectHideFlags: 0
@@ -183,8 +200,9 @@ GameObject:
   - component: {fileID: 849416000947333391}
   - component: {fileID: 7624032586059219771}
   - component: {fileID: 451893819059016990}
+  - component: {fileID: 7632286424961090542}
   m_Layer: 5
-  m_Name: StaminaText
+  m_Name: StaminaDisplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197,12 +215,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 669722578527832148}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8287786824793846375}
+  m_Father: {fileID: 3286912516034832019}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -308,6 +326,22 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &7632286424961090542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669722578527832148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bada41954f9d46746b1b1f119c7ee2f4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 6294612499620849907}
+  _networkObjectCache: {fileID: 0}
+  staminaText: {fileID: 451893819059016990}
 --- !u!1 &1329498163724597837
 GameObject:
   m_ObjectHideFlags: 0
@@ -1325,6 +1359,45 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &7035804561939464329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3286912516034832019}
+  m_Layer: 5
+  m_Name: Stats
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3286912516034832019
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7035804561939464329}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8241933779009179661}
+  - {fileID: 2791475444080005620}
+  - {fileID: 849416000947333391}
+  - {fileID: 7111260707916304054}
+  m_Father: {fileID: 8287786824793846375}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7432593479817012121
 GameObject:
   m_ObjectHideFlags: 0
@@ -1402,12 +1475,12 @@ RectTransform:
   m_GameObject: {fileID: 7684136271094087065}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.88281, y: 0.88281, z: 0.88281}
+  m_LocalScale: {x: 0.88280994, y: 0.88280994, z: 0.88280994}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4998657920035889592}
   - {fileID: 3014379324121287804}
-  m_Father: {fileID: 8287786824793846375}
+  m_Father: {fileID: 3286912516034832019}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1455,7 +1528,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7879225561427383706}
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1463,7 +1536,7 @@ RectTransform:
   - {fileID: 5539751200020023730}
   - {fileID: 6306975525714696172}
   - {fileID: 6594437032850643931}
-  m_Father: {fileID: 8287786824793846375}
+  m_Father: {fileID: 3286912516034832019}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1549,9 +1622,8 @@ GameObject:
   - component: {fileID: 5927750697939599449}
   - component: {fileID: 4108437998720690970}
   - component: {fileID: 7617130029729967936}
-  - component: {fileID: 525389214942419773}
   - component: {fileID: 6294612499620849907}
-  - component: {fileID: 5708915469017633828}
+  - component: {fileID: 596748148291868964}
   m_Layer: 5
   m_Name: HUD
   m_TagString: Untagged
@@ -1571,11 +1643,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 8241933779009179661}
-  - {fileID: 2791475444080005620}
   - {fileID: 1977434145152232477}
-  - {fileID: 849416000947333391}
-  - {fileID: 7111260707916304054}
+  - {fileID: 3286912516034832019}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1646,22 +1715,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &525389214942419773
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8523248088317076065}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a490a2c61cd22d48beece764db15c4a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 0
-  _addedNetworkObject: {fileID: 6294612499620849907}
-  _networkObjectCache: {fileID: 6294612499620849907}
-  healthText: {fileID: 7512965483970729024}
 --- !u!114 &6294612499620849907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1679,7 +1732,7 @@ MonoBehaviour:
   <PredictedSpawn>k__BackingField: {fileID: 0}
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
-  - {fileID: 525389214942419773}
+  - {fileID: 0}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -1713,7 +1766,7 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     Scale: {x: 0, y: 0, z: 0}
     IsValid: 1
---- !u!114 &5708915469017633828
+--- !u!114 &596748148291868964
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1722,13 +1775,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 8523248088317076065}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bada41954f9d46746b1b1f119c7ee2f4, type: 3}
+  m_Script: {fileID: 11500000, guid: f232029485974f24f88e21351ee2ab73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 255
   _addedNetworkObject: {fileID: 6294612499620849907}
   _networkObjectCache: {fileID: 0}
-  staminaText: {fileID: 451893819059016990}
+  healthDisplayUI: {fileID: 2473661989142970093}
+  moneyDisplayUI: {fileID: 5674021445147077898}
+  stressDisplayUI: {fileID: 1959708806267574374}
+  staminaDisplayUI: {fileID: 7632286424961090542}
 --- !u!1 &9089243140354601569
 GameObject:
   m_ObjectHideFlags: 0

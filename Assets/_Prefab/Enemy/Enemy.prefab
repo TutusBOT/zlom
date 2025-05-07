@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 5941368157154519890}
   - component: {fileID: 1587986664324447547}
   - component: {fileID: 7382815542685661625}
-  - component: {fileID: 1412903012559040736}
   m_Layer: 6
   m_Name: Eyebrow
   m_TagString: Untagged
@@ -87,27 +86,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &1412903012559040736
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 203910926314811168}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &688695566280788618
 GameObject:
   m_ObjectHideFlags: 0
@@ -118,16 +96,21 @@ GameObject:
   m_Component:
   - component: {fileID: 7908889078266574596}
   - component: {fileID: 9165433166816203748}
-  - component: {fileID: 7448593157175506697}
+  - component: {fileID: 190611701644058554}
+  - component: {fileID: 483786976839248071}
+  - component: {fileID: 8112943844687634086}
   - component: {fileID: 8593591314835196474}
   - component: {fileID: 3688009037046720638}
-  - component: {fileID: 483786976839248071}
   - component: {fileID: -6699310377175416654}
   - component: {fileID: 7739495648150726049}
   - component: {fileID: 6693165520555275754}
-  - component: {fileID: 190611701644058554}
   - component: {fileID: 7424213222454427390}
-  - component: {fileID: 2986441160212970774}
+  - component: {fileID: 2076304798738876942}
+  - component: {fileID: -1660951282210028294}
+  - component: {fileID: 4554129215036133411}
+  - component: {fileID: -6252904983370566942}
+  - component: {fileID: -4461259147259694498}
+  - component: {fileID: 2614643571647269627}
   m_Layer: 6
   m_Name: Enemy
   m_TagString: Untagged
@@ -170,12 +153,12 @@ NavMeshAgent:
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 0
   m_AutoBraking: 1
-  m_AutoRepath: 1
-  m_Height: 1
+  m_AutoRepath: 0
+  m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 1
   m_ObstacleAvoidanceType: 4
---- !u!114 &7448593157175506697
+--- !u!114 &190611701644058554
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -184,46 +167,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 688695566280788618}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d79f827b02199ab4b92fce6e3c38f8b8, type: 3}
+  m_Script: {fileID: 11500000, guid: 9d7ae761eeb0a2744aad8d6b998b8881, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
---- !u!114 &8593591314835196474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688695566280788618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1fd7a49029ae46846a8d38adb0015a04, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  detectionRadius: 10
-  detectionMask:
-    serializedVersion: 2
-    m_Bits: 128
-  showDebugVisuals: 1
---- !u!114 &3688009037046720638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688695566280788618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ad65c630dab190044a0fab7b4e2b1e85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerLayerMask:
-    serializedVersion: 2
-    m_Bits: 384
-  detectionRange: 10
-  detectionHeight: 3
-  fieldOfViewAngle: 60
-  showDebugVisuals: 1
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 6693165520555275754}
+  _networkObjectCache: {fileID: 6693165520555275754}
+  maxHealth: 100
+  moveSpeed: 3
+  runSpeed: 5.5
+  waypoints: []
+  canHearSounds: 1
+  hearingRange: 10
+  behaviorGraph: {fileID: 483786976839248071}
 --- !u!114 &483786976839248071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -242,6 +198,11 @@ MonoBehaviour:
   - rid: 305015052302025101
   - rid: 305015072715964569
   - rid: 305015072715965358
+  - rid: 8636091071474434449
+  - rid: 8636091071474434561
+  - rid: 8636091092995146177
+  - rid: 8636091092995146639
+  - rid: 8636091117396295874
   m_IsInitialised: 0
   m_IsStarted: 0
   references:
@@ -269,7 +230,7 @@ MonoBehaviour:
         GUID:
           m_Value0: 9709250664324343673
           m_Value1: 3375970802271611862
-        Name: New Range Detector
+        Name: RangeDetector
         m_Value: {fileID: 8593591314835196474}
     - rid: 305015072715965358
       type: {class: 'BlackboardVariable`1[[LineOfSightDetector, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
@@ -277,8 +238,105 @@ MonoBehaviour:
         GUID:
           m_Value0: 7918516792332915795
           m_Value1: 4997806875812404604
-        Name: New Line Of Sight Detector
+        Name: Line of sight detector
         m_Value: {fileID: 3688009037046720638}
+    - rid: 8636091071474434449
+      type: {class: 'BlackboardVariable`1[[WanderComponent, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 4168333439722867482
+          m_Value1: 10703876269295767803
+        Name: Wandering
+        m_Value: {fileID: -6699310377175416654}
+    - rid: 8636091071474434561
+      type: {class: 'BlackboardVariable`1[[FleeComponent, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 420197983911696828
+          m_Value1: 4597077854695371849
+        Name: Fleeing
+        m_Value: {fileID: 2076304798738876942}
+    - rid: 8636091092995146177
+      type: {class: 'BlackboardVariable`1[[ProximityDetector, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 16799879014127578052
+          m_Value1: 2869369859753046838
+        Name: ProximityDetector
+        m_Value: {fileID: -4461259147259694498}
+    - rid: 8636091092995146639
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10146148493511807181
+          m_Value1: 8848239932637774978
+        Name: Waypoints
+        m_Value: []
+    - rid: 8636091117396295874
+      type: {class: 'BlackboardVariable`1[[PatrolComponent, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9095528673053761871
+          m_Value1: 4663367375431395651
+        Name: Patrolling
+        m_Value: {fileID: 2614643571647269627}
+--- !u!114 &8112943844687634086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14180146921e91d4fbfffff2d2573fff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 1
+  _addedNetworkObject: {fileID: 6693165520555275754}
+  _networkObjectCache: {fileID: 6693165520555275754}
+  updatePathInterval: 0.2
+  maxChaseDistance: 30
+  minDistanceToTarget: 1.5
+  animator: {fileID: 0}
+  chaseAnimParam: IsChasing
+  speedParam: MoveSpeed
+--- !u!114 &8593591314835196474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd7a49029ae46846a8d38adb0015a04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRadius: 10
+  detectionAngle: 90
+  detectionMask:
+    serializedVersion: 2
+    m_Bits: 128
+  showDebugVisuals: 1
+--- !u!114 &3688009037046720638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad65c630dab190044a0fab7b4e2b1e85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRadius: 20
+  detectionAngle: 90
+  detectionMask:
+    serializedVersion: 2
+    m_Bits: 128
+  showDebugVisuals: 1
 --- !u!114 &-6699310377175416654
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -291,8 +349,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16176fb94d47ed8418f10bb3be11d299, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 2
+  _addedNetworkObject: {fileID: 6693165520555275754}
+  _networkObjectCache: {fileID: 6693165520555275754}
   wanderRadius: 200
   wanderTimer: 10
+  isWandering: 0
 --- !u!54 &7739495648150726049
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -338,7 +400,12 @@ MonoBehaviour:
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
   - {fileID: 190611701644058554}
+  - {fileID: 8112943844687634086}
+  - {fileID: -6699310377175416654}
   - {fileID: 7424213222454427390}
+  - {fileID: 2076304798738876942}
+  - {fileID: -6252904983370566942}
+  - {fileID: 2614643571647269627}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -363,7 +430,7 @@ MonoBehaviour:
   _spectatorInterpolation: 2
   _enableTeleport: 0
   _teleportThreshold: 1
-  <PrefabId>k__BackingField: 4
+  <PrefabId>k__BackingField: 20
   <SpawnableCollectionId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 9464304722866358178
   <SceneId>k__BackingField: 0
@@ -372,23 +439,6 @@ MonoBehaviour:
     Rotation: {x: 0, y: 0, z: 0, w: 1}
     Scale: {x: 1, y: 1, z: 1}
     IsValid: 1
---- !u!114 &190611701644058554
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 688695566280788618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d7ae761eeb0a2744aad8d6b998b8881, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _componentIndexCache: 0
-  _addedNetworkObject: {fileID: 6693165520555275754}
-  _networkObjectCache: {fileID: 6693165520555275754}
-  maxHealth: 100
-  moveSpeed: 3.5
 --- !u!114 &7424213222454427390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,7 +451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 1
+  _componentIndexCache: 3
   _addedNetworkObject: {fileID: 6693165520555275754}
   _networkObjectCache: {fileID: 6693165520555275754}
   _componentConfiguration: 0
@@ -432,7 +482,7 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
---- !u!114 &2986441160212970774
+--- !u!114 &2076304798738876942
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -441,17 +491,115 @@ MonoBehaviour:
   m_GameObject: {fileID: 688695566280788618}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f511b60f39f8af94b99fdea201487d2a, type: 3}
+  m_Script: {fileID: 11500000, guid: 9a833d9e7d2edc742843b7fa8ee1f97a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 4
   _addedNetworkObject: {fileID: 6693165520555275754}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 6693165520555275754}
+  fleeDistance: 15
+  minFleeDistanceFromSource: 12
+  pathUpdateInterval: 1
+  maxAttempts: 5
+  fleeSuccessDistance: 13
+  maxFleeTime: 10
+  roomTag: Room
+  prioritizeRooms: 1
+  navMeshSampleAttempts: 5
+  animator: {fileID: 0}
+  fleeingParam: IsFleeing
+  speedParam: MoveSpeed
+--- !u!114 &-1660951282210028294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb70f67d6a6da1141aa916839759c239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  memoryDuration: 0.5
+--- !u!95 &4554129215036133411
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-6252904983370566942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50c4783c78b01de44a92ce4d39bce169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 5
+  _addedNetworkObject: {fileID: 6693165520555275754}
+  _networkObjectCache: {fileID: 6693165520555275754}
+  damage: 10
+  cooldownDuration: 2
   attackRange: 2
-  attackCooldown: 1.5
-  damage: 20
-  lineOfSightDetector: {fileID: 3688009037046720638}
-  rangeDetector: {fileID: 8593591314835196474}
+  attackAnimParam: IsAttacking
+  attackStateName: Attack
+--- !u!114 &-4461259147259694498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72b002086b01aae49bff6944bc4d9c9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  proximityRadius: 3
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  showDebugVisuals: 1
+--- !u!114 &2614643571647269627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 688695566280788618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 115db259d9449a943ba557fcfc1d853a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentIndexCache: 6
+  _addedNetworkObject: {fileID: 6693165520555275754}
+  _networkObjectCache: {fileID: 6693165520555275754}
+  waypointWaitTime: 1
+  distanceThreshold: 0.1
+  animator: {fileID: 0}
+  moveSpeedParam: MoveSpeed
 --- !u!1 &1994694671543990721
 GameObject:
   m_ObjectHideFlags: 0
@@ -463,7 +611,6 @@ GameObject:
   - component: {fileID: 789606922877087966}
   - component: {fileID: 8766055869090650074}
   - component: {fileID: 7875932602696393294}
-  - component: {fileID: 111674088054781841}
   m_Layer: 6
   m_Name: Eyebrow2
   m_TagString: Untagged
@@ -539,27 +686,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &111674088054781841
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1994694671543990721}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &5953423591567640117
 GameObject:
   m_ObjectHideFlags: 0
