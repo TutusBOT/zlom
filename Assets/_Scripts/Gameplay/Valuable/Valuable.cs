@@ -13,7 +13,7 @@ public enum ValuableSize
     Large,
 }
 
-public class Valuable : NetworkBehaviour
+public class Valuable : NetworkBehaviour, IPickable
 {
     public int initialCashValue = 100;
 
@@ -26,7 +26,6 @@ public class Valuable : NetworkBehaviour
     public string breakSoundId = "glass_break";
     public string damageSoundId = "glass_damage";
 
-    public static event Action<GameObject> OnItemBroke;
     protected readonly SyncVar<bool> _isBeingHeld = new(false);
     private readonly SyncVar<bool> _isInvulnerable = new(false);
     private float invulnerabilityDuration = 2f;
@@ -195,7 +194,7 @@ public class Valuable : NetworkBehaviour
 
     public void DestroyValuable()
     {
-        OnItemBroke?.Invoke(gameObject);
+        IPickable.RaiseItemDestroyed(gameObject);
         HideTooltip();
         Despawn();
     }
@@ -205,7 +204,7 @@ public class Valuable : NetworkBehaviour
         return _currentCashValue.Value;
     }
 
-    public virtual void OnPickedUp()
+    public virtual void OnPickedUp(Player player)
     {
         if (!IsServerInitialized)
             PickUpServerRpc();
@@ -224,6 +223,16 @@ public class Valuable : NetworkBehaviour
     public void PickUpServerRpc()
     {
         _isBeingHeld.Value = true;
+    }
+
+    public bool CanBePickedUp()
+    {
+        return true;
+    }
+
+    public GameObject GetGameObject()
+    {
+        return gameObject;
     }
 
     private void ShowValueTooltip()

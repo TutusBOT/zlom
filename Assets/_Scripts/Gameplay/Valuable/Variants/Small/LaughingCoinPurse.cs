@@ -175,9 +175,9 @@ public class LaughingCoinPurse : Valuable
         }
     }
 
-    public override void OnPickedUp()
+    public override void OnPickedUp(Player player)
     {
-        base.OnPickedUp();
+        base.OnPickedUp(player);
 
         if (!hasBeenDiscovered)
         {
