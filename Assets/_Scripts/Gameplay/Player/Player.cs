@@ -86,6 +86,8 @@ public class Player : NetworkBehaviour
 
     public PlayerChatDisplay GetPlayerChatDisplay() => playerChatDisplay;
 
+    public PlayerHealth GetPlayerHealth() => playerHealth;
+
     public bool IsDead() => playerHealth.IsDead;
 
     public bool IsIsolated(float distance)

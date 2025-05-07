@@ -127,20 +127,20 @@ public class BlisterheartRelic : Valuable
         }
     }
 
-    public override void OnPickedUp()
+    public override void OnPickedUp(Player player)
     {
-        base.OnPickedUp();
+        base.OnPickedUp(player);
 
-        if (IsServerInitialized)
+        if (!IsServerInitialized)
+            return;
+
+        if (_isCoolingDown.Value)
         {
-            if (_isCoolingDown.Value)
-            {
-                _heldTime.Value = _heatIntensity.Value * maxHoldTime;
-            }
-            else
-            {
-                _heldTime.Value = 0f;
-            }
+            _heldTime.Value = _heatIntensity.Value * maxHoldTime;
+        }
+        else
+        {
+            _heldTime.Value = 0f;
         }
     }
 

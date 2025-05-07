@@ -13,9 +13,9 @@ public class Drums : Valuable
         size = ValuableSize.Medium;
     }
 
-    public override void OnPickedUp()
+    public override void OnPickedUp(Player player)
     {
-        base.OnPickedUp();
+        base.OnPickedUp(player);
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySound(drumSoundId, transform.position);
