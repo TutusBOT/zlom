@@ -31,7 +31,7 @@ public class FinishLevelButton : MonoBehaviour
     {
         if (!_isEnabled)
             return;
-        SceneController.Instance.LoadScene("Shop");
+        SceneController.Instance.LoadScene("Train");
     }
 
     private void OnQuotaCompleted()
