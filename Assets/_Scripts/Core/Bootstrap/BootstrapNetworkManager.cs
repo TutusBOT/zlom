@@ -33,8 +33,24 @@ public class BootstrapNetworkManager : NetworkBehaviour
         instance.CloseScenesObserver(scenesToClose);
 
         SceneLoadData sld = new SceneLoadData(sceneName);
+
+        List<NetworkObject> networkObjects = new List<NetworkObject>();
+        foreach (Player player in PlayerManager.Instance.GetAllPlayers())
+        {
+            player.GetComponent<CharacterController>().enabled = false;
+            player.transform.position = new Vector3(0f, 2f, 0f);
+            networkObjects.Add(player.NetworkObject);
+        }
+
+        sld.MovedNetworkObjects = networkObjects.ToArray();
+
         NetworkConnection[] conns = instance.ServerManager.Clients.Values.ToArray();
         instance.SceneManager.LoadConnectionScenes(conns, sld);
+
+        foreach (Player player in PlayerManager.Instance.GetAllPlayers())
+        {
+            player.GetComponent<CharacterController>().enabled = true;
+        }
     }
 
     [ObserversRpc]

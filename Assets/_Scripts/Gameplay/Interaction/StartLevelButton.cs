@@ -4,6 +4,6 @@ public class StartLevelButton : MonoBehaviour
 {
     public void OnClick()
     {
-        SceneController.Instance.LoadScene("Dungeon3D");
+        BootstrapNetworkManager.ChangeNetworkScene("Dungeon3D", new string[] { "Train" });
     }
 }
