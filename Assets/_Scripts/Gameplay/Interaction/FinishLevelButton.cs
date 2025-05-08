@@ -31,7 +31,7 @@ public class FinishLevelButton : MonoBehaviour
     {
         if (!_isEnabled)
             return;
-        SceneController.Instance.LoadScene("Train");
+        BootstrapNetworkManager.ChangeNetworkScene("Train", new string[] { "Dungeon3D" });
     }
 
     private void OnQuotaCompleted()
