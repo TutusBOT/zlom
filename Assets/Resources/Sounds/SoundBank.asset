@@ -85,3 +85,14 @@ MonoBehaviour:
     maxDistance: 10
     randomizePitch: 1
     pitchRange: {x: 0.9, y: 1.1}
+  - id: screecher_scream
+    clips:
+    - {fileID: 8300000, guid: 3fbec7ff6ca36ef40b94b28d5709766a, type: 3}
+    - {fileID: 8300000, guid: f4b0689c1816ff64291a0f0177f31683, type: 3}
+    volume: 1
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
