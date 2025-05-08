@@ -28,15 +28,16 @@ public class Valuable : NetworkBehaviour, IPickable
 
     protected readonly SyncVar<bool> _isBeingHeld = new(false);
     private readonly SyncVar<bool> _isInvulnerable = new(false);
-    private float invulnerabilityDuration = 2f;
+    private float _invulnerabilityDuration = 2f;
+    protected Player _player;
 
     [Header("Value Display")]
     [SerializeField]
     private GameObject valueDisplayPrefab;
-    private GameObject activeValueDisplay;
-    private TextMeshProUGUI valueText;
-    private float tooltipDisplayTime = 1f;
-    private float tooltipTimer = 0f;
+    private GameObject _activeValueDisplay;
+    private TextMeshProUGUI _valueText;
+    private float _tooltipDisplayTime = 1f;
+    private float _tooltipTimer = 0f;
 
     private float SizeScale
     {
@@ -91,27 +92,27 @@ public class Valuable : NetworkBehaviour, IPickable
         if (!_isBeingHeld.Value)
             return;
 
-        tooltipTimer += Time.deltaTime;
+        _tooltipTimer += Time.deltaTime;
 
-        if (tooltipTimer >= tooltipDisplayTime)
+        if (_tooltipTimer >= _tooltipDisplayTime)
         {
             HideTooltip();
             return;
         }
 
-        if (activeValueDisplay != null)
+        if (_activeValueDisplay != null)
         {
-            activeValueDisplay.transform.position =
+            _activeValueDisplay.transform.position =
                 transform.position + Vector3.up * (1.0f * SizeScale);
 
             if (Camera.main != null)
             {
-                activeValueDisplay.transform.forward = Camera.main.transform.forward;
+                _activeValueDisplay.transform.forward = Camera.main.transform.forward;
             }
 
-            if (valueText != null)
+            if (_valueText != null)
             {
-                valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
+                _valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
             }
         }
     }
@@ -211,7 +212,8 @@ public class Valuable : NetworkBehaviour, IPickable
         else
             _isBeingHeld.Value = true;
 
-        tooltipTimer = 0f;
+        _tooltipTimer = 0f;
+        _player = player;
 
         if (IsOwner || IsClientInitialized)
         {
@@ -237,19 +239,19 @@ public class Valuable : NetworkBehaviour, IPickable
 
     private void ShowValueTooltip()
     {
-        Debug.Log($"Showing tooltip for {gameObject.name} {activeValueDisplay}");
-        if (valueDisplayPrefab != null && activeValueDisplay == null)
+        Debug.Log($"Showing tooltip for {gameObject.name} {_activeValueDisplay}");
+        if (valueDisplayPrefab != null && _activeValueDisplay == null)
         {
-            activeValueDisplay = Instantiate(valueDisplayPrefab);
+            _activeValueDisplay = Instantiate(valueDisplayPrefab);
 
-            activeValueDisplay.transform.position =
+            _activeValueDisplay.transform.position =
                 transform.position + Vector3.up * (1.5f * SizeScale);
 
-            valueText = activeValueDisplay.GetComponentInChildren<TextMeshProUGUI>();
+            _valueText = _activeValueDisplay.GetComponentInChildren<TextMeshProUGUI>();
 
-            if (valueText != null)
+            if (_valueText != null)
             {
-                valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
+                _valueText.text = $"${Mathf.RoundToInt(_currentCashValue.Value)}";
             }
         }
     }
@@ -260,6 +262,8 @@ public class Valuable : NetworkBehaviour, IPickable
             DropServerRpc();
         else
             _isBeingHeld.Value = false;
+
+        _player = null;
 
         HideTooltip();
     }
@@ -272,17 +276,17 @@ public class Valuable : NetworkBehaviour, IPickable
 
     private void HideTooltip()
     {
-        if (activeValueDisplay != null)
+        if (_activeValueDisplay != null)
         {
-            Destroy(activeValueDisplay);
-            activeValueDisplay = null;
-            valueText = null;
+            Destroy(_activeValueDisplay);
+            _activeValueDisplay = null;
+            _valueText = null;
         }
     }
 
     private IEnumerator InvulnerabilityTimer()
     {
-        yield return new WaitForSeconds(invulnerabilityDuration);
+        yield return new WaitForSeconds(_invulnerabilityDuration);
         _isInvulnerable.Value = false;
     }
 }

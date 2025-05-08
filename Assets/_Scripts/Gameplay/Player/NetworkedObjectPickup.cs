@@ -208,8 +208,8 @@ public class NetworkedObjectPickup : NetworkBehaviour, IUpgradeable
             springJoint.connectedAnchor = handPos;
     }
 
-    [ServerRpc]
-    private void RequestDropServerRpc()
+    [ServerRpc(RequireOwnership = false)]
+    public void RequestDropServerRpc()
     {
         if (!isHoldingItem)
             return;

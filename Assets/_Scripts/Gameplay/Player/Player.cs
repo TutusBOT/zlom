@@ -27,6 +27,9 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private PlayerHealth playerHealth;
 
+    [SerializeField]
+    private NetworkedObjectPickup networkedObjectPickup;
+
     private void Awake()
     {
         if (stressController == null)
@@ -52,6 +55,9 @@ public class Player : NetworkBehaviour
 
         if (playerHealth == null)
             Debug.LogError("PlayerHealth is not assigned in the inspector.");
+
+        if (networkedObjectPickup == null)
+            Debug.LogError("NetworkedObjectPickup is not assigned in the inspector.");
     }
 
     public override void OnStartClient()
@@ -87,6 +93,8 @@ public class Player : NetworkBehaviour
     public PlayerChatDisplay GetPlayerChatDisplay() => playerChatDisplay;
 
     public PlayerHealth GetPlayerHealth() => playerHealth;
+
+    public NetworkedObjectPickup GetNetworkedObjectPickup() => networkedObjectPickup;
 
     public bool IsDead() => playerHealth.IsDead;
 

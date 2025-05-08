@@ -192,19 +192,19 @@ public class BlisterheartRelic : Valuable
             AudioManager.Instance.PlaySound(burnSoundId, transform.position);
         }
 
-        // You could also add particle effects here
+        // TODO: add particle effects here
     }
 
-    // Method to force all clients to drop the item
     [ObserversRpc]
     private void ForceDrop()
     {
-        // Find local pickup controller on each client and drop
-        // SmoothPickUp pickupController = FindObjectOfType<PickUpItem>();
-        // if (pickupController != null)
-        // {
-        //     pickupController.ForceDrop();
-        // }
+        if (_player == null)
+        {
+            Debug.LogWarning("Player reference is null. Cannot force drop.");
+            return;
+        }
+
+        _player.GetNetworkedObjectPickup().RequestDropServerRpc();
     }
 
     private void UpdateHeatVisuals(float intensity)
