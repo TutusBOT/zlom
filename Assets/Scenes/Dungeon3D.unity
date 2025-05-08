@@ -597,12 +597,12 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 1630119741}
   _networkObjectCache: {fileID: 0}
   enemyPrefabs:
-  - prefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
+  - prefab: {fileID: 868919610254610476, guid: 81e017fe29edf6d429eabc56203696cb, type: 3}
     spawnChance: 100
     maxCount: 10
     tier: 3
     currentCount: 0
-  - prefab: {fileID: 688695566280788618, guid: 37e09c629ed9b3d45b46ef40004211d5, type: 3}
+  - prefab: {fileID: 868919610254610476, guid: 81e017fe29edf6d429eabc56203696cb, type: 3}
     spawnChance: 100
     maxCount: 10
     tier: 3
