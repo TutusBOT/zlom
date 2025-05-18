@@ -88,4 +88,17 @@ public class PlayerManager : MonoBehaviour
     {
         return new List<Player>(_activePlayers);
     }
+
+    public Player GetLocalPlayer()
+    {
+        foreach (var player in _activePlayers)
+        {
+            if (player.IsOwner)
+            {
+                return player;
+            }
+        }
+
+        return null;
+    }
 }
