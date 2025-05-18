@@ -39,6 +39,10 @@ public class FlashlightController : NetworkBehaviour
     private float _normalIntensity;
     private float _flashCooldownTimer = 0f;
     private float _flickerTimer = 0f;
+    private float _turnOnCooldown = 0.2f;
+    private float _turnOffCooldown = 0.2f;
+    private bool _isAnimating = false;
+    private Coroutine _animationCoroutine = null;
 
     [Header("Networking")]
     private readonly SyncVar<bool> _syncedIsOn = new SyncVar<bool>(false);
@@ -356,22 +360,55 @@ public class FlashlightController : NetworkBehaviour
 
     public void ToggleFlashlight()
     {
-        if (!_isOn && _currentBatteryLevel <= 0)
+        Debug.Log($"Flashlight toggled {_isOn} {_isAnimating}");
+        if ((!_isOn && _currentBatteryLevel <= 0) || _isAnimating)
             return;
 
-        SetLightState(!_isOn);
+        if (_animationCoroutine != null)
+            StopCoroutine(_animationCoroutine);
+
+        _animationCoroutine = StartCoroutine(_isOn ? TurnOffAnimation() : TurnOnAnimation());
+    }
+
+    private IEnumerator TurnOnAnimation()
+    {
+        _isAnimating = true;
+        Debug.Log("Turn on animation started");
+
+        yield return new WaitForSeconds(_turnOnCooldown);
+
+        if (IsOwner && toggleOnSound)
+            AudioManager.Instance.PlaySoundAtPosition(toggleOnSound, transform.position);
+        SetLightState(true);
+
+        _isAnimating = false;
+        _animationCoroutine = null;
+        Debug.Log("Turn on animation ended");
+    }
+
+    private IEnumerator TurnOffAnimation()
+    {
+        _isAnimating = true;
+        Debug.Log("Turn off animation started");
+
+        // Turn off light immediately
+        if (IsOwner && toggleOffSound)
+            AudioManager.Instance.PlaySoundAtPosition(toggleOffSound, transform.position);
+
+        // Immediately turn off the light
+        SetLightState(false);
+
+        // But keep the animation going to prevent immediate re-toggling
+        yield return new WaitForSeconds(_turnOffCooldown);
+
+        // Now animation is complete, allow toggling again
+        _isAnimating = false;
+        _animationCoroutine = null;
+        Debug.Log("Turn off animation ended");
     }
 
     private void SetLightState(bool state)
     {
-        if (IsOwner)
-        {
-            if (state && toggleOnSound)
-                AudioManager.Instance.PlaySoundAtPosition(toggleOnSound, transform.position);
-            else if (!state && toggleOffSound)
-                AudioManager.Instance.PlaySoundAtPosition(toggleOffSound, transform.position);
-        }
-
         if (!IsOwner && !IsServerInitialized)
             return;
 
@@ -394,10 +431,6 @@ public class FlashlightController : NetworkBehaviour
         // Server-side logic for updating the light state
         _isOn = state;
         _syncedIsOn.Value = state; // This will trigger the sync to all clients
-
-        // If turning off due to server command, also stop any flash effect
-        if (!state)
-            StopAllCoroutines();
     }
 
     private void OnFlashlightStateChanged(bool oldValue, bool newValue, bool asServer)
@@ -409,7 +442,7 @@ public class FlashlightController : NetworkBehaviour
         if (spotLight)
             spotLight.enabled = newValue;
 
-        if (!IsOwner || asServer)
+        if (!IsOwner)
         {
             if (newValue && toggleOnSound)
                 AudioManager.Instance.PlaySoundAtPosition(toggleOnSound, transform.position);
