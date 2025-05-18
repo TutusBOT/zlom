@@ -15,4 +15,5 @@ public static class InputActions
     public const string Flash = "Flash";
     public const string Interact = "Interact";
     public const string Confirm = "Confirm";
+    public const string ToggleMap = "ToggleMap";
 }

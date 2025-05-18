@@ -130,6 +130,7 @@ public class SettingsManager : MonoBehaviour
                 new SerializableKeyBinding(InputActions.TextChat, KeyCode.T),
                 new SerializableKeyBinding(InputActions.VoiceChat, KeyCode.V),
                 new SerializableKeyBinding(InputActions.Cancel, KeyCode.Escape),
+                new SerializableKeyBinding(InputActions.ToggleMap, KeyCode.Tab),
             },
         };
 
