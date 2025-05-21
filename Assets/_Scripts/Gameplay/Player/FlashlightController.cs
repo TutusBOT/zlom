@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
@@ -204,6 +205,7 @@ public class FlashlightController : NetworkBehaviour
         UpdateBattery();
         UpdateFlashCooldown();
         UpdateFlashlightOrientation();
+        DetectFlashlightHits();
     }
 
     private void HandleInput()
@@ -499,5 +501,192 @@ public class FlashlightController : NetworkBehaviour
     public float GetBatteryPercentage()
     {
         return _currentBatteryLevel / maxBatteryLevel * 100f;
+    }
+
+    [Header("Hit Detection")]
+    [SerializeField]
+    private LayerMask hitDetectionLayers;
+    private readonly HashSet<GameObject> _hitObjectsThisFrame = new HashSet<GameObject>();
+
+    private void DetectFlashlightHits()
+    {
+        if (!_isOn || spotLight == null)
+            return;
+
+        _hitObjectsThisFrame.Clear();
+
+        Vector3 rayOrigin = spotLight.transform.position;
+        Vector3 rayDirection = spotLight.transform.forward;
+        float effectiveRange = spotLight.range;
+        float coneRadius = Mathf.Tan(spotLight.spotAngle * 0.5f * Mathf.Deg2Rad) * effectiveRange;
+
+        // First, find all potential hits in the cone
+        RaycastHit[] hits = Physics.SphereCastAll(
+            rayOrigin,
+            coneRadius,
+            rayDirection,
+            effectiveRange,
+            hitDetectionLayers
+        );
+
+        // Create a list of valid hits after filtering
+        List<(RaycastHit hit, float intensity)> validHits = new List<(RaycastHit, float)>();
+
+        _lastOrigin = rayOrigin;
+        _lastDirection = rayDirection;
+        _lastConeRadius = coneRadius;
+        _lastRange = effectiveRange;
+        _debugHitPoints.Clear();
+
+        foreach (RaycastHit hit in hits)
+        {
+            if (_hitObjectsThisFrame.Contains(hit.collider.gameObject))
+                continue;
+
+            // Calculate direction and angle to the hit point
+            Vector3 hitPos = hit.point;
+            Vector3 dirToHit = (hitPos - rayOrigin).normalized;
+            float angleToHit = Vector3.Angle(rayDirection, dirToHit);
+
+            // Skip if outside the cone angle
+            if (angleToHit > spotLight.spotAngle * 0.5f)
+                continue;
+
+            // More accurate occlusion check - cast a ray DIRECTLY to the hit point
+            if (
+                Physics.Raycast(
+                    rayOrigin,
+                    dirToHit,
+                    out RaycastHit directHit,
+                    hit.distance,
+                    Physics.AllLayers
+                )
+            )
+            {
+                // If we hit something different first, this object is occluded
+                if (directHit.collider != hit.collider && !directHit.collider.isTrigger)
+                {
+                    Debug.DrawLine(rayOrigin, directHit.point, Color.red, 0.1f);
+                    Debug.Log(
+                        $"Hit occluded by {directHit.collider.name} at distance {directHit.distance} vs original distance {hit.distance}"
+                    );
+                    _debugHitPoints.Add((directHit.point, directHit.normal, Color.red));
+                    continue; // Skip this hit
+                }
+            }
+
+            // Object passes all checks - it's a valid hit
+            // Calculate intensity based on angle from center of beam
+            float normalizedAngle = angleToHit / (spotLight.spotAngle * 0.5f);
+            float intensityFactor = 1.0f - normalizedAngle;
+
+            // Debug visualization of valid hit
+            Debug.DrawLine(rayOrigin, hit.point, Color.green, 0.1f);
+
+            // Add to valid hits
+            validHits.Add((hit, intensityFactor));
+        }
+
+        // Process all valid hits
+        foreach (var (hit, intensity) in validHits)
+        {
+            ProcessHit(hit, intensity);
+        }
+    }
+
+    private void ProcessHit(RaycastHit hit, float intensityFactor)
+    {
+        GameObject hitObject = hit.collider.gameObject;
+        if (_hitObjectsThisFrame.Contains(hitObject))
+            return;
+
+        _hitObjectsThisFrame.Add(hitObject);
+
+        // Try to get component on the hit object first
+        IFlashlightDetectable detectable = hitObject.GetComponent<IFlashlightDetectable>();
+
+        // If not found on the direct hit object, try to find it on any parent
+        if (detectable == null)
+            detectable = hitObject.GetComponentInParent<IFlashlightDetectable>();
+
+        // If still not found, exit
+        if (detectable == null)
+            return;
+
+        // Apply distance falloff to intensity
+        float distanceFactor =
+            hit.distance <= 5f
+                ? 1f
+                : Mathf.Lerp(1f, 0.5f, (hit.distance - 5f) / (spotLight.range - 5f));
+        float baseIntensity = 0.3f;
+
+        float finalIntensity =
+            (baseIntensity + intensityFactor * 0.7f) * distanceFactor * spotLight.intensity;
+
+        Debug.Log($"Flashlight hit {intensityFactor} {distanceFactor} {finalIntensity}");
+
+        // Special case for flash ability
+        if (_flashCooldownTimer > flashCooldown - flashDuration)
+            finalIntensity *= flashIntensityMultiplier;
+
+        detectable.OnFlashlightHit(this, hit.point, hit.normal, finalIntensity);
+    }
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool showDebugGizmos = true;
+    private Vector3 _lastOrigin;
+    private Vector3 _lastDirection;
+    private float _lastConeRadius;
+    private float _lastRange;
+    private List<(Vector3 point, Vector3 normal, Color color)> _debugHitPoints =
+        new List<(Vector3, Vector3, Color)>();
+
+    private void OnDrawGizmos()
+    {
+        if (!showDebugGizmos || !_isOn || !Application.isPlaying)
+            return;
+
+        Gizmos.color = new Color(1f, 1f, 0f, 0.1f);
+
+        if (_lastConeRadius > 0 && _lastRange > 0)
+        {
+            DrawWireframeCone(_lastOrigin, _lastDirection, _lastConeRadius, _lastRange);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawRay(_lastOrigin, _lastDirection * _lastRange);
+        }
+
+        foreach (var (point, normal, color) in _debugHitPoints)
+        {
+            Gizmos.color = color;
+            Gizmos.DrawSphere(point, 0.1f);
+            Gizmos.DrawRay(point, normal * 0.5f);
+        }
+    }
+
+    private void DrawWireframeCone(Vector3 origin, Vector3 direction, float radius, float length)
+    {
+        int segments = 16;
+        Vector3 center = origin + direction * length;
+        Vector3 forward = direction;
+        Vector3 up = Vector3.up;
+
+        if (Mathf.Abs(Vector3.Dot(forward, up)) > 0.99f)
+            up = Vector3.right;
+
+        Vector3 right = Vector3.Cross(up, forward).normalized;
+        up = Vector3.Cross(forward, right).normalized;
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle1 = ((float)i / segments) * 2 * Mathf.PI;
+            float angle2 = ((float)(i + 1) / segments) * 2 * Mathf.PI;
+
+            Vector3 pos1 = center + (up * Mathf.Sin(angle1) + right * Mathf.Cos(angle1)) * radius;
+            Vector3 pos2 = center + (up * Mathf.Sin(angle2) + right * Mathf.Cos(angle2)) * radius;
+
+            Gizmos.DrawLine(pos1, pos2);
+            Gizmos.DrawLine(origin, pos1);
+        }
     }
 }

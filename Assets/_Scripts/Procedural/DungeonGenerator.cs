@@ -82,7 +82,7 @@ public class DungeonGenerator : NetworkBehaviour
 
     [Header("Enemy Spawning")]
     [SerializeField]
-    private EnemySpawnController enemySpawner;
+    private EnemiesManager enemiesManager;
 
     [SerializeField]
     private bool spawnEnemiesInRooms = true;
@@ -164,7 +164,7 @@ public class DungeonGenerator : NetworkBehaviour
             valuableSpawner.SpawnValuablesInRooms();
         }
 
-        if (spawnEnemiesInRooms && enemySpawner != null)
+        if (spawnEnemiesInRooms && enemiesManager != null)
         {
             StartCoroutine(GenerateNavMeshDelayed());
             StartCoroutine(SpawnEnemiesInRooms());
@@ -216,7 +216,7 @@ public class DungeonGenerator : NetworkBehaviour
         List<Transform> lastThreeRooms = roomsList.GetRange(roomCount - 3, 3);
 
         Transform[] roomsToSpawn = lastThreeRooms.ToArray();
-        enemySpawner.SpawnEnemies(roomsToSpawn, waypoints, 3);
+        enemiesManager.SpawnEnemies(roomsToSpawn, waypoints, 3);
     }
 
     private void SetupRoomLighting()
