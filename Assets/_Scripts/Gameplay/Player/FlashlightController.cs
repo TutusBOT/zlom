@@ -77,6 +77,21 @@ public class FlashlightController : NetworkBehaviour
     private Quaternion _targetRotation;
     private float _rotationLerpSpeed = 15f;
 
+    [Header("Hit Detection")]
+    [SerializeField]
+    private LayerMask hitDetectionLayers;
+    private readonly HashSet<GameObject> _hitObjectsThisFrame = new HashSet<GameObject>();
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool showDebugGizmos = true;
+    private Vector3 _lastOrigin;
+    private Vector3 _lastDirection;
+    private float _lastConeRadius;
+    private float _lastRange;
+    private List<(Vector3 point, Vector3 normal, Color color)> _debugHitPoints =
+        new List<(Vector3, Vector3, Color)>();
+
     private void Awake()
     {
         _syncedIsOn.OnChange += OnFlashlightStateChanged;
@@ -90,7 +105,6 @@ public class FlashlightController : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        // Find the player camera - it's already created by PlayerController
         _playerCameraTransform = GetComponentInChildren<Camera>()?.transform;
         if (_playerCameraTransform == null)
         {
@@ -102,7 +116,6 @@ public class FlashlightController : NetworkBehaviour
         GameObject flashlightHolder = new GameObject("FlashlightHolder");
         flashlightHolder.transform.SetParent(_playerCameraTransform, false);
 
-        // Create spotlight if not assigned
         if (spotLight == null)
         {
             GameObject spotlightObj = new GameObject("Spotlight");
@@ -210,13 +223,11 @@ public class FlashlightController : NetworkBehaviour
 
     private void HandleInput()
     {
-        // Toggle flashlight on/off
         if (InputBindingManager.Instance.IsActionTriggered(InputActions.Flashlight))
         {
             ToggleFlashlight();
         }
 
-        // Flash
         if (
             InputBindingManager.Instance.IsActionTriggered(InputActions.Flash)
             && _canFlash
@@ -503,10 +514,7 @@ public class FlashlightController : NetworkBehaviour
         return _currentBatteryLevel / maxBatteryLevel * 100f;
     }
 
-    [Header("Hit Detection")]
-    [SerializeField]
-    private LayerMask hitDetectionLayers;
-    private readonly HashSet<GameObject> _hitObjectsThisFrame = new HashSet<GameObject>();
+    #region Flashlight Hit Detection
 
     private void DetectFlashlightHits()
     {
@@ -526,11 +534,8 @@ public class FlashlightController : NetworkBehaviour
         _lastConeRadius = Mathf.Tan(spotLight.spotAngle * 0.5f * Mathf.Deg2Rad) * effectiveRange;
         _lastRange = effectiveRange;
 
-        // ===== APPROACH 1: MULTIPLE RAYCASTS IN A CONE PATTERN =====
-        // This is more reliable than SphereCastAll for all ranges
         List<(RaycastHit hit, float intensity)> validHits = new List<(RaycastHit, float)>();
 
-        // Cast center ray
         if (
             Physics.Raycast(
                 rayOrigin,
@@ -547,7 +552,7 @@ public class FlashlightController : NetworkBehaviour
 
         // Cast rays in a cone pattern
         int raysPerRing = 8;
-        int ringCount = 3; // More rings = better coverage but more expensive
+        int ringCount = 3;
 
         for (int ring = 1; ring <= ringCount; ring++)
         {
@@ -567,7 +572,6 @@ public class FlashlightController : NetworkBehaviour
                 );
                 Vector3 rayDir = rotation * rayDirection;
 
-                // Visualize ray
                 Debug.DrawRay(
                     rayOrigin,
                     rayDir * effectiveRange,
@@ -575,7 +579,6 @@ public class FlashlightController : NetworkBehaviour
                     0.1f
                 );
 
-                // Cast ray
                 if (
                     Physics.Raycast(
                         rayOrigin,
@@ -591,7 +594,6 @@ public class FlashlightController : NetworkBehaviour
             }
         }
 
-        // ===== APPROACH 2: CLOSE-RANGE OVERLAP SPHERE =====
         // Catch anything very close that might be missed by raycasts
         float closeRange = 3f;
         Collider[] nearColliders = Physics.OverlapSphere(rayOrigin, closeRange, hitDetectionLayers);
@@ -602,7 +604,6 @@ public class FlashlightController : NetworkBehaviour
             if (_hitObjectsThisFrame.Contains(col.gameObject))
                 continue;
 
-            // Get center and closest point
             Vector3 closestPoint = col.ClosestPoint(rayOrigin);
             Vector3 dirToPoint = (closestPoint - rayOrigin).normalized;
 
@@ -639,20 +640,16 @@ public class FlashlightController : NetworkBehaviour
                 detectable.OnFlashlightHit(this, closestPoint, -dirToPoint, finalIntensity);
                 _hitObjectsThisFrame.Add(col.gameObject);
 
-                // Debug visualization
-                Debug.DrawLine(rayOrigin, closestPoint, Color.magenta, 0.1f);
                 _debugHitPoints.Add((closestPoint, -dirToPoint, Color.magenta));
             }
         }
 
-        // Process all the hits we collected from the raycasts
         foreach (var (hit, intensity) in validHits)
         {
             ProcessHit(hit, intensity);
         }
     }
 
-    // Helper method to check for occlusion and add valid hits to the list
     private void ProcessHitWithOcclusionCheck(
         RaycastHit hit,
         float intensity,
@@ -675,12 +672,11 @@ public class FlashlightController : NetworkBehaviour
             )
         )
         {
-            // If we hit something different first, this object is occluded
             if (directHit.collider != hit.collider && !directHit.collider.isTrigger)
             {
                 Debug.DrawLine(_lastOrigin, directHit.point, Color.red, 0.1f);
                 _debugHitPoints.Add((directHit.point, directHit.normal, Color.red));
-                return; // Skip this hit
+                return;
             }
         }
 
@@ -690,7 +686,6 @@ public class FlashlightController : NetworkBehaviour
         validHits.Add((hit, intensity));
     }
 
-    // Calculate final intensity with consistent formula
     private float CalculateFinalIntensity(float intensityFactor, float distance)
     {
         float distanceFactor =
@@ -715,14 +710,10 @@ public class FlashlightController : NetworkBehaviour
 
         _hitObjectsThisFrame.Add(hitObject);
 
-        // Try to get component on the hit object first
-        IFlashlightDetectable detectable = hitObject.GetComponent<IFlashlightDetectable>();
+        IFlashlightDetectable detectable =
+            hitObject.GetComponent<IFlashlightDetectable>()
+            ?? hitObject.GetComponentInParent<IFlashlightDetectable>();
 
-        // If not found on the direct hit object, try to find it on any parent
-        if (detectable == null)
-            detectable = hitObject.GetComponentInParent<IFlashlightDetectable>();
-
-        // If still not found, exit
         if (detectable == null)
             return;
 
@@ -736,24 +727,15 @@ public class FlashlightController : NetworkBehaviour
         float finalIntensity =
             (baseIntensity + intensityFactor * 0.7f) * distanceFactor * spotLight.intensity;
 
-        Debug.Log($"Flashlight hit {intensityFactor} {distanceFactor} {finalIntensity}");
-
-        // Special case for flash ability
         if (_flashCooldownTimer > flashCooldown - flashDuration)
             finalIntensity *= flashIntensityMultiplier;
 
         detectable.OnFlashlightHit(this, hit.point, hit.normal, finalIntensity);
     }
 
-    [Header("Debug")]
-    [SerializeField]
-    private bool showDebugGizmos = true;
-    private Vector3 _lastOrigin;
-    private Vector3 _lastDirection;
-    private float _lastConeRadius;
-    private float _lastRange;
-    private List<(Vector3 point, Vector3 normal, Color color)> _debugHitPoints =
-        new List<(Vector3, Vector3, Color)>();
+    #endregion
+
+    #region Debug
 
     private void OnDrawGizmos()
     {
@@ -802,4 +784,6 @@ public class FlashlightController : NetworkBehaviour
             Gizmos.DrawLine(origin, pos1);
         }
     }
+
+    #endregion
 }
