@@ -355,6 +355,9 @@ MonoBehaviour:
   crankingAudioSource: {fileID: 294656319187813847}
   lowBatteryThreshold: 20
   flickerThreshold: 10
+  hitDetectionLayers:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!114 &4261230266848846684
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using Unity.Behavior;
@@ -11,6 +13,11 @@ public class Enemy : NetworkBehaviour, IHear
     private float maxHealth = 100f;
 
     private readonly SyncVar<float> _currentHealth = new();
+    protected readonly SyncVar<bool> isAlive = new(true);
+    public float respawnTime = 30f;
+
+    [SerializeField]
+    protected AudioClip deathSound;
 
     [Header("Movement")]
     [Tooltip("Regular patrol/walking speed")]
@@ -30,7 +37,7 @@ public class Enemy : NetworkBehaviour, IHear
     private float hearingRange = 10f;
 
     [SerializeField]
-    private BehaviorGraphAgent behaviorGraph;
+    protected BehaviorGraphAgent behaviorGraph;
 
     public override void OnStartServer()
     {
@@ -69,14 +76,79 @@ public class Enemy : NetworkBehaviour, IHear
         behaviorGraph.SetVariableValue("SoundPosition", sound.pos);
     }
 
-    protected virtual void Die()
+    [ServerRpc(RequireOwnership = false)]
+    public virtual void Die()
     {
-        Despawn();
+        if (!isAlive.Value || !IsServerInitialized)
+            return;
+
+        isAlive.Value = false;
+
+        ResetBehaviorGraph();
+        RpcDie();
+        HandleDeathEvents();
+        EnemiesManager.Instance.RegisterEnemyDeath(this);
     }
 
-    protected void Despawn()
+    [ObserversRpc]
+    protected virtual void RpcDie()
     {
-        base.NetworkObject.Despawn();
+        SetComponentsEnabled(false);
+        PlayDeathEffects();
+    }
+
+    protected virtual void PlayDeathEffects()
+    {
+        if (deathSound != null)
+        {
+            AudioManager.Instance.PlaySoundAtPosition(deathSound, transform.position);
+        }
+    }
+
+    protected virtual void HandleDeathEvents()
+    {
+        // Base implementation empty - override in specific enemy types
+    }
+
+    protected virtual void ResetBehaviorGraph()
+    {
+        behaviorGraph.SetVariableValue("HasHeardSound", false);
+        behaviorGraph.SetVariableValue("SoundPosition", Vector3.zero);
+        behaviorGraph.SetVariableValue("ShouldPerformAction", false);
+    }
+
+    public virtual void Respawn()
+    {
+        isAlive.Value = true;
+        _currentHealth.Value = maxHealth;
+        SetComponentsEnabled(true);
+    }
+
+    [ObserversRpc]
+    private void SetComponentsEnabled(bool enabled)
+    {
+        foreach (var renderer in GetComponentsInChildren<Renderer>())
+        {
+            renderer.enabled = enabled;
+        }
+
+        var aiComponents = GetComponents<MonoBehaviour>()
+            .Where(x => x.GetType().Name.Contains("AI") || x.GetType().Name.Contains("Controller"));
+
+        foreach (var comp in aiComponents)
+            comp.enabled = enabled;
+
+        // Handle colliders
+        foreach (var collider in GetComponentsInChildren<Collider>())
+            collider.enabled = enabled;
+
+        var agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        if (agent != null)
+            agent.enabled = enabled;
+
+        var behaviorGraph = GetComponent<BehaviorGraphAgent>();
+        if (behaviorGraph != null)
+            behaviorGraph.enabled = enabled;
     }
 
     private void Update()

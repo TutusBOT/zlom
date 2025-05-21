@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
@@ -76,6 +77,21 @@ public class FlashlightController : NetworkBehaviour
     private Quaternion _targetRotation;
     private float _rotationLerpSpeed = 15f;
 
+    [Header("Hit Detection")]
+    [SerializeField]
+    private LayerMask hitDetectionLayers;
+    private readonly HashSet<GameObject> _hitObjectsThisFrame = new HashSet<GameObject>();
+
+    [Header("Debug")]
+    [SerializeField]
+    private bool showDebugGizmos = true;
+    private Vector3 _lastOrigin;
+    private Vector3 _lastDirection;
+    private float _lastConeRadius;
+    private float _lastRange;
+    private List<(Vector3 point, Vector3 normal, Color color)> _debugHitPoints =
+        new List<(Vector3, Vector3, Color)>();
+
     private void Awake()
     {
         _syncedIsOn.OnChange += OnFlashlightStateChanged;
@@ -89,7 +105,6 @@ public class FlashlightController : NetworkBehaviour
         if (!IsOwner)
             return;
 
-        // Find the player camera - it's already created by PlayerController
         _playerCameraTransform = GetComponentInChildren<Camera>()?.transform;
         if (_playerCameraTransform == null)
         {
@@ -101,7 +116,6 @@ public class FlashlightController : NetworkBehaviour
         GameObject flashlightHolder = new GameObject("FlashlightHolder");
         flashlightHolder.transform.SetParent(_playerCameraTransform, false);
 
-        // Create spotlight if not assigned
         if (spotLight == null)
         {
             GameObject spotlightObj = new GameObject("Spotlight");
@@ -204,17 +218,16 @@ public class FlashlightController : NetworkBehaviour
         UpdateBattery();
         UpdateFlashCooldown();
         UpdateFlashlightOrientation();
+        DetectFlashlightHits();
     }
 
     private void HandleInput()
     {
-        // Toggle flashlight on/off
         if (InputBindingManager.Instance.IsActionTriggered(InputActions.Flashlight))
         {
             ToggleFlashlight();
         }
 
-        // Flash
         if (
             InputBindingManager.Instance.IsActionTriggered(InputActions.Flash)
             && _canFlash
@@ -500,4 +513,277 @@ public class FlashlightController : NetworkBehaviour
     {
         return _currentBatteryLevel / maxBatteryLevel * 100f;
     }
+
+    #region Flashlight Hit Detection
+
+    private void DetectFlashlightHits()
+    {
+        if (!_isOn || spotLight == null)
+            return;
+
+        _hitObjectsThisFrame.Clear();
+        _debugHitPoints.Clear();
+
+        Vector3 rayOrigin = spotLight.transform.position;
+        Vector3 rayDirection = spotLight.transform.forward;
+        float effectiveRange = spotLight.range;
+
+        // Store for debug visualization
+        _lastOrigin = rayOrigin;
+        _lastDirection = rayDirection;
+        _lastConeRadius = Mathf.Tan(spotLight.spotAngle * 0.5f * Mathf.Deg2Rad) * effectiveRange;
+        _lastRange = effectiveRange;
+
+        List<(RaycastHit hit, float intensity)> validHits = new List<(RaycastHit, float)>();
+
+        if (
+            Physics.Raycast(
+                rayOrigin,
+                rayDirection,
+                out RaycastHit centerHit,
+                effectiveRange,
+                hitDetectionLayers
+            )
+        )
+        {
+            // Direct center hit gets full intensity
+            ProcessHitWithOcclusionCheck(centerHit, 1.0f, validHits);
+        }
+
+        // Cast rays in a cone pattern
+        int raysPerRing = 8;
+        int ringCount = 3;
+
+        for (int ring = 1; ring <= ringCount; ring++)
+        {
+            // Each ring gets progressively wider angle
+            float ringAngle = (spotLight.spotAngle * 0.5f) * (ring / (float)ringCount);
+            float intensityMultiplier = 1.0f - (ring / (float)(ringCount + 1)); // Outer rings get less intensity
+
+            for (int i = 0; i < raysPerRing; i++)
+            {
+                // Calculate direction for this ray
+                float angle = (i / (float)raysPerRing) * 2 * Mathf.PI;
+
+                // Create rotation around forward axis
+                Quaternion rotation = Quaternion.AngleAxis(
+                    ringAngle,
+                    new Vector3(Mathf.Sin(angle), Mathf.Cos(angle), 0)
+                );
+                Vector3 rayDir = rotation * rayDirection;
+
+                Debug.DrawRay(
+                    rayOrigin,
+                    rayDir * effectiveRange,
+                    Color.yellow * intensityMultiplier,
+                    0.1f
+                );
+
+                if (
+                    Physics.Raycast(
+                        rayOrigin,
+                        rayDir,
+                        out RaycastHit hit,
+                        effectiveRange,
+                        hitDetectionLayers
+                    )
+                )
+                {
+                    ProcessHitWithOcclusionCheck(hit, intensityMultiplier, validHits);
+                }
+            }
+        }
+
+        // Catch anything very close that might be missed by raycasts
+        float closeRange = 3f;
+        Collider[] nearColliders = Physics.OverlapSphere(rayOrigin, closeRange, hitDetectionLayers);
+
+        foreach (Collider col in nearColliders)
+        {
+            // Skip if already processed
+            if (_hitObjectsThisFrame.Contains(col.gameObject))
+                continue;
+
+            Vector3 closestPoint = col.ClosestPoint(rayOrigin);
+            Vector3 dirToPoint = (closestPoint - rayOrigin).normalized;
+
+            // Check if in front of flashlight (not behind)
+            if (Vector3.Dot(rayDirection, dirToPoint) <= 0)
+                continue;
+
+            // Check if within a reasonable angle (wider than normal cone for close objects)
+            float angleToPoint = Vector3.Angle(rayDirection, dirToPoint);
+            if (angleToPoint > spotLight.spotAngle * 0.75f) // 75% gives a little extra tolerance
+                continue;
+
+            // Check for occlusion
+            float distToPoint = Vector3.Distance(rayOrigin, closestPoint);
+            if (Physics.Raycast(rayOrigin, dirToPoint, out RaycastHit blockHit, distToPoint))
+            {
+                // If we hit something else first, point is occluded
+                if (blockHit.collider != col && !blockHit.collider.isTrigger)
+                    continue;
+            }
+
+            // Calculate intensity - close objects get more intensity
+            float closeIntensity = 1.0f - (distToPoint / closeRange) * 0.5f; // 0.5-1.0 range
+
+            // Process directly since we don't have a proper RaycastHit
+            IFlashlightDetectable detectable = col.GetComponent<IFlashlightDetectable>();
+            if (detectable == null)
+                detectable = col.GetComponentInParent<IFlashlightDetectable>();
+
+            if (detectable != null)
+            {
+                float finalIntensity = CalculateFinalIntensity(closeIntensity, distToPoint);
+
+                detectable.OnFlashlightHit(this, closestPoint, -dirToPoint, finalIntensity);
+                _hitObjectsThisFrame.Add(col.gameObject);
+
+                _debugHitPoints.Add((closestPoint, -dirToPoint, Color.magenta));
+            }
+        }
+
+        foreach (var (hit, intensity) in validHits)
+        {
+            ProcessHit(hit, intensity);
+        }
+    }
+
+    private void ProcessHitWithOcclusionCheck(
+        RaycastHit hit,
+        float intensity,
+        List<(RaycastHit, float)> validHits
+    )
+    {
+        if (_hitObjectsThisFrame.Contains(hit.collider.gameObject))
+            return;
+
+        Vector3 dirToHit = (hit.point - _lastOrigin).normalized;
+
+        // Check for occlusion, but with a slight offset to avoid self-occlusion
+        if (
+            Physics.Raycast(
+                _lastOrigin,
+                dirToHit,
+                out RaycastHit directHit,
+                hit.distance + 0.01f,
+                Physics.AllLayers
+            )
+        )
+        {
+            if (directHit.collider != hit.collider && !directHit.collider.isTrigger)
+            {
+                Debug.DrawLine(_lastOrigin, directHit.point, Color.red, 0.1f);
+                _debugHitPoints.Add((directHit.point, directHit.normal, Color.red));
+                return;
+            }
+        }
+
+        // Valid hit
+        Debug.DrawLine(_lastOrigin, hit.point, Color.green, 0.1f);
+        _debugHitPoints.Add((hit.point, hit.normal, Color.green));
+        validHits.Add((hit, intensity));
+    }
+
+    private float CalculateFinalIntensity(float intensityFactor, float distance)
+    {
+        float distanceFactor =
+            distance <= 5f ? 1f : Mathf.Lerp(1f, 0.5f, (distance - 5f) / (spotLight.range - 5f));
+
+        float baseIntensity = 0.3f;
+        float finalIntensity =
+            (baseIntensity + intensityFactor * 0.7f) * distanceFactor * spotLight.intensity;
+
+        // Special case for flash ability
+        if (_flashCooldownTimer > flashCooldown - flashDuration)
+            finalIntensity *= flashIntensityMultiplier;
+
+        return finalIntensity;
+    }
+
+    private void ProcessHit(RaycastHit hit, float intensityFactor)
+    {
+        GameObject hitObject = hit.collider.gameObject;
+        if (_hitObjectsThisFrame.Contains(hitObject))
+            return;
+
+        _hitObjectsThisFrame.Add(hitObject);
+
+        IFlashlightDetectable detectable =
+            hitObject.GetComponent<IFlashlightDetectable>()
+            ?? hitObject.GetComponentInParent<IFlashlightDetectable>();
+
+        if (detectable == null)
+            return;
+
+        // Apply distance falloff to intensity
+        float distanceFactor =
+            hit.distance <= 5f
+                ? 1f
+                : Mathf.Lerp(1f, 0.5f, (hit.distance - 5f) / (spotLight.range - 5f));
+        float baseIntensity = 0.3f;
+
+        float finalIntensity =
+            (baseIntensity + intensityFactor * 0.7f) * distanceFactor * spotLight.intensity;
+
+        if (_flashCooldownTimer > flashCooldown - flashDuration)
+            finalIntensity *= flashIntensityMultiplier;
+
+        detectable.OnFlashlightHit(this, hit.point, hit.normal, finalIntensity);
+    }
+
+    #endregion
+
+    #region Debug
+
+    private void OnDrawGizmos()
+    {
+        if (!showDebugGizmos || !_isOn || !Application.isPlaying)
+            return;
+
+        Gizmos.color = new Color(1f, 1f, 0f, 0.1f);
+
+        if (_lastConeRadius > 0 && _lastRange > 0)
+        {
+            DrawWireframeCone(_lastOrigin, _lastDirection, _lastConeRadius, _lastRange);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawRay(_lastOrigin, _lastDirection * _lastRange);
+        }
+
+        foreach (var (point, normal, color) in _debugHitPoints)
+        {
+            Gizmos.color = color;
+            Gizmos.DrawSphere(point, 0.1f);
+            Gizmos.DrawRay(point, normal * 0.5f);
+        }
+    }
+
+    private void DrawWireframeCone(Vector3 origin, Vector3 direction, float radius, float length)
+    {
+        int segments = 16;
+        Vector3 center = origin + direction * length;
+        Vector3 forward = direction;
+        Vector3 up = Vector3.up;
+
+        if (Mathf.Abs(Vector3.Dot(forward, up)) > 0.99f)
+            up = Vector3.right;
+
+        Vector3 right = Vector3.Cross(up, forward).normalized;
+        up = Vector3.Cross(forward, right).normalized;
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle1 = ((float)i / segments) * 2 * Mathf.PI;
+            float angle2 = ((float)(i + 1) / segments) * 2 * Mathf.PI;
+
+            Vector3 pos1 = center + (up * Mathf.Sin(angle1) + right * Mathf.Cos(angle1)) * radius;
+            Vector3 pos2 = center + (up * Mathf.Sin(angle2) + right * Mathf.Cos(angle2)) * radius;
+
+            Gizmos.DrawLine(pos1, pos2);
+            Gizmos.DrawLine(origin, pos1);
+        }
+    }
+
+    #endregion
 }
