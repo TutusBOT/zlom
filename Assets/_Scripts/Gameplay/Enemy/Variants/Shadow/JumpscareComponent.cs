@@ -22,7 +22,6 @@ public class JumpscareComponent : NetworkBehaviour
     [SerializeField]
     private string jumpscareAnimTrigger = "Jumpscare";
 
-    // Visual Effects
     [Header("Visual Effects")]
     [SerializeField]
     private GameObject jumpscareVfxPrefab;
@@ -96,17 +95,14 @@ public class JumpscareComponent : NetworkBehaviour
     [ObserversRpc]
     private void ClientRpcPlayJumpscareEffects(Vector3 playerPosition)
     {
-        // Play jumpscare sound
         if (AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySound(jumpscareSoundId, transform.position, 1.0f);
         }
 
-        // Play animation
         if (animator != null)
             animator.SetTrigger(jumpscareAnimTrigger);
 
-        // Spawn visual effect if available
         if (jumpscareVfxPrefab != null)
         {
             GameObject vfx = Instantiate(
@@ -122,16 +118,11 @@ public class JumpscareComponent : NetworkBehaviour
     {
         _jumpscareTimer = 0f;
 
-        // Get player position for effects
         Vector3 playerPosition = _targetPlayer.transform.position;
 
-        // Play effects on all clients
         ClientRpcPlayJumpscareEffects(playerPosition);
-
-        // Apply stress to target player
         ApplyJumpscareStress();
 
-        // Wait for jumpscare duration
         yield return new WaitForSeconds(jumpscareDuration);
 
         _jumpscareTimer = jumpscareDuration;

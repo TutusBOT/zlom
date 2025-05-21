@@ -54,7 +54,6 @@ public partial class JumpscareAction : Action
             return Status.Failure;
         }
 
-        // Start the jumpscare
         Player targetPlayer = Target.Value.GetComponent<Player>();
         _jumpscareComp.StartJumpscare(targetPlayer);
 
@@ -66,11 +65,9 @@ public partial class JumpscareAction : Action
         if (_jumpscareComp == null)
             return Status.Failure;
 
-        // Check if jumpscare is complete
         if (_jumpscareComp.IsJumpscareComplete())
             return Status.Success;
 
-        // Check if target is still valid
         if (Target.Value == null)
         {
             _jumpscareComp.StopJumpscare();
