@@ -121,8 +121,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79e19fb110fa757439c89e7e5a5c7dd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionRange: 4
-  sellKey: 101
   valueMultiplier: 1
   zoneColor: {r: 0, g: 1, b: 0, a: 0.2}
-  sellPromptUI: {fileID: 0}
+  debug: 0
