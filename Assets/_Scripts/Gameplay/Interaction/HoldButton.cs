@@ -1,7 +1,9 @@
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Physical3DButton : MonoBehaviour, IInteractable
+public class Physical3DButton : NetworkBehaviour, IInteractable
 {
     [Header("Button Settings")]
     public float requiredHoldTime = 1.0f;
@@ -26,7 +28,8 @@ public class Physical3DButton : MonoBehaviour, IInteractable
     private Vector3 _pressedPosition;
     private bool _isBeingPressed = false;
     private bool _isHovered = false;
-    private bool _buttonActivated = false;
+    public readonly SyncVar<bool> _buttonActivated = new SyncVar<bool>();
+
     private Renderer _buttonRenderer;
     private Material _originalButtonMaterial;
 
@@ -76,7 +79,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
     {
         // Buttons can only be interacted with if they're not already activated
         // You could change this if you want buttons to be reusable
-        return !_buttonActivated;
+        return !_buttonActivated.Value;
     }
 
     public void OnHoverEnter()
@@ -88,7 +91,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
             _buttonRenderer != null
             && hoveredMaterial != null
             && !_isBeingPressed
-            && !_buttonActivated
+            && !_buttonActivated.Value
         )
         {
             _buttonRenderer.material = hoveredMaterial;
@@ -104,7 +107,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
             _buttonRenderer != null
             && normalMaterial != null
             && !_isBeingPressed
-            && !_buttonActivated
+            && !_buttonActivated.Value
         )
         {
             _buttonRenderer.material = normalMaterial;
@@ -113,7 +116,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
 
     public void OnInteractStart()
     {
-        if (!_buttonActivated)
+        if (!_buttonActivated.Value)
         {
             _isBeingPressed = true;
 
@@ -134,7 +137,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
 
     public void OnInteractHold(float duration)
     {
-        if (_isBeingPressed && !_buttonActivated)
+        if (_isBeingPressed && !_buttonActivated.Value)
         {
             // Update progress indicator based on hold duration
             UpdateProgressIndicator(duration / requiredHoldTime);
@@ -142,7 +145,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
             // Check if held long enough to activate
             if (duration >= requiredHoldTime)
             {
-                _buttonActivated = true;
+                _buttonActivated.Value = true;
 
                 // Change material to activated state
                 if (_buttonRenderer != null && activatedMaterial != null)
@@ -165,7 +168,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
             progressIndicator.SetActive(false);
 
         // Change material back to normal or hovered state if not activated
-        if (_buttonRenderer != null && !_buttonActivated)
+        if (_buttonRenderer != null && !_buttonActivated.Value)
         {
             if (_isHovered && hoveredMaterial != null)
                 _buttonRenderer.material = hoveredMaterial;
@@ -187,7 +190,7 @@ public class Physical3DButton : MonoBehaviour, IInteractable
 
     private void ResetButton()
     {
-        _buttonActivated = false;
+        _buttonActivated.Value = false;
 
         // Restore normal material or hovered material
         if (_buttonRenderer != null)

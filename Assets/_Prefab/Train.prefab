@@ -1465,9 +1465,37 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1088667552819026372, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1088667552819026372, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1088667552819026372, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1088667552819026372, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.507
+      objectReference: {fileID: 0}
+    - target: {fileID: 1088667552819026372, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.204
+      objectReference: {fileID: 0}
+    - target: {fileID: 1088667552819026372, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1636083157514668353, guid: cb721cbf86dc25142831589c47a01867, type: 3}
       propertyPath: m_Name
       value: SellZone
+      objectReference: {fileID: 0}
+    - target: {fileID: 8475603386174171794, guid: cb721cbf86dc25142831589c47a01867, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.64
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

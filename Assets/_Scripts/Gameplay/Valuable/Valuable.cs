@@ -15,6 +15,7 @@ public enum ValuableSize
 
 public class Valuable : NetworkBehaviour, IPickable
 {
+
     public int initialCashValue = 100;
 
     private readonly SyncVar<float> _currentCashValue = new(100f);
@@ -117,14 +118,26 @@ public class Valuable : NetworkBehaviour, IPickable
         }
     }
 
+        public void SetInvulnerable(bool state)
+        {
+            _isInvulnerable.Value = state;
+
+            if (state)
+                Debug.Log($"{name} is now INVULNERABLE");
+            else
+                Debug.Log($"{name} is now VULNERABLE");
+        }
+
     protected virtual void OnCollisionEnter(Collision collision)
     {
         if (!IsServerInitialized)
             return;
 
         if (_isInvulnerable.Value)
+        {
+            Debug.Log($"Item is Invulnerable");
             return;
-
+        }
         float impactForce = collision.relativeVelocity.magnitude;
         Debug.Log($"Impact force: {impactForce}");
 
