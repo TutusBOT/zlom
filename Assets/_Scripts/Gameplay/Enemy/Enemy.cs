@@ -151,7 +151,7 @@ public class Enemy : NetworkBehaviour, IHear
             behaviorGraph.enabled = enabled;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (IsServerInitialized)
         {

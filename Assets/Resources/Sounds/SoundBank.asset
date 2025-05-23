@@ -96,3 +96,13 @@ MonoBehaviour:
     maxDistance: 10
     randomizePitch: 1
     pitchRange: {x: 0.9, y: 1.1}
+  - id: juggernaut_scream
+    clips:
+    - {fileID: 8300000, guid: 6e92402ef72cce74dafa2c54c3903531, type: 3}
+    volume: 0.3
+    pitch: 0
+    spatialBlend: 1
+    minDistance: 0
+    maxDistance: 10
+    randomizePitch: 1
+    pitchRange: {x: 0.9, y: 1.1}
