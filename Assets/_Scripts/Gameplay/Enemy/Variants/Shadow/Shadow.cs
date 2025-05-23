@@ -15,7 +15,6 @@ public class Shadow : Enemy, IFlashlightDetectable
         if (intensityFactor < 0.1f)
             return;
 
-        Debug.Log("Shadow: Flashlight hit detected");
         _lightExposureTime += Time.deltaTime;
 
         if (_lightExposureTime < _reactionThreshold)

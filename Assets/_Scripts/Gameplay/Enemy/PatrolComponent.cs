@@ -140,17 +140,8 @@ public class PatrolComponent : NetworkBehaviour
                 if (_waitTimer > 0)
                     _waitTimer -= Time.deltaTime;
 
-                // Add logging to help debug
-                if (_waitTimer <= 0.1f)
-                {
-                    Debug.Log($"Wait timer nearly expired: {_waitTimer}s remaining");
-                }
-
                 if (_waitTimer <= 0f)
                 {
-                    Debug.Log(
-                        $"Wait timer expired, moving from waypoint after {waypointWaitTime}s wait"
-                    );
                     MoveToNextWaypoint(false);
                 }
                 break;
