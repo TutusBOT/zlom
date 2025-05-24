@@ -602,7 +602,7 @@ MonoBehaviour:
     maxCount: 10
     tier: 3
     currentCount: 0
-  - prefab: {fileID: 1183495326353828328, guid: a5a94dde373d34f42ad5e5d989d4614e, type: 3}
+  - prefab: {fileID: 2844647882835190238, guid: fb66386e1eabe7747a5ec9697c800460, type: 3}
     spawnChance: 100
     maxCount: 10
     tier: 3

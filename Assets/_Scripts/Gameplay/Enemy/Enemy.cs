@@ -22,11 +22,11 @@ public class Enemy : NetworkBehaviour, IHear
     [Header("Movement")]
     [Tooltip("Regular patrol/walking speed")]
     [SerializeField]
-    private float moveSpeed = 3f;
+    protected float moveSpeed = 3f;
 
     [Tooltip("Chase/running speed")]
     [SerializeField]
-    private float runSpeed = 5f;
+    protected float runSpeed = 5f;
     public List<GameObject> waypoints = new List<GameObject>();
 
     [Header("Sound Detection")]

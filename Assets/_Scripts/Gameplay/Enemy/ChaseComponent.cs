@@ -28,7 +28,7 @@ public class ChaseComponent : NetworkBehaviour
 
     // Internal state
     private NavMeshAgent _agent;
-    private Transform _target;
+    private GameObject _target;
     private Vector3 _lastKnownPosition;
     private float _pathUpdateTimer;
     private bool _isActive = false;
@@ -46,13 +46,13 @@ public class ChaseComponent : NetworkBehaviour
         this.chaseSpeed = chaseSpeed;
     }
 
-    public void StartChasing(Transform targetTransform)
+    public void StartChasing(GameObject target)
     {
-        if (targetTransform == null)
+        if (target == null)
             return;
 
-        _target = targetTransform;
-        _lastKnownPosition = _target.position;
+        _target = target;
+        _lastKnownPosition = _target.transform.position;
         _agent.speed = chaseSpeed;
         _isActive = true;
         _pathUpdateTimer = 0f; // Force immediate update
@@ -79,7 +79,8 @@ public class ChaseComponent : NetworkBehaviour
         if (_target == null || !_isActive)
             return false;
 
-        return Vector3.Distance(transform.position, _target.position) <= minDistanceToTarget;
+        return Vector3.Distance(transform.position, _target.transform.position)
+            <= minDistanceToTarget;
     }
 
     public bool IsTargetLost()
@@ -105,10 +106,13 @@ public class ChaseComponent : NetworkBehaviour
 
         if (_target != null)
         {
-            float distanceToTarget = Vector3.Distance(transform.position, _target.position);
+            float distanceToTarget = Vector3.Distance(
+                transform.position,
+                _target.transform.position
+            );
 
             // Update target position (the target reference exists)
-            _lastKnownPosition = _target.position;
+            _lastKnownPosition = _target.transform.position;
 
             // If we're too far from target, stop chasing
             if (distanceToTarget > maxChaseDistance)
