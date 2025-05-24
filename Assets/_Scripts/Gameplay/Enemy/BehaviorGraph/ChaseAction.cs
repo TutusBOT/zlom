@@ -47,7 +47,7 @@ public partial class ChaseAction : Action
             return Status.Failure;
         }
 
-        chaseComp.StartChasing(Target.Value.transform);
+        chaseComp.StartChasing(Target.Value);
 
         return Status.Running;
     }
