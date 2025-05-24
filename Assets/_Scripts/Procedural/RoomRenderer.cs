@@ -141,6 +141,7 @@ public class RoomRenderer
         if (controller != null)
         {
             room.roomController = controller;
+            controller.SpawnNetworkObjects();
         }
 
         return placedRoom;

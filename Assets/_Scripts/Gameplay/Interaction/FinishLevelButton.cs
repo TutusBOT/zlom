@@ -1,11 +1,12 @@
 using UnityEngine;
 
-public class FinishLevelButton : MonoBehaviour
+public class FinishLevelButton : HoldButton
 {
     private bool _isEnabled = false;
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
         if (EconomyManager.Instance != null)
         {
             EconomyManager.Instance.OnQuotaCompleted += OnQuotaCompleted;
@@ -30,7 +31,10 @@ public class FinishLevelButton : MonoBehaviour
     public void OnClick()
     {
         if (!_isEnabled)
+        {
+            ResetButtonServerRpc();
             return;
+        }
         BootstrapNetworkManager.ChangeNetworkScene("Train", new string[] { "Dungeon3D" });
     }
 
@@ -39,3 +43,4 @@ public class FinishLevelButton : MonoBehaviour
         _isEnabled = true;
     }
 }
+

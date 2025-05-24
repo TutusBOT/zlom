@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class SellZone : MonoBehaviour
 {
+
+    public static SellZone Instance { get; private set; }
+
     [Header("Settings")]
     public float valueMultiplier = 1.2f;
 
@@ -14,6 +17,18 @@ public class SellZone : MonoBehaviour
 
     private HashSet<Valuable> previousValuables = new HashSet<Valuable>();
 
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     private void Start()
     {
         Renderer rend = GetComponent<Renderer>();
@@ -117,4 +132,29 @@ public class SellZone : MonoBehaviour
         Gizmos.color = new Color(0, 1, 0, 0.3f);
         Gizmos.DrawCube(transform.position, transform.localScale);
     }
+
+    public int GetTotalValueInZone()
+    {
+        int totalValue = 0;
+
+        Collider[] colliders = Physics.OverlapBox(transform.position, transform.localScale / 2);
+        foreach (Collider collider in colliders)
+        {
+            if (collider.CompareTag("Valuable"))
+            {
+                Valuable valuable = collider.GetComponent<Valuable>();
+                if (valuable != null)
+                {
+                    float value = valuable.GetCurrentValue() * valueMultiplier;
+                    totalValue += Mathf.RoundToInt(value);
+                }
+            }
+        }
+
+        if (debug)
+            Debug.Log($"[SellZone] Total value in zone: {totalValue}");
+
+        return totalValue;
+    }
 }
+

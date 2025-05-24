@@ -3,7 +3,7 @@ using FishNet.Object.Synchronizing;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Physical3DButton : NetworkBehaviour, IInteractable
+public class HoldButton : NetworkBehaviour, IInteractable
 {
     [Header("Button Settings")]
     public float requiredHoldTime = 1.0f;
@@ -33,7 +33,7 @@ public class Physical3DButton : NetworkBehaviour, IInteractable
     private Renderer _buttonRenderer;
     private Material _originalButtonMaterial;
 
-    void Start()
+    protected virtual void Start()
     {
         if (buttonMesh != null)
         {
@@ -188,19 +188,24 @@ public class Physical3DButton : NetworkBehaviour, IInteractable
 
     #endregion
 
-    private void ResetButton()
-    {
-        _buttonActivated.Value = false;
+[ServerRpc(RequireOwnership = false)]
+public void ResetButtonServerRpc()
+{
+    _buttonActivated.Value = false;
+    RpcResetButtonVisuals();
+}
 
-        // Restore normal material or hovered material
-        if (_buttonRenderer != null)
-        {
-            if (_isHovered && hoveredMaterial != null)
-                _buttonRenderer.material = hoveredMaterial;
-            else if (normalMaterial != null)
-                _buttonRenderer.material = normalMaterial;
-        }
+[ObserversRpc]
+private void RpcResetButtonVisuals()
+{
+    if (_buttonRenderer != null)
+    {
+        if (_isHovered && hoveredMaterial != null)
+            _buttonRenderer.material = hoveredMaterial;
+        else if (normalMaterial != null)
+            _buttonRenderer.material = normalMaterial;
     }
+}
 
     private void UpdateProgressIndicator(float progress)
     {
