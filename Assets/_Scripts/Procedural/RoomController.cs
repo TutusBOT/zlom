@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using FishNet;
+using FishNet.Object;
 using UnityEngine;
 
 public class RoomController : MonoBehaviour, ILightingStateReceiver
@@ -33,7 +35,15 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
     [SerializeField]
     private Transform lightSwitchMountPoint;
     private LightSwitch _roomLightSwitch;
-
+    [System.Serializable]
+    public class NetworkSpawnData
+    {
+        public NetworkObject prefab;
+        public Transform[] spawnPoints;
+    }
+    [Header("Networked Objects To Spawn")]
+    [SerializeField]
+    private NetworkSpawnData[] networkSpawns;
     // Lighting state
     private bool _isPowered = false;
     private bool _hasWorkingLights = false;
@@ -44,6 +54,25 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
     public bool IsPowered => _isPowered && CanBePowered;
     public bool IsLit => IsPowered && _hasWorkingLights;
 
+    public void SpawnNetworkObjects()
+{
+    if (networkSpawns == null)
+        return;
+
+    foreach (var spawnData in networkSpawns)
+    {
+        if (spawnData.prefab == null || spawnData.spawnPoints == null)
+            continue;
+
+        foreach (var point in spawnData.spawnPoints)
+        {
+            if (point == null) continue;
+
+            NetworkObject obj = Instantiate(spawnData.prefab, point.position, point.rotation, transform);
+            InstanceFinder.ServerManager.Spawn(obj);
+        }
+    }
+}
     public void SetupDoorsFromConnections(List<ConnectionPoint> connectionPoints)
     {
         Debug.Log($"Room at {transform.position}: Setting up {connectionPoints.Count} doors");
