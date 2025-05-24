@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using FishNet;
 using FishNet.Object;
 using TMPro;
@@ -158,6 +159,13 @@ public class ChatInputManager : MonoBehaviour
             return true;
         }
 
+        if (command.StartsWith("!enemy "))
+        {
+            string enemyName = input.Substring(7).Trim();
+            SpawnEnemy(enemyName);
+            return true;
+        }
+
         Debug.Log($"Unknown command: {command}");
         return false;
     }
@@ -210,5 +218,46 @@ public class ChatInputManager : MonoBehaviour
         GameObject item = Instantiate(prefab, spawnPosition, Quaternion.identity);
         NetworkObject networkObject = item.GetComponent<NetworkObject>();
         InstanceFinder.ServerManager.Spawn(networkObject);
+    }
+
+    private void SpawnEnemy(string enemyName)
+    {
+        if (_player == null)
+            return;
+
+        string prefabPath = "Assets/_Prefab/DungeonGenerator/Enemy/Variants/";
+
+        if (string.IsNullOrEmpty(enemyName))
+            prefabPath += "WeepingAngel.prefab";
+        else
+            prefabPath += enemyName + ".prefab";
+
+        GameObject prefab = null;
+
+#if UNITY_EDITOR
+        prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+#else
+        Debug.LogError("AssetDatabase is only available in editor mode!");
+        return;
+#endif
+
+        if (prefab == null)
+        {
+            Debug.LogError($"Failed to load enemy prefab: {prefabPath}");
+            return;
+        }
+
+        // Calculate spawn position in front of player
+        Vector3 spawnPosition = _player.transform.position + _player.transform.forward * 4f;
+
+        try
+        {
+            EnemiesManager.Instance.SpawnEnemy(prefab, spawnPosition, new List<GameObject>());
+            Debug.Log($"Spawned enemy: {prefab.name} at {spawnPosition}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to spawn enemy: {e.Message}");
+        }
     }
 }
