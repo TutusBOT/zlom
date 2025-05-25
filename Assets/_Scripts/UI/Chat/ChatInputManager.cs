@@ -166,6 +166,15 @@ public class ChatInputManager : MonoBehaviour
             return true;
         }
 
+        if (command.StartsWith("!valuable ") || command.StartsWith("!val "))
+        {
+            string valuableName = command.StartsWith("!valuable ")
+                ? input.Substring(10).Trim()
+                : input.Substring(5).Trim();
+            SpawnValuable(valuableName);
+            return true;
+        }
+
         Debug.Log($"Unknown command: {command}");
         return false;
     }
@@ -258,6 +267,93 @@ public class ChatInputManager : MonoBehaviour
         catch (System.Exception e)
         {
             Debug.LogError($"Failed to spawn enemy: {e.Message}");
+        }
+    }
+
+    private void SpawnValuable(string valuableName)
+    {
+        if (_player == null)
+            return;
+
+        // Handle empty name case
+        if (string.IsNullOrEmpty(valuableName))
+        {
+            Debug.LogWarning("Valuable name is empty");
+            return;
+        }
+
+        GameObject prefab = null;
+        string prefabPath = "";
+
+        string[] sizeFolders = { "Small", "Medium", "Large" };
+
+#if UNITY_EDITOR
+        foreach (string sizeFolder in sizeFolders)
+        {
+            prefabPath = $"Assets/_Prefab/Valuable/Variants/{sizeFolder}/{valuableName}.prefab";
+            prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+            if (prefab != null)
+                break;
+
+            if (!string.IsNullOrEmpty(valuableName))
+            {
+                string capitalized = char.ToUpper(valuableName[0]) + valuableName.Substring(1);
+                prefabPath = $"Assets/_Prefab/Valuable/{sizeFolder}/{capitalized}.prefab";
+                prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+                if (prefab != null)
+                    break;
+            }
+        }
+
+        if (prefab == null)
+        {
+            prefabPath = $"Assets/_Prefab/Valuable/Variants/{valuableName}.prefab";
+            prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+
+            if (prefab == null && !string.IsNullOrEmpty(valuableName))
+            {
+                string capitalized = char.ToUpper(valuableName[0]) + valuableName.Substring(1);
+                prefabPath = $"Assets/_Prefab/Valuable/Variants/{capitalized}.prefab";
+                prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            }
+        }
+#else
+        Debug.LogError("AssetDatabase is only available in editor mode!");
+        return;
+#endif
+
+        if (prefab == null)
+        {
+            Debug.LogError($"Failed to load valuable prefab: {valuableName}");
+            return;
+        }
+
+        // Calculate spawn position slightly above and in front of player
+        Vector3 spawnPosition =
+            _player.transform.position + _player.transform.forward * 2f + Vector3.up * 1f;
+
+        GameObject item = Instantiate(prefab, spawnPosition, Quaternion.identity);
+
+        // Configure valuable initial values if desired
+        Valuable valuable = item.GetComponent<Valuable>();
+        if (valuable != null)
+        {
+            // Optional: Set custom value based on command parameters
+            // For now, we'll use the default value in the prefab
+        }
+
+        NetworkObject networkObject = item.GetComponent<NetworkObject>();
+        if (networkObject != null)
+        {
+            InstanceFinder.ServerManager.Spawn(networkObject);
+            Debug.Log($"Spawned valuable: {prefab.name} at {spawnPosition}");
+        }
+        else
+        {
+            Debug.LogError("NetworkObject component not found on valuable prefab!");
+            Destroy(item);
         }
     }
 }
