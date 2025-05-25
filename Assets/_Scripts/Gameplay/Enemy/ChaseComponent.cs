@@ -27,11 +27,11 @@ public class ChaseComponent : NetworkBehaviour
     private string speedParam = "MoveSpeed";
 
     // Internal state
-    private NavMeshAgent _agent;
-    private GameObject _target;
+    protected NavMeshAgent _agent;
+    protected GameObject _target;
     private Vector3 _lastKnownPosition;
     private float _pathUpdateTimer;
-    private bool _isActive = false;
+    protected bool _isActive = false;
 
     private void Awake()
     {
@@ -93,7 +93,7 @@ public class ChaseComponent : NetworkBehaviour
         _lastKnownPosition = position;
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         if (!IsServerInitialized)
             return;
