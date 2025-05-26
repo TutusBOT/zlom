@@ -276,6 +276,36 @@ public class StressController : NetworkBehaviour
         }
     }
 
+    public void ReduceStress(float amount, string source = "unknown")
+    {
+        if (!IsOwner || _isStageComplete)
+            return;
+
+        // Reduce stress but don't go below zero
+        _localStressValue = Mathf.Max(0, _localStressValue - amount);
+        _syncedStressValue.Value = _localStressValue;
+
+        OnStressValueChanged?.Invoke(_localStressValue, maxStress);
+    }
+
+    public void Calm()
+    {
+        if (!IsOwner || _isStageComplete)
+            return;
+
+        // Reset stress to zero
+        _localStressValue = 0f;
+        _syncedStressValue.Value = 0f;
+
+        OnStressValueChanged?.Invoke(_localStressValue, maxStress);
+
+        // Reset affliction if any
+        if (_currentAffliction.Value != AfflictionType.None)
+        {
+            ResetAfflictionServerRpc();
+        }
+    }
+
     /// <summary>
     /// Coroutine that checks continuous stress sources at fixed intervals
     /// </summary>

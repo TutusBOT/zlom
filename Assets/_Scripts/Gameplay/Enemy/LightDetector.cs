@@ -1,10 +1,9 @@
-using System;
 using UnityEngine;
 
 public class LightDetector : MonoBehaviour
 {
     public bool IsInLight { get; private set; }
-    public RoomLightSource CurrentLightSource { get; private set; }
+    public ILightSource CurrentLightSource { get; private set; }
 
     [SerializeField]
     private float memoryDuration = 0.5f;
@@ -14,18 +13,24 @@ public class LightDetector : MonoBehaviour
 
     private void OnEnable()
     {
-        RoomLightSource.OnObjectEnteredLight += HandleEnteredLight;
-        RoomLightSource.OnObjectExitedLight += HandleExitedLight;
+        // Subscribe to the universal light source events
+        LightSourceEvents.OnObjectEnteredLight += HandleEnteredLight;
+        LightSourceEvents.OnObjectExitedLight += HandleExitedLight;
     }
 
     private void OnDisable()
     {
-        RoomLightSource.OnObjectEnteredLight -= HandleEnteredLight;
-        RoomLightSource.OnObjectExitedLight -= HandleExitedLight;
+        // Unsubscribe from the universal light source events
+        LightSourceEvents.OnObjectEnteredLight -= HandleEnteredLight;
+        LightSourceEvents.OnObjectExitedLight -= HandleExitedLight;
     }
 
-    private void HandleEnteredLight(GameObject obj, RoomLightSource lightSource)
+    private void HandleEnteredLight(GameObject obj, ILightSource lightSource)
     {
+        Debug.Log(
+            $"LightDetector: HandleEnteredLight called for {obj.name} with light source {lightSource.name}"
+        );
+
         if (obj != gameObject)
             return;
 
@@ -34,7 +39,7 @@ public class LightDetector : MonoBehaviour
         lastTimeInLight = Time.time;
     }
 
-    private void HandleExitedLight(GameObject obj, RoomLightSource lightSource)
+    private void HandleExitedLight(GameObject obj, ILightSource lightSource)
     {
         if (obj != gameObject)
             return;
