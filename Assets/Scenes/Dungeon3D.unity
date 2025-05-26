@@ -340,7 +340,7 @@ MonoBehaviour:
         length: 1
       variantData:
         normalVariants:
-        - {fileID: 8730771594713419465, guid: 093c4a2d2b93bb043bf2a4803b46aa96, type: 3}
+        - {fileID: 7510496102614955654, guid: 0e0155e05507fb64b94c0bf5e1ef64a5, type: 3}
         allowDoorsAnywhere: 1
         allowedNorthDoors: []
         allowedSouthDoors: []
@@ -602,7 +602,7 @@ MonoBehaviour:
     maxCount: 10
     tier: 3
     currentCount: 0
-  - prefab: {fileID: 1294967159813668379, guid: 32dce2fcf568f544da55b9e0691dc547, type: 3}
+  - prefab: {fileID: 4850775017191225704, guid: 6d901bb142d2fa04595e1882549e4d9a, type: 3}
     spawnChance: 100
     maxCount: 10
     tier: 3

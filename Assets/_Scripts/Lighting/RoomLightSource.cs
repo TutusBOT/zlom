@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class RoomLightSource : MonoBehaviour
+public class RoomLightSource : MonoBehaviour, ILightSource
 {
     [SerializeField]
     Light pointLight;
@@ -17,9 +17,6 @@ public class RoomLightSource : MonoBehaviour
     };
 
     private LightState _lightState = LightState.Off;
-
-    public static event Action<GameObject, RoomLightSource> OnObjectEnteredLight;
-    public static event Action<GameObject, RoomLightSource> OnObjectExitedLight;
 
     private void Start()
     {
@@ -77,7 +74,7 @@ public class RoomLightSource : MonoBehaviour
             GameObject targetObject = GetTargetGameObject(col.gameObject);
 
             // Notify that this object is no longer in light
-            OnObjectExitedLight?.Invoke(targetObject, this);
+            LightSourceEvents.NotifyObjectExitedLight(targetObject, this);
         }
     }
 
@@ -108,7 +105,7 @@ public class RoomLightSource : MonoBehaviour
         GameObject targetObject = GetTargetGameObject(other.gameObject);
 
         Debug.Log("Light source triggered by: " + targetObject.name);
-        OnObjectEnteredLight?.Invoke(targetObject, this);
+        LightSourceEvents.NotifyObjectEnteredLight(targetObject, this);
     }
 
     private void OnTriggerExit(Collider other)
@@ -116,7 +113,7 @@ public class RoomLightSource : MonoBehaviour
         GameObject targetObject = GetTargetGameObject(other.gameObject);
 
         Debug.Log("Light source exited by: " + targetObject.name);
-        OnObjectExitedLight?.Invoke(targetObject, this);
+        LightSourceEvents.NotifyObjectExitedLight(targetObject, this);
     }
 
     private GameObject GetTargetGameObject(GameObject original)

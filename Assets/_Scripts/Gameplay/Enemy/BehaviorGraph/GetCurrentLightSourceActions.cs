@@ -29,8 +29,7 @@ public partial class GetCurrentLightSourceAction : Action
 
         if (detector.IsInLight && detector.CurrentLightSource != null)
         {
-            OutputLightSource.Value = detector.CurrentLightSource;
-            Debug.Log(detector.CurrentLightSource.transform.position);
+            OutputLightSource.Value = detector.CurrentLightSource as RoomLightSource;
             return Status.Success;
         }
 

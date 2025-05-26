@@ -48,6 +48,7 @@ public class Item : NetworkBehaviour, IPickable
 
     private void Update()
     {
+        Debug.Log("skibidi");
         if (!IsServerInitialized)
             return;
 
@@ -60,6 +61,7 @@ public class Item : NetworkBehaviour, IPickable
             }
         }
 
+        Debug.Log($"Item: {itemName}, Cooldown: {isOnCooldown}, Timer: {cooldownTimer}");
         if (!isOnCooldown && isBeingHeld && Input.GetKeyDown(KeyCode.E))
         {
             UseItem();
@@ -68,6 +70,8 @@ public class Item : NetworkBehaviour, IPickable
 
     public virtual void UseItem()
     {
+        Debug.Log($"Using item: {itemName}");
+        Debug.Log($"Is being held: {isBeingHeld}, Is on cooldown: {isOnCooldown}");
         if (isOnCooldown || !isBeingHeld)
             return;
 

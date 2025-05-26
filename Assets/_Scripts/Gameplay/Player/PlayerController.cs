@@ -20,6 +20,7 @@ public class PlayerController : NetworkBehaviour, IUpgradeable
     private bool isSprinting = false;
     public float CurrentStamina => currentStamina;
     public float MaxStamina => maxStamina;
+    private bool isAdrenalineActive = false;
     public event System.Action<float, float> OnStaminaChanged;
 
     [Header("Crouch")]
@@ -182,6 +183,13 @@ public class PlayerController : NetworkBehaviour, IUpgradeable
 
     private void HandleStamina(bool isSprintButtonPressed)
     {
+        if (isAdrenalineActive)
+        {
+            currentStamina = maxStamina;
+            OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+            return;
+        }
+
         if (isSprintButtonPressed)
         {
             currentStamina -= staminaDrainRate * Time.deltaTime;
@@ -286,5 +294,19 @@ public class PlayerController : NetworkBehaviour, IUpgradeable
                 }
             }
         }
+    }
+
+    public void ActivateAdrenaline(float duration)
+    {
+        isAdrenalineActive = true;
+        currentStamina = maxStamina;
+        OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+
+        Invoke(nameof(DeactivateAdrenaline), duration);
+    }
+
+    private void DeactivateAdrenaline()
+    {
+        isAdrenalineActive = false;
     }
 }
