@@ -35,18 +35,22 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
     [SerializeField]
     private Transform lightSwitchMountPoint;
     private LightSwitch _roomLightSwitch;
+
     [System.Serializable]
     public class NetworkSpawnData
     {
         public NetworkObject prefab;
         public Transform[] spawnPoints;
     }
+
     [Header("Networked Objects To Spawn")]
     [SerializeField]
     private NetworkSpawnData[] networkSpawns;
+
     // Lighting state
     private bool _isPowered = false;
     private bool _hasWorkingLights = false;
+    private bool _wasInBlackout = false;
 
     // Properties for external access
     public bool HasLightingImplementation => lightingType != RoomLightingType.Unimplemented;
@@ -54,25 +58,42 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
     public bool IsPowered => _isPowered && CanBePowered;
     public bool IsLit => IsPowered && _hasWorkingLights;
 
-    public void SpawnNetworkObjects()
-{
-    if (networkSpawns == null)
-        return;
-
-    foreach (var spawnData in networkSpawns)
+    private void Start()
     {
-        if (spawnData.prefab == null || spawnData.spawnPoints == null)
-            continue;
+        RoomLightingManager.OnBlackoutStateChanged += OnBlackoutStateChanged;
+    }
 
-        foreach (var point in spawnData.spawnPoints)
+    private void OnDestroy()
+    {
+        RoomLightingManager.OnBlackoutStateChanged -= OnBlackoutStateChanged;
+    }
+
+    public void SpawnNetworkObjects()
+    {
+        if (networkSpawns == null)
+            return;
+
+        foreach (var spawnData in networkSpawns)
         {
-            if (point == null) continue;
+            if (spawnData.prefab == null || spawnData.spawnPoints == null)
+                continue;
 
-            NetworkObject obj = Instantiate(spawnData.prefab, point.position, point.rotation, transform);
-            InstanceFinder.ServerManager.Spawn(obj);
+            foreach (var point in spawnData.spawnPoints)
+            {
+                if (point == null)
+                    continue;
+
+                NetworkObject obj = Instantiate(
+                    spawnData.prefab,
+                    point.position,
+                    point.rotation,
+                    transform
+                );
+                InstanceFinder.ServerManager.Spawn(obj);
+            }
         }
     }
-}
+
     public void SetupDoorsFromConnections(List<ConnectionPoint> connectionPoints)
     {
         Debug.Log($"Room at {transform.position}: Setting up {connectionPoints.Count} doors");
@@ -210,6 +231,30 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
         }
     }
 
+    private void OnBlackoutStateChanged(bool isInBlackout)
+    {
+        if (isInBlackout && !_wasInBlackout)
+        {
+            OnBlackoutStarted();
+        }
+        else if (!isInBlackout && _wasInBlackout)
+        {
+            OnBlackoutEnded();
+        }
+
+        _wasInBlackout = isInBlackout;
+    }
+
+    private void OnBlackoutStarted()
+    {
+        // Handle blackout effects
+    }
+
+    private void OnBlackoutEnded()
+    {
+        // Handle blackout recovery effects
+    }
+
     public void SetupLightSwitch()
     {
         if (!HasLightingImplementation)
@@ -243,5 +288,16 @@ public class RoomController : MonoBehaviour, ILightingStateReceiver
         {
             RoomLightingManager.Instance.DestroyLightServerRpc(light.transform.position);
         }
+    }
+
+    public bool CanCurrentlyBePowered()
+    {
+        if (!CanBePowered)
+            return false;
+
+        if (RoomLightingManager.Instance != null && RoomLightingManager.Instance.IsInBlackout())
+            return false;
+
+        return true;
     }
 }

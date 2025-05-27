@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
@@ -25,8 +26,22 @@ public class RoomLightingManager : NetworkBehaviour
         new Dictionary<int, RoomController>();
     private Dictionary<int, RoomLightSource> _lightSources = new Dictionary<int, RoomLightSource>();
 
+    [Header("Power Management")]
+    [SerializeField]
+    private float roomAutoOffTime = 30f; // Time in seconds before room auto-turns off
+
+    [SerializeField]
+    private int maxSimultaneousRooms = 1; // Maximum rooms that can be on at once
+
     [SerializeField]
     private bool debug;
+
+    // Blackout system
+    private readonly SyncVar<bool> _isInBlackout = new SyncVar<bool>(false);
+    private Dictionary<int, Coroutine> _roomAutoOffCoroutines = new Dictionary<int, Coroutine>();
+
+    // Events for blackout notifications
+    public static System.Action<bool> OnBlackoutStateChanged;
 
     private void Awake()
     {
@@ -47,6 +62,7 @@ public class RoomLightingManager : NetworkBehaviour
         // Listen for changes
         _roomPowerStates.OnChange += OnRoomPowerStateChanged;
         _destroyedLights.OnChange += OnDestroyedLightChanged;
+        _isInBlackout.OnChange += OnBlackoutStateChanged_Internal;
     }
 
     public override void OnStopNetwork()
@@ -56,11 +72,22 @@ public class RoomLightingManager : NetworkBehaviour
         // Unsubscribe
         _roomPowerStates.OnChange -= OnRoomPowerStateChanged;
         _destroyedLights.OnChange -= OnDestroyedLightChanged;
+        _isInBlackout.OnChange -= OnBlackoutStateChanged_Internal;
     }
 
     private void OnDestroy()
     {
         DungeonGenerator.DungeonGenerated -= OnDungeonGenerated;
+    }
+
+    private void OnBlackoutStateChanged_Internal(bool oldValue, bool newValue, bool asServer)
+    {
+        OnBlackoutStateChanged?.Invoke(newValue);
+
+        if (debug)
+        {
+            Debug.Log($"Blackout state changed: {newValue}");
+        }
     }
 
     private void OnDungeonGenerated()
@@ -124,12 +151,11 @@ public class RoomLightingManager : NetworkBehaviour
 
         if (debug)
             Debug.Log(
-                $"RoomLightingManager registered {implementedCount} of {rooms.Length} rooms with lighting "
-                    + $"({_lightSources.Count} lights total)"
+                $"RoomLightingManager registered {implementedCount} of {rooms.Length} rooms with lighting ({_lightSources.Count} lights total)"
             );
     }
 
-    private int GenerateRoomId(RoomController room) // ID is based on position
+    private int GenerateRoomId(RoomController room)
     {
         Vector3 pos = room.transform.position;
         return Mathf.RoundToInt(pos.x * 1000)
@@ -137,7 +163,7 @@ public class RoomLightingManager : NetworkBehaviour
             + Mathf.RoundToInt(pos.z * 10);
     }
 
-    private int GenerateLightId(RoomLightSource light) // ID is based on position
+    private int GenerateLightId(RoomLightSource light)
     {
         Vector3 pos = light.transform.position;
         return Mathf.RoundToInt(pos.x * 10000)
@@ -161,6 +187,19 @@ public class RoomLightingManager : NetworkBehaviour
             }
 
             UpdateRoomLights(room, value);
+
+            // Handle auto-off timer
+            if (IsServerInitialized)
+            {
+                if (value) // Room turned on
+                {
+                    StartRoomAutoOffTimer(key);
+                }
+                else // Room turned off
+                {
+                    StopRoomAutoOffTimer(key);
+                }
+            }
         }
     }
 
@@ -249,9 +288,80 @@ public class RoomLightingManager : NetworkBehaviour
         return false;
     }
 
+    // Auto-off timer system
+    private void StartRoomAutoOffTimer(int roomId)
+    {
+        StopRoomAutoOffTimer(roomId); // Stop any existing timer
+
+        Coroutine autoOffCoroutine = StartCoroutine(RoomAutoOffCoroutine(roomId));
+        _roomAutoOffCoroutines[roomId] = autoOffCoroutine;
+    }
+
+    private void StopRoomAutoOffTimer(int roomId)
+    {
+        if (_roomAutoOffCoroutines.TryGetValue(roomId, out Coroutine coroutine))
+        {
+            if (coroutine != null)
+                StopCoroutine(coroutine);
+
+            _roomAutoOffCoroutines.Remove(roomId);
+        }
+    }
+
+    private IEnumerator RoomAutoOffCoroutine(int roomId)
+    {
+        yield return new WaitForSeconds(roomAutoOffTime);
+
+        // Auto turn off the room
+        if (_roomPowerStates.ContainsKey(roomId) && _roomPowerStates[roomId])
+        {
+            _roomPowerStates[roomId] = false;
+        }
+
+        _roomAutoOffCoroutines.Remove(roomId);
+    }
+
+    // Check for power overload
+    private int GetPoweredRoomCount()
+    {
+        int count = 0;
+        foreach (var kvp in _roomPowerStates)
+        {
+            if (kvp.Value)
+                count++;
+        }
+        return count;
+    }
+
+    private void TriggerPowerOutage()
+    {
+        foreach (var kvp in _roomAutoOffCoroutines)
+        {
+            if (kvp.Value != null)
+                StopCoroutine(kvp.Value);
+        }
+        _roomAutoOffCoroutines.Clear();
+
+        // Turn off all rooms
+        var roomIds = new List<int>(_roomPowerStates.Keys);
+        foreach (int roomId in roomIds)
+        {
+            _roomPowerStates[roomId] = false;
+        }
+
+        // Trigger blackout
+        _isInBlackout.Value = true;
+    }
+
     [ServerRpc(RequireOwnership = false)]
     public void SetRoomPowerServerRpc(Vector3 roomPosition, bool isPowered)
     {
+        // Check if we're in blackout
+        if (_isInBlackout.Value && isPowered)
+        {
+            return;
+        }
+
         RoomController room = FindRoomAtPosition(roomPosition);
         if (room == null)
             return;
@@ -263,10 +373,23 @@ public class RoomLightingManager : NetworkBehaviour
 
         if (!canBePowered)
         {
-            Debug.Log($"Cannot power room at {roomPosition} - room is disabled or unimplemented");
             return;
         }
 
+        // Check for power overload if trying to turn on
+        if (isPowered)
+        {
+            int currentPoweredRooms = GetPoweredRoomCount();
+
+            if (currentPoweredRooms >= maxSimultaneousRooms)
+            {
+                // Trigger power outage
+                TriggerPowerOutage();
+                return;
+            }
+        }
+
+        // Set room power state
         if (_roomPowerStates.ContainsKey(roomId))
         {
             _roomPowerStates[roomId] = isPowered;
@@ -275,6 +398,17 @@ public class RoomLightingManager : NetworkBehaviour
         {
             _roomPowerStates.Add(roomId, isPowered);
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void ResetBlackoutServerRpc()
+    {
+        if (!_isInBlackout.Value)
+        {
+            return;
+        }
+
+        _isInBlackout.Value = false;
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -322,6 +456,7 @@ public class RoomLightingManager : NetworkBehaviour
         return null;
     }
 
+    // Public getters
     public bool IsRoomPowered(RoomController room)
     {
         if (room == null)
@@ -338,5 +473,20 @@ public class RoomLightingManager : NetworkBehaviour
 
         int lightId = GenerateLightId(light);
         return _destroyedLights.TryGetValue(lightId, out bool destroyed) && destroyed;
+    }
+
+    public bool IsInBlackout()
+    {
+        return _isInBlackout.Value;
+    }
+
+    public float GetRoomAutoOffTime()
+    {
+        return roomAutoOffTime;
+    }
+
+    public int GetMaxSimultaneousRooms()
+    {
+        return maxSimultaneousRooms;
     }
 }
