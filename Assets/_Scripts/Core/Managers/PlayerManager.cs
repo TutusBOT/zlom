@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
@@ -89,6 +90,10 @@ public class PlayerManager : MonoBehaviour
         return new List<Player>(_activePlayers);
     }
 
+    public List<Player> GetAllAlivePlayers()
+    {
+        return _activePlayers.Where(player => !player.IsDead()).ToList();
+    }
     public Player GetLocalPlayer()
     {
         foreach (var player in _activePlayers)

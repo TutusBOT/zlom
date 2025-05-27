@@ -63,6 +63,7 @@ public class BootstrapNetworkManager : NetworkBehaviour
         }
     }
 
+    private int _playerSpawnCount = 0;
     public void SpawnPlayer(NetworkConnection conn, Vector3 position, Quaternion rotation)
     {
         if (!IsServerInitialized)
@@ -71,6 +72,10 @@ public class BootstrapNetworkManager : NetworkBehaviour
         NetworkManager nm = InstanceFinder.NetworkManager;
 
         NetworkObject nob = nm.GetPooledInstantiated(_playerPrefab, position, rotation, true);
+        _playerSpawnCount++;
+
+    // Rename player GameObject with number
+        nob.gameObject.name = $"Player {_playerSpawnCount}";
         nm.ServerManager.Spawn(nob, conn);
 
         NotifyClientOfSpawnRpc(conn, nob);

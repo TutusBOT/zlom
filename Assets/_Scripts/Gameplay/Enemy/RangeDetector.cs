@@ -3,19 +3,19 @@ using UnityEngine;
 public class RangeDetector : MonoBehaviour
 {
     [SerializeField]
-    private float detectionRadius = 20f;
+    protected float detectionRadius = 20f;
 
     [SerializeField]
-    private float detectionAngle = 90f;
+    protected float detectionAngle = 90f;
 
     [SerializeField]
-    private LayerMask detectionMask;
+    protected LayerMask detectionMask;
 
     [SerializeField]
-    private bool showDebugVisuals = true;
+    protected bool showDebugVisuals = true;
     public GameObject DetectedTarget { get; set; }
 
-    public GameObject UpdateDetector()
+    public virtual GameObject UpdateDetector()
     {
         Collider[] colliders = Physics.OverlapSphere(
             transform.position,

@@ -25,7 +25,7 @@ public class Player : NetworkBehaviour
     private PlayerChatDisplay playerChatDisplay;
 
     [SerializeField]
-    private PlayerHealth playerHealth;
+    public PlayerHealth playerHealth;
 
     [SerializeField]
     private NetworkedObjectPickup networkedObjectPickup;
